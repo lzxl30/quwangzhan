@@ -51,15 +51,13 @@
 
     .controls {
       display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .control-group {
       display: flex; align-items: center; gap: 8px;
     }
     .control-group label { font-size: 0.85rem; color: var(--text2); white-space: nowrap; }
-    .control-group input[type="range"] {
-      width: 110px; cursor: pointer;
-    }
+    .control-group input[type="range"] { width: 110px; cursor: pointer; }
     .control-group input[type="number"] {
       width: 80px; background: var(--input-bg); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
@@ -70,22 +68,46 @@
       -webkit-appearance: none; margin: 0;
     }
     .control-group input[type="color"] {
-      width: 32px; height: 32px; border: none; border-radius: 8px;
-      cursor: pointer; background: transparent; padding: 2px;
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
     }
     .control-group input[type="text"] {
       background: var(--input-bg); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
-      padding: 6px 10px; font-size: 0.85rem; width: 200px;
+      padding: 6px 10px; font-size: 0.85rem; width: 120px;
     }
     .control-group select {
       background: var(--input-bg); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 6px 10px; font-size: 0.85rem;
     }
-    .control-group input[type="checkbox"] {
-      accent-color: var(--accent);
+    .control-group input[type="checkbox"] { accent-color: var(--accent); }
+
+    .color-section {
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--input-bg);
     }
+    .color-palette-wrap {
+      display: flex; align-items: flex-start; gap: 16px;
+      margin-top: 8px;
+    }
+    .color-palette-canvas {
+      border: 1px solid var(--border); border-radius: 8px;
+      cursor: crosshair; width: 200px; height: 200px;
+    }
+    .apply-buttons {
+      display: flex; gap: 8px; margin-top: 8px;
+    }
+    .apply-btn {
+      background: var(--btn-bg); color: var(--text);
+      border: 1px solid var(--border); padding: 6px 12px;
+      border-radius: 20px; font-size: 0.8rem; cursor: pointer;
+      transition: 0.2s; white-space: nowrap;
+    }
+    .apply-btn:hover { border-color: var(--accent); color: var(--accent); }
     .preset-chars {
       display: flex; gap: 6px; flex-wrap: wrap;
     }
@@ -105,13 +127,8 @@
       margin-bottom: 16px;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     }
-    canvas {
-      display: block; max-width: 100%; height: auto;
-      image-rendering: pixelated;
-    }
-    .action-buttons {
-      display: flex; gap: 12px; flex-wrap: wrap;
-    }
+    canvas { display: block; max-width: 100%; max-height: 60vh; image-rendering: auto; }
+    .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn {
       background: var(--accent); color: #fff; border: none;
       padding: 12px 24px; border-radius: 30px; font-weight: 600;
@@ -130,7 +147,7 @@
       .upload-box { padding: 24px 14px; }
       .controls { gap: 8px; }
       .btn { font-size: 0.85rem; padding: 10px 16px; }
-      .control-group input[type="text"] { width: 130px; }
+      .color-palette-canvas { width: 150px; height: 150px; }
     }
   </style>
 </head>
@@ -159,21 +176,68 @@
           <option value="image">图片原色</option>
         </select>
       </div>
-      <div class="control-group" id="singleColorGroup">
-        <label>字符颜色</label>
-        <input type="color" id="charColor" value="#00ff00">
+    </div>
+
+    <!-- 取色器类型（全局） -->
+    <div class="controls">
+      <div class="control-group">
+        <label>取色器类型</label>
+        <select id="pickerType">
+          <option value="native">原生取色器</option>
+          <option value="palette">色盘取色器</option>
+        </select>
       </div>
     </div>
 
-    <div class="controls">
-      <div class="control-group">
-        <label>背景颜色</label>
-        <input type="color" id="bgColor" value="#000000">
+    <!-- 字符颜色设置（仅单一颜色模式显示） -->
+    <div id="charColorSection" class="color-section" style="display:none;">
+      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">字符颜色</div>
+      <div id="charNativePicker" style="display:flex; align-items:center; gap:12px;">
+        <div class="control-group">
+          <label>颜色</label>
+          <input type="color" id="charColor" value="#00ff00">
+        </div>
+        <span id="charColorHex" style="font-size:0.85rem; color:var(--text2);">#00ff00</span>
       </div>
-      <div class="control-group">
+    </div>
+
+    <!-- 背景颜色设置（始终显示） -->
+    <div class="color-section">
+      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">背景颜色</div>
+      <div id="bgNativePicker" style="display:flex; align-items:center; gap:12px;">
+        <div class="control-group">
+          <label>颜色</label>
+          <input type="color" id="bgColor" value="#000000">
+        </div>
+        <span id="bgColorHex" style="font-size:0.85rem; color:var(--text2);">#000000</span>
+      </div>
+      <div class="control-group" style="margin-top:8px;">
         <label>
           <input type="checkbox" id="transparentBg"> 透明背景
         </label>
+      </div>
+    </div>
+
+    <!-- 色盘区域（当取色器类型为色盘时显示） -->
+    <div id="paletteSection" class="color-section" style="display:none;">
+      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">色盘选色</div>
+      <div class="color-palette-wrap">
+        <canvas id="colorPalette" class="color-palette-canvas" width="256" height="256"></canvas>
+        <div>
+          <div style="font-size:0.85rem; color:var(--text2);">当前选中颜色</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+            <span id="palettePreview" style="display:inline-block; width:32px; height:32px; background:#00ff00; border:1px solid var(--border); border-radius:6px;"></span>
+            <span id="paletteHex">#00ff00</span>
+          </div>
+          <div class="apply-buttons">
+            <button class="apply-btn" id="applyToChar">应用到字符</button>
+            <button class="apply-btn" id="applyToBg">应用到背景</button>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text2); margin-top:8px;">
+            <div>字符颜色: <span id="currentCharColor" style="color:#00ff00;">#00ff00</span></div>
+            <div>背景颜色: <span id="currentBgColor" style="color:#000000;">#000000</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -205,8 +269,7 @@
 
   <script>
     (function() {
-      document.documentElement.style.colorScheme = 'dark';
-
+      // DOM
       const uploadBox = document.getElementById('uploadBox');
       const fileInput = document.getElementById('fileInput');
       const uploadHint = document.getElementById('uploadHint');
@@ -215,9 +278,6 @@
       const widthSlider = document.getElementById('widthSlider');
       const widthNumber = document.getElementById('widthNumber');
       const colorMode = document.getElementById('colorMode');
-      const singleColorGroup = document.getElementById('singleColorGroup');
-      const charColor = document.getElementById('charColor');
-      const bgColor = document.getElementById('bgColor');
       const transparentBg = document.getElementById('transparentBg');
       const customChars = document.getElementById('customChars');
       const presetChars = document.getElementById('presetChars');
@@ -226,238 +286,290 @@
       const downloadImgBtn = document.getElementById('downloadImgBtn');
       const statusHint = document.getElementById('statusHint');
 
+      const charColorSection = document.getElementById('charColorSection');
+      const charColor = document.getElementById('charColor');
+      const charColorHex = document.getElementById('charColorHex');
+      const bgColorInput = document.getElementById('bgColor');
+      const bgColorHex = document.getElementById('bgColorHex');
+      const bgNativePicker = document.getElementById('bgNativePicker');
+      const charNativePicker = document.getElementById('charNativePicker');
+      const paletteSection = document.getElementById('paletteSection');
+      const pickerType = document.getElementById('pickerType');
+      const colorPalette = document.getElementById('colorPalette');
+      const palettePreview = document.getElementById('palettePreview');
+      const paletteHex = document.getElementById('paletteHex');
+      const applyToChar = document.getElementById('applyToChar');
+      const applyToBg = document.getElementById('applyToBg');
+      const currentCharColor = document.getElementById('currentCharColor');
+      const currentBgColor = document.getElementById('currentBgColor');
+
       let originalImage = null;
       let currentAscii = '';
       let currentColors = [];
+      let currentCols = 80;
+      let currentRows = 0;
+
+      // 颜色状态
+      let charColorValue = '#00ff00';
+      let bgColorValue = '#000000';
+      let paletteSelectedColor = '#00ff00';
+
+      function updateAllDisplays() {
+        charColorHex.textContent = charColorValue;
+        bgColorHex.textContent = bgColorValue;
+        currentCharColor.textContent = charColorValue;
+        currentCharColor.style.color = charColorValue;
+        currentBgColor.textContent = bgColorValue;
+        currentBgColor.style.color = bgColorValue;
+        palettePreview.style.backgroundColor = paletteSelectedColor;
+        paletteHex.textContent = paletteSelectedColor;
+      }
 
       // 颜色模式切换
       colorMode.addEventListener('change', () => {
-        singleColorGroup.style.display = colorMode.value === 'single' ? 'flex' : 'none';
+        const single = colorMode.value === 'single';
+        charColorSection.style.display = single ? 'block' : 'none';
+        if (pickerType.value === 'palette') {
+          applyToChar.style.display = single ? 'inline-block' : 'none';
+        }
         generateAscii();
       });
 
-      // 背景控件
-      bgColor.addEventListener('input', () => { if (originalImage) drawCanvas(); });
-      transparentBg.addEventListener('change', () => { if (originalImage) drawCanvas(); });
+      // 取色器类型切换
+      pickerType.addEventListener('change', () => {
+        const isNative = pickerType.value === 'native';
+        charNativePicker.style.display = isNative ? 'flex' : 'none';
+        bgNativePicker.style.display = isNative ? 'flex' : 'none';
+        paletteSection.style.display = isNative ? 'none' : 'block';
+        if (!isNative) {
+          paletteSelectedColor = charColorValue;
+          updateAllDisplays();
+        }
+        // 控制色盘中的应用字符按钮
+        if (!isNative && colorMode.value === 'single') {
+          applyToChar.style.display = 'inline-block';
+        } else {
+          applyToChar.style.display = 'none';
+        }
+      });
 
-      // 宽度双向联动
-      function setWidth(val) {
-        val = Math.max(1, parseInt(val) || 80);
-        widthNumber.value = val;
-        // 滑块最大300，如果手动输入超过300，滑块拉到最右
-        widthSlider.value = Math.min(val, 300);
-        return val;
+      charColor.addEventListener('input', () => {
+        charColorValue = charColor.value;
+        updateAllDisplays();
+        if (colorMode.value === 'single') drawPreview();
+      });
+      bgColorInput.addEventListener('input', () => {
+        bgColorValue = bgColorInput.value;
+        updateAllDisplays();
+        drawPreview();
+      });
+
+      // 色盘绘制
+      function drawPalette() {
+        const ctx = colorPalette.getContext('2d');
+        const w = colorPalette.width, h = colorPalette.height;
+        const imageData = ctx.createImageData(w, h);
+        const data = imageData.data;
+        for (let y = 0; y < h; y++) {
+          const sat = y / h;
+          for (let x = 0; x < w; x++) {
+            const hue = (x / w) * 360;
+            const rgb = hslToRgb(hue, sat, 0.5);
+            const i = (y * w + x) * 4;
+            data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2]; data[i+3] = 255;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
       }
+      function hslToRgb(h, s, l) {
+        h /= 360;
+        let r, g, b;
+        if (s === 0) r = g = b = l;
+        else {
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1; if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+          };
+          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          const p = 2 * l - q;
+          r = hue2rgb(p, q, h + 1/3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1/3);
+        }
+        return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+      }
+      function rgbToHex(r,g,b) { return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
 
-      widthSlider.addEventListener('input', () => {
-        const val = parseInt(widthSlider.value, 10);
-        widthNumber.value = val;
-        generateAscii();
+      drawPalette();
+
+      colorPalette.addEventListener('click', (e) => {
+        const rect = colorPalette.getBoundingClientRect();
+        const sx = colorPalette.width/rect.width, sy = colorPalette.height/rect.height;
+        const x = (e.clientX - rect.left) * sx, y = (e.clientY - rect.top) * sy;
+        if (x<0||y<0||x>=colorPalette.width||y>=colorPalette.height) return;
+        const pixel = colorPalette.getContext('2d').getImageData(Math.floor(x),Math.floor(y),1,1).data;
+        paletteSelectedColor = rgbToHex(pixel[0], pixel[1], pixel[2]);
+        updateAllDisplays();
       });
 
-      widthNumber.addEventListener('input', () => {
-        const val = setWidth(widthNumber.value);
-        generateAscii();
+      applyToChar.addEventListener('click', () => {
+        charColorValue = paletteSelectedColor;
+        updateAllDisplays();
+        if (colorMode.value === 'single') drawPreview();
       });
-      widthNumber.addEventListener('blur', () => {
-        const val = setWidth(widthNumber.value);
-        generateAscii();
+      applyToBg.addEventListener('click', () => {
+        bgColorValue = paletteSelectedColor;
+        updateAllDisplays();
+        drawPreview();
       });
 
-      // 上传处理
-      uploadBox.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) handleImage(e.target.files[0]);
-      });
-      uploadBox.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadBox.classList.add('dragover');
-      });
-      uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
-      uploadBox.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadBox.classList.remove('dragover');
-        if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
-      });
+      // 宽度联动
+      function setWidth(val) { val = Math.max(1, parseInt(val)||80); widthNumber.value=val; widthSlider.value=Math.min(val,300); return val; }
+      widthSlider.addEventListener('input', ()=>{ widthNumber.value=parseInt(widthSlider.value,10); generateAscii(); });
+      widthNumber.addEventListener('input', ()=>{ setWidth(widthNumber.value); generateAscii(); });
+      widthNumber.addEventListener('blur', ()=>{ setWidth(widthNumber.value); generateAscii(); });
+
+      // 上传
+      uploadBox.addEventListener('click', ()=>fileInput.click());
+      fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleImage(e.target.files[0]); });
+      uploadBox.addEventListener('dragover', e=>{ e.preventDefault(); uploadBox.classList.add('dragover'); });
+      uploadBox.addEventListener('dragleave', ()=>uploadBox.classList.remove('dragover'));
+      uploadBox.addEventListener('drop', e=>{ e.preventDefault(); uploadBox.classList.remove('dragover'); if(e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]); });
 
       function handleImage(file) {
-        if (!file.type.startsWith('image/')) {
-          alert('请选择一张图片！');
-          return;
-        }
+        if(!file.type.startsWith('image/')) { alert('请选择一张图片！'); return; }
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.src = e.target.result;
+        reader.onload = e => {
+          const img = new Image(); img.src = e.target.result;
           img.onload = () => {
             originalImage = img;
             uploadHint.innerHTML = `<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`;
             uploadBox.classList.add('has-file');
-            generateAscii();
-            statusHint.textContent = '';
+            generateAscii(); statusHint.textContent='';
           };
         };
         reader.readAsDataURL(file);
       }
 
-      // 生成字符画数据
+      // 生成数据
       function generateAscii() {
-        if (!originalImage) return;
-
+        if(!originalImage) return;
         const charSet = customChars.value.trim() || ' ';
-        const outputWidth = setWidth(widthNumber.value);
-        const aspectRatio = originalImage.height / originalImage.width;
-        const charAspect = 2;
-        const outputHeight = Math.floor(outputWidth * aspectRatio / charAspect);
+        const ow = setWidth(widthNumber.value);
+        const oh = Math.floor(ow * (originalImage.height/originalImage.width) / 2);
+        currentCols=ow; currentRows=oh;
 
-        // 采样
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = outputWidth;
-        tempCanvas.height = outputHeight;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(originalImage, 0, 0, outputWidth, outputHeight);
-        const imageData = tempCtx.getImageData(0, 0, outputWidth, outputHeight);
-        const pixels = imageData.data;
+        const tc = document.createElement('canvas'); tc.width=ow; tc.height=oh;
+        const tctx = tc.getContext('2d'); tctx.drawImage(originalImage,0,0,ow,oh);
+        const imgData = tctx.getImageData(0,0,ow,oh); const pixels = imgData.data;
 
-        const colors = [];
-        let ascii = '';
-
-        for (let y = 0; y < outputHeight; y++) {
-          let line = '';
-          const rowColors = [];
-          for (let x = 0; x < outputWidth; x++) {
-            const index = (y * outputWidth + x) * 4;
-            const r = pixels[index];
-            const g = pixels[index + 1];
-            const b = pixels[index + 2];
-            const a = pixels[index + 3];
-            const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-            const charIndex = Math.floor(brightness / 255 * (charSet.length - 1));
-            const ch = charSet[charIndex] || charSet[0];
-            line += ch;
-            rowColors.push([r, g, b, a]);
+        const colors = []; let ascii = '';
+        for(let y=0;y<oh;y++){
+          let line=''; const row=[];
+          for(let x=0;x<ow;x++){
+            const idx = (y*ow+x)*4;
+            const r=pixels[idx], g=pixels[idx+1], b=pixels[idx+2], a=pixels[idx+3];
+            const bright = 0.299*r+0.587*g+0.114*b;
+            const ci = Math.floor(bright/255*(charSet.length-1));
+            line += charSet[ci]||charSet[0];
+            row.push([r,g,b,a]);
           }
-          ascii += line + '\n';
-          colors.push(rowColors);
+          ascii += line+'\n'; colors.push(row);
         }
-
-        currentAscii = ascii;
-        currentColors = colors;
-        drawCanvas(outputWidth, outputHeight);
+        currentAscii=ascii; currentColors=colors;
+        drawPreview();
       }
 
-      // 绘制Canvas
-      function drawCanvas(cols, rows) {
-        if (!originalImage) return;
-        cols = cols || parseInt(widthNumber.value, 10);
-        const aspectRatio = originalImage.height / originalImage.width;
-        const charAspect = 2;
-        rows = rows || Math.floor(cols * aspectRatio / charAspect);
+      // 预览
+      function drawPreview() {
+        if(!originalImage || currentCols===0) return;
+        const cw = previewArea.clientWidth-24; if(cw<=0) return;
+        const fontSize=12, cw2=fontSize*0.6, lh=fontSize*1.2;
+        const aw = currentCols*cw2, ah = currentRows*lh;
+        const maxH = previewArea.clientHeight-24||400;
+        const scale = Math.min(cw/aw, maxH/ah, 1);
 
-        const containerWidth = previewArea.clientWidth - 24;
-        if (containerWidth <= 0 || cols === 0) return;
-
-        const targetFontSize = Math.floor(containerWidth / cols / 0.6);
-        const fontSize = Math.min(24, Math.max(4, targetFontSize));
-        const lineHeight = fontSize * 1.2;
-
-        canvas.width = containerWidth;
-        canvas.height = lineHeight * rows;
-        canvas.style.width = containerWidth + 'px';
-        canvas.style.height = (lineHeight * rows) + 'px';
-
+        canvas.width = cw; canvas.height = maxH;
+        canvas.style.width = cw+'px'; canvas.style.height = maxH+'px';
         const ctx = canvas.getContext('2d');
-        if (transparentBg.checked) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        } else {
-          ctx.fillStyle = bgColor.value;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
 
+        if(transparentBg.checked) ctx.clearRect(0,0,cw,maxH);
+        else { ctx.fillStyle=bgColorValue; ctx.fillRect(0,0,cw,maxH); }
+
+        ctx.save();
+        ctx.translate((cw-aw*scale)/2, (maxH-ah*scale)/2);
+        ctx.scale(scale,scale);
         ctx.font = `${fontSize}px 'Courier New', monospace`;
         ctx.textBaseline = 'top';
 
-        const isSingleColor = colorMode.value === 'single';
-        const singleColor = charColor.value;
-
-        for (let y = 0; y < rows; y++) {
-          if (!currentColors[y]) continue;
-          for (let x = 0; x < cols; x++) {
-            const ch = (currentAscii.split('\n')[y] || '')[x] || ' ';
-            if (isSingleColor) {
-              ctx.fillStyle = singleColor;
-            } else {
-              const [r, g, b, a = 255] = currentColors[y][x] || [0,255,0,255];
-              ctx.fillStyle = `rgba(${r},${g},${b},${a/255})`;
-            }
-            ctx.fillText(ch, x * fontSize * 0.6, y * lineHeight);
+        const single = colorMode.value==='single';
+        for(let y=0;y<currentRows;y++){
+          const line = currentAscii.split('\n')[y]||'';
+          for(let x=0;x<currentCols;x++){
+            const ch = line[x]||' ';
+            if(single) ctx.fillStyle = charColorValue;
+            else { const [r,g,b,a=255] = (currentColors[y]&&currentColors[y][x])||[0,255,0,255]; ctx.fillStyle=`rgba(${r},${g},${b},${a/255})`; }
+            ctx.fillText(ch, x*cw2, y*lh);
           }
         }
+        ctx.restore();
       }
 
-      // 其他控件
-      charColor.addEventListener('input', () => {
-        if (colorMode.value === 'single' && originalImage) drawCanvas();
-      });
+      transparentBg.addEventListener('change', drawPreview);
       customChars.addEventListener('input', generateAscii);
-
-      presetChars.addEventListener('click', (e) => {
-        const btn = e.target.closest('.preset-btn');
-        if (!btn) return;
-        customChars.value = btn.dataset.chars;
-        generateAscii();
+      presetChars.addEventListener('click', e=>{
+        const btn = e.target.closest('.preset-btn'); if(!btn) return;
+        customChars.value = btn.dataset.chars; generateAscii();
       });
+      window.addEventListener('resize', ()=>{ if(originalImage) drawPreview(); });
 
-      window.addEventListener('resize', () => {
-        if (originalImage) {
-          const cols = parseInt(widthNumber.value, 10);
-          const aspectRatio = originalImage.height / originalImage.width;
-          const charAspect = 2;
-          const rows = Math.floor(cols * aspectRatio / charAspect);
-          drawCanvas(cols, rows);
+      copyBtn.addEventListener('click', async ()=>{
+        if(!currentAscii) return;
+        try { await navigator.clipboard.writeText(currentAscii); statusHint.textContent='✅ 已复制到剪贴板！'; }
+        catch { statusHint.textContent='❌ 复制失败'; }
+      });
+      downloadTxtBtn.addEventListener('click', ()=>{
+        if(!currentAscii) return;
+        const blob = new Blob([currentAscii], {type:'text/plain'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ascii_art.txt'; a.click();
+        statusHint.textContent='✅ TXT 已下载。';
+      });
+      downloadImgBtn.addEventListener('click', ()=>{
+        if(!originalImage || currentCols===0) return;
+        const fontSize=12, cw2=fontSize*0.6, lh=fontSize*1.2;
+        const w = Math.ceil(currentCols*cw2), h = Math.ceil(currentRows*lh);
+        const off = document.createElement('canvas'); off.width=w; off.height=h;
+        const ctx = off.getContext('2d');
+        if(transparentBg.checked) ctx.clearRect(0,0,w,h);
+        else { ctx.fillStyle=bgColorValue; ctx.fillRect(0,0,w,h); }
+        ctx.font = `${fontSize}px 'Courier New', monospace`;
+        ctx.textBaseline='top';
+        const single = colorMode.value==='single';
+        for(let y=0;y<currentRows;y++){
+          const line = currentAscii.split('\n')[y]||'';
+          for(let x=0;x<currentCols;x++){
+            const ch = line[x]||' ';
+            if(single) ctx.fillStyle=charColorValue;
+            else { const [r,g,b,a=255] = (currentColors[y]&&currentColors[y][x])||[0,255,0,255]; ctx.fillStyle=`rgba(${r},${g},${b},${a/255})`; }
+            ctx.fillText(ch, x*cw2, y*lh);
+          }
         }
-      });
-
-      // 复制/下载
-      copyBtn.addEventListener('click', async () => {
-        if (!currentAscii) return;
-        try {
-          await navigator.clipboard.writeText(currentAscii);
-          statusHint.textContent = '✅ 已复制到剪贴板！';
-        } catch (err) {
-          statusHint.textContent = '❌ 复制失败，请手动复制。';
-        }
-      });
-
-      downloadTxtBtn.addEventListener('click', () => {
-        if (!currentAscii) return;
-        const blob = new Blob([currentAscii], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'ascii_art.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-        statusHint.textContent = '✅ TXT 已下载。';
-      });
-
-      downloadImgBtn.addEventListener('click', () => {
-        if (!originalImage) return;
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'ascii_art.png';
-          a.click();
-          URL.revokeObjectURL(url);
-          statusHint.textContent = '✅ 图片已下载。';
-        });
+        off.toBlob(blob=>{
+          const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ascii_art.png'; a.click();
+          statusHint.textContent='✅ 原尺寸图片已下载。';
+        },'image/png');
       });
 
       // 初始化
-      statusHint.textContent = '';
-      singleColorGroup.style.display = 'flex';
-      widthNumber.value = 80;
+      charColorSection.style.display = 'flex'; // 默认单色模式显示
+      pickerType.value='native';
+      paletteSection.style.display='none';
+      applyToChar.style.display='inline-block';
+      updateAllDisplays();
+      statusHint.textContent='';
     })();
   </script>
 </body>
