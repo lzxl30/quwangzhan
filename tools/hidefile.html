@@ -303,6 +303,7 @@
         return imageData;
       }
 
+      // 修改点：隐藏按钮只生成预览和下载链接，不再自动下载
       hideBtn.addEventListener('click', () => {
         if (!carrierCanvas) { alert('请先选择载体图片！'); return; }
         if (!secretFile) { alert('请选择要隐藏的文件！'); return; }
@@ -316,13 +317,8 @@
             resultImg.src = url;
             resultDownload.href = url;
             resultPreview.style.display = 'block';
-            hideHint.textContent = '✅ 图片已生成（PNG），可预览并下载。';
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'hidden_file.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            hideHint.textContent = '✅ 图片已生成，可点击下方链接下载。';
+            // 不再自动触发下载，只保留手动下载链接
           }, 'image/png');
         } catch (err) {
           alert('隐藏失败：' + err.message);
