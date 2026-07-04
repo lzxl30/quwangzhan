@@ -152,11 +152,16 @@
       background: repeating-conic-gradient(#555 0% 25%, #333 0% 50%) 50% / 20px 20px;
       border-radius: var(--radius);
       padding: 12px; overflow: hidden;
-      min-height: 120px; display: flex; align-items: center; justify-content: center;
+      min-height: 120px;
+      display: flex; align-items: center; justify-content: center;
       margin-bottom: 16px;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     }
-    canvas { display: block; max-width: 100%; max-height: 60vh; image-rendering: auto; }
+    canvas {
+      display: block;
+      max-width: 100%; max-height: 60vh;
+      image-rendering: pixelated;
+    }
     .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn {
       background: var(--accent); color: #fff; border: none;
@@ -189,7 +194,6 @@
       .color-section { padding: 10px; }
     }
 
-    /* 平板端 */
     @media (min-width: 601px) and (max-width: 1024px) {
       .color-palette-canvas { width: 180px; height: 180px; }
       .btn { padding: 12px 20px; }
@@ -199,7 +203,7 @@
 <body>
   <div class="container">
     <h2>🅰️ ASCII 字符画</h2>
-    <p class="subtitle">上传图片 → 自定义字符、颜色、宽度和背景 → 生成复古/彩色字符画</p>
+    <p class="subtitle">上传图片 → 自定义字符、颜色、宽度和大小 → 生成复古/彩色字符画</p>
 
     <div class="upload-box" id="uploadBox">
       <div class="upload-hint" id="uploadHint">
@@ -213,6 +217,11 @@
         <label>输出宽度</label>
         <input type="range" id="widthSlider" min="40" max="300" value="80" step="10">
         <input type="number" id="widthNumber" value="80" min="1" step="1">
+      </div>
+      <div class="control-group">
+        <label>字符大小</label>
+        <input type="range" id="fontSizeSlider" min="4" max="48" value="12" step="1">
+        <input type="number" id="fontSizeNumber" value="12" min="4" max="48" step="1">
       </div>
       <div class="control-group">
         <label>颜色模式</label>
@@ -332,411 +341,211 @@
 
   <script>
     (function() {
-      // ========== DOM 元素 ==========
       const $ = (id) => document.getElementById(id);
-      const uploadBox = $('uploadBox');
-      const fileInput = $('fileInput');
-      const uploadHint = $('uploadHint');
-      const canvas = $('asciiCanvas');
-      const previewArea = $('previewArea');
-      const widthSlider = $('widthSlider');
-      const widthNumber = $('widthNumber');
-      const colorMode = $('colorMode');
-      const transparentBg = $('transparentBg');
-      const customChars = $('customChars');
-      const presetChars = $('presetChars');
-      const copyBtn = $('copyBtn');
-      const downloadTxtBtn = $('downloadTxtBtn');
-      const downloadImgBtn = $('downloadImgBtn');
-      const statusHint = $('statusHint');
+      const uploadBox = $('uploadBox'), fileInput = $('fileInput'), uploadHint = $('uploadHint');
+      const canvas = $('asciiCanvas'), previewArea = $('previewArea');
+      const widthSlider = $('widthSlider'), widthNumber = $('widthNumber');
+      const fontSizeSlider = $('fontSizeSlider'), fontSizeNumber = $('fontSizeNumber');
+      const colorMode = $('colorMode'), transparentBg = $('transparentBg');
+      const customChars = $('customChars'), presetChars = $('presetChars');
+      const copyBtn = $('copyBtn'), downloadTxtBtn = $('downloadTxtBtn'), downloadImgBtn = $('downloadImgBtn'), statusHint = $('statusHint');
 
-      const charColorSection = $('charColorSection');
-      const charColor = $('charColor');
-      const charColorHex = $('charColorHex');
-      const bgColorInput = $('bgColor');
-      const bgColorHex = $('bgColorHex');
-      const bgNativePicker = $('bgNativePicker');
-      const charNativePicker = $('charNativePicker');
-      const paletteSection = $('paletteSection');
-      const pickerType = $('pickerType');
-      const colorPalette = $('colorPalette');
-      const palettePreview = $('palettePreview');
-      const paletteHex = $('paletteHex');
-      const applyToChar = $('applyToChar');
-      const applyToBg = $('applyToBg');
-      const currentCharColor = $('currentCharColor');
-      const currentBgColor = $('currentBgColor');
-      const brightnessSlider = $('brightnessSlider');
-      const brightnessValue = $('brightnessValue');
+      const charColorSection = $('charColorSection'), charColor = $('charColor'), charColorHex = $('charColorHex');
+      const bgColorInput = $('bgColor'), bgColorHex = $('bgColorHex');
+      const bgNativePicker = $('bgNativePicker'), charNativePicker = $('charNativePicker');
+      const paletteSection = $('paletteSection'), pickerType = $('pickerType');
+      const colorPalette = $('colorPalette'), palettePreview = $('palettePreview'), paletteHex = $('paletteHex');
+      const applyToChar = $('applyToChar'), applyToBg = $('applyToBg');
+      const currentCharColor = $('currentCharColor'), currentBgColor = $('currentBgColor');
+      const brightnessSlider = $('brightnessSlider'), brightnessValue = $('brightnessValue');
 
-      // ========== 状态变量 ==========
       let originalImage = null;
       let currentAscii = '';
       let currentColors = [];
-      let currentCols = 80;
-      let currentRows = 0;
+      let currentCols = 80, currentRows = 0;
+      let currentFontSize = 12;
 
-      let charColorValue = '#00ff00';
-      let bgColorValue = '#000000';
-      let selectedHue = 120;
-      let selectedSat = 100;
-      let selectedBri = 50;
+      let charColorValue = '#00ff00', bgColorValue = '#000000';
+      let selectedHue = 120, selectedSat = 100, selectedBri = 50;
 
       // ========== 工具函数 ==========
       function getPaletteColor() { return hslToHex(selectedHue, selectedSat, selectedBri); }
-      function hexToRgb(hex) {
-        hex = hex.replace('#', '');
-        return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+      function hexToRgb(hex) { hex = hex.replace('#',''); return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)]; }
+      function rgbToHsl(r,g,b) {
+        r/=255;g/=255;b/=255; const max=Math.max(r,g,b),min=Math.min(r,g,b);
+        let h=0,s=0,l=(max+min)/2;
+        if(max!==min){ const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
+          switch(max){ case r: h=((g-b)/d+(g<b?6:0))/6; break; case g: h=((b-r)/d+2)/6; break; case b: h=((r-g)/d+4)/6; break; }
+        } return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
       }
-      function rgbToHsl(r, g, b) {
-        r /= 255; g /= 255; b /= 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
-        let h = 0, s = 0, l = (max + min) / 2;
-        if (max !== min) {
-          const d = max - min;
-          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-          switch (max) {
-            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-            case g: h = ((b - r) / d + 2) / 6; break;
-            case b: h = ((r - g) / d + 4) / 6; break;
-          }
-        }
-        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+      function hslToRgb(h,s,l){ h/=360;s/=100;l/=100; let r,g,b;
+        if(s===0){r=g=b=l;}else{ const hue2rgb=(p,q,t)=>{ if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p; };
+          const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q; r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+        } return [Math.round(r*255),Math.round(g*255),Math.round(b*255)];
       }
-      function hslToRgb(h, s, l) {
-        h /= 360; s /= 100; l /= 100;
-        let r, g, b;
-        if (s === 0) { r = g = b = l; }
-        else {
-          const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1; if (t > 1) t -= 1;
-            if (t < 1/6) return p + (q - p) * 6 * t;
-            if (t < 1/2) return q;
-            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-          };
-          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          const p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1/3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1/3);
-        }
-        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-      }
-      function hslToHex(h, s, l) {
-        const rgb = hslToRgb(h, s, l);
-        return '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('');
-      }
-      function updatePaletteFromRGB(r, g, b) {
-        const hsl = rgbToHsl(r, g, b);
-        selectedHue = hsl[0]; selectedSat = hsl[1]; selectedBri = hsl[2];
-        brightnessSlider.value = selectedBri;
-        brightnessValue.textContent = selectedBri + '%';
-        updateAllDisplays();
-      }
+      function hslToHex(h,s,l){ const rgb=hslToRgb(h,s,l); return '#'+rgb.map(x=>x.toString(16).padStart(2,'0')).join(''); }
+      function updatePaletteFromRGB(r,g,b){ const hsl=rgbToHsl(r,g,b); selectedHue=hsl[0];selectedSat=hsl[1];selectedBri=hsl[2]; brightnessSlider.value=selectedBri; brightnessValue.textContent=selectedBri+'%'; updateAllDisplays(); }
       function updateAllDisplays() {
-        charColorHex.textContent = charColorValue;
-        bgColorHex.textContent = bgColorValue;
-        currentCharColor.textContent = charColorValue;
-        currentCharColor.style.color = charColorValue;
-        currentBgColor.textContent = bgColorValue;
-        currentBgColor.style.color = bgColorValue;
-        const palColor = getPaletteColor();
-        palettePreview.style.backgroundColor = palColor;
-        paletteHex.textContent = palColor;
+        charColorHex.textContent=charColorValue; bgColorHex.textContent=bgColorValue;
+        currentCharColor.textContent=charColorValue; currentCharColor.style.color=charColorValue;
+        currentBgColor.textContent=bgColorValue; currentBgColor.style.color=bgColorValue;
+        const pal = getPaletteColor(); palettePreview.style.backgroundColor=pal; paletteHex.textContent=pal;
       }
 
-      // ========== 色盘绘制 ==========
-      function drawPalette() {
-        const ctx = colorPalette.getContext('2d');
-        const w = colorPalette.width, h = colorPalette.height;
-        const imageData = ctx.createImageData(w, h);
-        const data = imageData.data;
-        for (let y = 0; y < h; y++) {
-          const sat = (1 - y / h) * 100;
-          for (let x = 0; x < w; x++) {
-            const hue = (x / w) * 360;
-            const rgb = hslToRgb(hue, sat, 50);
-            const i = (y * w + x) * 4;
-            data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2]; data[i+3] = 255;
-          }
-        }
-        ctx.putImageData(imageData, 0, 0);
+      function drawPalette(){
+        const ctx=colorPalette.getContext('2d'), w=colorPalette.width, h=colorPalette.height;
+        const imgData=ctx.createImageData(w,h); const d=imgData.data;
+        for(let y=0;y<h;y++){ const sat=(1-y/h)*100; for(let x=0;x<w;x++){ const hue=(x/w)*360; const rgb=hslToRgb(hue,sat,50); const i=(y*w+x)*4; d[i]=rgb[0];d[i+1]=rgb[1];d[i+2]=rgb[2];d[i+3]=255; } }
+        ctx.putImageData(imgData,0,0);
       }
       drawPalette();
 
-      // 色盘事件（同时支持鼠标和触摸）
-      function handlePalettePick(clientX, clientY) {
-        const rect = colorPalette.getBoundingClientRect();
-        const sx = colorPalette.width / rect.width;
-        const sy = colorPalette.height / rect.height;
-        const x = (clientX - rect.left) * sx;
-        const y = (clientY - rect.top) * sy;
-        if (x < 0 || y < 0 || x >= colorPalette.width || y >= colorPalette.height) return;
-        selectedHue = Math.round((x / colorPalette.width) * 360);
-        selectedSat = Math.round((1 - y / colorPalette.height) * 100);
-        selectedSat = Math.min(100, Math.max(0, selectedSat));
+      function handlePalettePick(clientX,clientY){
+        const rect=colorPalette.getBoundingClientRect();
+        const sx=colorPalette.width/rect.width, sy=colorPalette.height/rect.height;
+        const x=(clientX-rect.left)*sx, y=(clientY-rect.top)*sy;
+        if(x<0||y<0||x>=colorPalette.width||y>=colorPalette.height) return;
+        selectedHue=Math.round((x/colorPalette.width)*360);
+        selectedSat=Math.round((1 - y/colorPalette.height)*100);
+        selectedSat=Math.min(100,Math.max(0,selectedSat));
         updateAllDisplays();
       }
-      colorPalette.addEventListener('mousedown', (e) => {
-        handlePalettePick(e.clientX, e.clientY);
-        const onMove = (ev) => { handlePalettePick(ev.clientX, ev.clientY); };
-        const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-      });
-      colorPalette.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handlePalettePick(e.touches[0].clientX, e.touches[0].clientY);
-        const onMove = (ev) => { handlePalettePick(ev.touches[0].clientX, ev.touches[0].clientY); };
-        const onUp = () => { document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); };
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend', onUp);
-      });
+      colorPalette.addEventListener('mousedown',(e)=>{ handlePalettePick(e.clientX,e.clientY); const onMove=(ev)=>handlePalettePick(ev.clientX,ev.clientY); const onUp=()=>{ document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }; document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp); });
+      colorPalette.addEventListener('touchstart',(e)=>{ e.preventDefault(); handlePalettePick(e.touches[0].clientX,e.touches[0].clientY); const onMove=(ev)=>{ handlePalettePick(ev.touches[0].clientX,ev.touches[0].clientY); }; const onUp=()=>{ document.removeEventListener('touchmove',onMove); document.removeEventListener('touchend',onUp); }; document.addEventListener('touchmove',onMove,{passive:false}); document.addEventListener('touchend',onUp); });
 
-      // 亮度滑块
-      brightnessSlider.addEventListener('input', () => {
-        selectedBri = parseInt(brightnessSlider.value, 10);
-        brightnessValue.textContent = selectedBri + '%';
-        updateAllDisplays();
-      });
+      brightnessSlider.addEventListener('input',()=>{ selectedBri=parseInt(brightnessSlider.value,10); brightnessValue.textContent=selectedBri+'%'; updateAllDisplays(); });
+      document.querySelectorAll('.preset-color-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ const hex=btn.dataset.color; updatePaletteFromRGB(...hexToRgb(hex)); }); });
+      applyToChar.addEventListener('click',()=>{ charColorValue=getPaletteColor(); updateAllDisplays(); if(colorMode.value==='single') drawPreview(); });
+      applyToBg.addEventListener('click',()=>{ bgColorValue=getPaletteColor(); updateAllDisplays(); drawPreview(); });
 
-      // 预设颜色按钮
-      document.querySelectorAll('.preset-color-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const hex = btn.dataset.color;
-          const rgb = hexToRgb(hex);
-          updatePaletteFromRGB(rgb[0], rgb[1], rgb[2]);
-        });
-      });
+      colorMode.addEventListener('change',()=>{ const single=colorMode.value==='single'; charColorSection.style.display=single?'block':'none'; if(pickerType.value==='palette') applyToChar.style.display=single?'inline-block':'none'; generateAscii(); });
+      pickerType.addEventListener('change',()=>{ const isNative=pickerType.value==='native'; charNativePicker.style.display=isNative?'flex':'none'; bgNativePicker.style.display=isNative?'flex':'none'; paletteSection.style.display=isNative?'none':'block'; if(!isNative){ const [r,g,b]=hexToRgb(charColorValue); updatePaletteFromRGB(r,g,b); } applyToChar.style.display=(!isNative && colorMode.value==='single')?'inline-block':'none'; });
+      charColor.addEventListener('input',()=>{ charColorValue=charColor.value; updateAllDisplays(); if(colorMode.value==='single') drawPreview(); });
+      bgColorInput.addEventListener('input',()=>{ bgColorValue=bgColorInput.value; updateAllDisplays(); drawPreview(); });
 
-      applyToChar.addEventListener('click', () => {
-        charColorValue = getPaletteColor();
-        updateAllDisplays();
-        if (colorMode.value === 'single') drawPreview();
-      });
-      applyToBg.addEventListener('click', () => {
-        bgColorValue = getPaletteColor();
-        updateAllDisplays();
-        drawPreview();
-      });
+      // 宽度和字号同步
+      function setWidth(val){ val=Math.max(1,parseInt(val)||80); widthNumber.value=val; widthSlider.value=Math.min(val,300); return val; }
+      function setFontSize(val){ val=Math.min(48,Math.max(4,parseInt(val)||12)); fontSizeNumber.value=val; fontSizeSlider.value=val; return val; }
+      widthSlider.addEventListener('input',()=>{ widthNumber.value=parseInt(widthSlider.value,10); generateAscii(); });
+      widthNumber.addEventListener('input',()=>{ setWidth(widthNumber.value); generateAscii(); });
+      widthNumber.addEventListener('blur',()=>{ setWidth(widthNumber.value); generateAscii(); });
+      fontSizeSlider.addEventListener('input',()=>{ fontSizeNumber.value=parseInt(fontSizeSlider.value,10); currentFontSize=parseInt(fontSizeSlider.value,10); drawPreview(); });
+      fontSizeNumber.addEventListener('input',()=>{ currentFontSize=setFontSize(fontSizeNumber.value); drawPreview(); });
+      fontSizeNumber.addEventListener('blur',()=>{ currentFontSize=setFontSize(fontSizeNumber.value); drawPreview(); });
 
-      // ========== 颜色模式与取色器切换 ==========
-      colorMode.addEventListener('change', () => {
-        const single = colorMode.value === 'single';
-        charColorSection.style.display = single ? 'block' : 'none';
-        if (pickerType.value === 'palette') applyToChar.style.display = single ? 'inline-block' : 'none';
-        generateAscii();
-      });
-      pickerType.addEventListener('change', () => {
-        const isNative = pickerType.value === 'native';
-        charNativePicker.style.display = isNative ? 'flex' : 'none';
-        bgNativePicker.style.display = isNative ? 'flex' : 'none';
-        paletteSection.style.display = isNative ? 'none' : 'block';
-        if (!isNative) {
-          const rgb = hexToRgb(charColorValue);
-          const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-          selectedHue = hsl[0]; selectedSat = hsl[1]; selectedBri = hsl[2];
-          brightnessSlider.value = selectedBri;
-          brightnessValue.textContent = selectedBri + '%';
-          updateAllDisplays();
-        }
-        applyToChar.style.display = (!isNative && colorMode.value === 'single') ? 'inline-block' : 'none';
-      });
+      uploadBox.addEventListener('click',()=>fileInput.click());
+      fileInput.addEventListener('change',(e)=>{ if(e.target.files.length) handleImage(e.target.files[0]); });
+      uploadBox.addEventListener('dragover',(e)=>{ e.preventDefault(); uploadBox.classList.add('dragover'); });
+      uploadBox.addEventListener('dragleave',()=>uploadBox.classList.remove('dragover'));
+      uploadBox.addEventListener('drop',(e)=>{ e.preventDefault(); uploadBox.classList.remove('dragover'); if(e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]); });
 
-      charColor.addEventListener('input', () => {
-        charColorValue = charColor.value;
-        updateAllDisplays();
-        if (colorMode.value === 'single') drawPreview();
-      });
-      bgColorInput.addEventListener('input', () => {
-        bgColorValue = bgColorInput.value;
-        updateAllDisplays();
-        drawPreview();
-      });
-
-      // ========== 宽度联动 ==========
-      function setWidth(val) {
-        val = Math.max(1, parseInt(val) || 80);
-        widthNumber.value = val;
-        widthSlider.value = Math.min(val, 300);
-        return val;
-      }
-      widthSlider.addEventListener('input', () => { widthNumber.value = parseInt(widthSlider.value, 10); generateAscii(); });
-      widthNumber.addEventListener('input', () => { setWidth(widthNumber.value); generateAscii(); });
-      widthNumber.addEventListener('blur', () => { setWidth(widthNumber.value); generateAscii(); });
-
-      // ========== 上传处理 ==========
-      uploadBox.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleImage(e.target.files[0]); });
-      uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.classList.add('dragover'); });
-      uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
-      uploadBox.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadBox.classList.remove('dragover');
-        if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
-      });
-
-      function handleImage(file) {
-        if (!file.type.startsWith('image/')) { alert('请选择一张图片！'); return; }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.src = e.target.result;
-          img.onload = () => {
-            originalImage = img;
-            uploadHint.innerHTML = `<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`;
-            uploadBox.classList.add('has-file');
-            generateAscii();
-            statusHint.textContent = '';
-          };
-        };
+      function handleImage(file){
+        if(!file.type.startsWith('image/')){ alert('请选择一张图片！'); return; }
+        const reader=new FileReader();
+        reader.onload=(e)=>{ const img=new Image(); img.src=e.target.result; img.onload=()=>{ originalImage=img; uploadHint.innerHTML=`<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`; uploadBox.classList.add('has-file'); generateAscii(); statusHint.textContent=''; }; };
         reader.readAsDataURL(file);
       }
 
-      // ========== 生成字符画数据 ==========
-      function generateAscii() {
-        if (!originalImage) return;
-        const charSet = customChars.value.trim() || ' ';
-        const ow = setWidth(widthNumber.value);
-        const oh = Math.floor(ow * (originalImage.height / originalImage.width) / 2);
-        currentCols = ow; currentRows = oh;
-
-        const tc = document.createElement('canvas');
-        tc.width = ow; tc.height = oh;
-        const tctx = tc.getContext('2d');
-        tctx.drawImage(originalImage, 0, 0, ow, oh);
-        const imgData = tctx.getImageData(0, 0, ow, oh);
-        const pixels = imgData.data;
-
-        const colors = [];
-        let ascii = '';
-        for (let y = 0; y < oh; y++) {
-          let line = '';
-          const row = [];
-          for (let x = 0; x < ow; x++) {
-            const idx = (y * ow + x) * 4;
-            const r = pixels[idx], g = pixels[idx + 1], b = pixels[idx + 2], a = pixels[idx + 3];
-            const bright = 0.299 * r + 0.587 * g + 0.114 * b;
-            const ci = Math.floor(bright / 255 * (charSet.length - 1));
-            line += charSet[ci] || charSet[0];
-            row.push([r, g, b, a]);
-          }
-          ascii += line + '\n';
-          colors.push(row);
-        }
-        currentAscii = ascii;
-        currentColors = colors;
+      function generateAscii(){
+        if(!originalImage) return;
+        const charSet=customChars.value.trim()||' ';
+        const ow=setWidth(widthNumber.value);
+        const oh=Math.floor(ow*(originalImage.height/originalImage.width)/2);
+        currentCols=ow; currentRows=oh;
+        const tc=document.createElement('canvas'); tc.width=ow; tc.height=oh; const tctx=tc.getContext('2d'); tctx.drawImage(originalImage,0,0,ow,oh);
+        const imgData=tctx.getImageData(0,0,ow,oh); const pixels=imgData.data;
+        const colors=[]; let ascii='';
+        for(let y=0;y<oh;y++){ let line=''; const row=[]; for(let x=0;x<ow;x++){ const idx=(y*ow+x)*4; const r=pixels[idx],g=pixels[idx+1],b=pixels[idx+2],a=pixels[idx+3]; const bright=0.299*r+0.587*g+0.114*b; const ci=Math.floor(bright/255*(charSet.length-1)); line+=charSet[ci]||charSet[0]; row.push([r,g,b,a]); } ascii+=line+'\n'; colors.push(row); }
+        currentAscii=ascii; currentColors=colors;
         drawPreview();
       }
 
-      // ========== 预览绘制（整体缩放） ==========
-      function drawPreview() {
-        if (!originalImage || currentCols === 0) return;
-        const cw = previewArea.clientWidth - 24;
-        if (cw <= 0) return;
-        const fontSize = 12, cw2 = fontSize * 0.6, lh = fontSize * 1.2;
-        const aw = currentCols * cw2, ah = currentRows * lh;
-        const maxH = previewArea.clientHeight - 24 || 400;
-        const scale = Math.min(cw / aw, maxH / ah, 1);
+      function drawPreview(){
+        if(!originalImage||currentCols===0) return;
+        const containerWidth = previewArea.clientWidth - 24;
+        const containerHeight = previewArea.clientHeight - 24 || 400;
+        if(containerWidth <= 0) return;
 
-        canvas.width = cw;
-        canvas.height = maxH;
-        canvas.style.width = cw + 'px';
-        canvas.style.height = maxH + 'px';
+        const fontSize = currentFontSize;
+        const charWidth = fontSize * 0.6;
+        const lineHeight = fontSize * 1.2;
+        const actualWidth = currentCols * charWidth;
+        const actualHeight = currentRows * lineHeight;
+
+        // 计算缩放比例，使整张图完整显示
+        const scale = Math.min(containerWidth / actualWidth, containerHeight / actualHeight, 1);
+
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+        canvas.style.width = containerWidth + 'px';
+        canvas.style.height = containerHeight + 'px';
+
         const ctx = canvas.getContext('2d');
-
-        if (transparentBg.checked) ctx.clearRect(0, 0, cw, maxH);
-        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0, 0, cw, maxH); }
+        if(transparentBg.checked) ctx.clearRect(0,0,containerWidth,containerHeight);
+        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0,0,containerWidth,containerHeight); }
 
         ctx.save();
-        ctx.translate((cw - aw * scale) / 2, (maxH - ah * scale) / 2);
+        ctx.translate((containerWidth - actualWidth * scale) / 2, (containerHeight - actualHeight * scale) / 2);
         ctx.scale(scale, scale);
         ctx.font = `${fontSize}px 'Courier New', monospace`;
         ctx.textBaseline = 'top';
 
         const single = colorMode.value === 'single';
-        for (let y = 0; y < currentRows; y++) {
+        for(let y=0; y<currentRows; y++){
           const line = currentAscii.split('\n')[y] || '';
-          for (let x = 0; x < currentCols; x++) {
+          for(let x=0; x<currentCols; x++){
             const ch = line[x] || ' ';
-            if (single) ctx.fillStyle = charColorValue;
-            else {
-              const [r, g, b, a = 255] = (currentColors[y] && currentColors[y][x]) || [0, 255, 0, 255];
-              ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
-            }
-            ctx.fillText(ch, x * cw2, y * lh);
+            if(single) ctx.fillStyle = charColorValue;
+            else { const [r,g,b,a=255] = (currentColors[y] && currentColors[y][x]) || [0,255,0,255]; ctx.fillStyle = `rgba(${r},${g},${b},${a/255})`; }
+            ctx.fillText(ch, x * charWidth, y * lineHeight);
           }
         }
         ctx.restore();
       }
 
-      // ========== 其他事件 ==========
       transparentBg.addEventListener('change', drawPreview);
       customChars.addEventListener('input', generateAscii);
-      presetChars.addEventListener('click', (e) => {
-        const btn = e.target.closest('.preset-btn');
-        if (!btn) return;
-        customChars.value = btn.dataset.chars;
-        generateAscii();
-      });
-      window.addEventListener('resize', () => { if (originalImage) drawPreview(); });
+      presetChars.addEventListener('click',(e)=>{ const btn=e.target.closest('.preset-btn'); if(!btn) return; customChars.value=btn.dataset.chars; generateAscii(); });
+      window.addEventListener('resize',()=>{ if(originalImage) drawPreview(); });
 
-      // ========== 复制与下载 ==========
-      copyBtn.addEventListener('click', async () => {
-        if (!currentAscii) return;
-        try { await navigator.clipboard.writeText(currentAscii); statusHint.textContent = '✅ 已复制到剪贴板！'; }
-        catch { statusHint.textContent = '❌ 复制失败'; }
-      });
-      downloadTxtBtn.addEventListener('click', () => {
-        if (!currentAscii) return;
-        const blob = new Blob([currentAscii], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'ascii_art.txt';
-        a.click();
-        statusHint.textContent = '✅ TXT 已下载。';
-      });
-      downloadImgBtn.addEventListener('click', () => {
-        if (!originalImage || currentCols === 0) return;
-        const fontSize = 12, cw2 = fontSize * 0.6, lh = fontSize * 1.2;
-        const w = Math.ceil(currentCols * cw2), h = Math.ceil(currentRows * lh);
-        const off = document.createElement('canvas');
-        off.width = w; off.height = h;
-        const ctx = off.getContext('2d');
-        if (transparentBg.checked) ctx.clearRect(0, 0, w, h);
-        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0, 0, w, h); }
+      copyBtn.addEventListener('click',async ()=>{ if(!currentAscii) return; try{ await navigator.clipboard.writeText(currentAscii); statusHint.textContent='✅ 已复制到剪贴板！'; } catch{ statusHint.textContent='❌ 复制失败'; } });
+      downloadTxtBtn.addEventListener('click',()=>{ if(!currentAscii) return; const blob=new Blob([currentAscii],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ascii_art.txt'; a.click(); statusHint.textContent='✅ TXT 已下载。'; });
+      downloadImgBtn.addEventListener('click',()=>{
+        if(!originalImage || currentCols===0) return;
+        const fontSize = currentFontSize;
+        const charWidth = fontSize * 0.6;
+        const lineHeight = fontSize * 1.2;
+        const w = Math.ceil(currentCols * charWidth);
+        const h = Math.ceil(currentRows * lineHeight);
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = w; offCanvas.height = h;
+        const ctx = offCanvas.getContext('2d');
+        if(transparentBg.checked) ctx.clearRect(0,0,w,h);
+        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0,0,w,h); }
         ctx.font = `${fontSize}px 'Courier New', monospace`;
         ctx.textBaseline = 'top';
         const single = colorMode.value === 'single';
-        for (let y = 0; y < currentRows; y++) {
+        for(let y=0; y<currentRows; y++){
           const line = currentAscii.split('\n')[y] || '';
-          for (let x = 0; x < currentCols; x++) {
+          for(let x=0; x<currentCols; x++){
             const ch = line[x] || ' ';
-            if (single) ctx.fillStyle = charColorValue;
-            else {
-              const [r, g, b, a = 255] = (currentColors[y] && currentColors[y][x]) || [0, 255, 0, 255];
-              ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
-            }
-            ctx.fillText(ch, x * cw2, y * lh);
+            if(single) ctx.fillStyle = charColorValue;
+            else { const [r,g,b,a=255] = (currentColors[y] && currentColors[y][x]) || [0,255,0,255]; ctx.fillStyle = `rgba(${r},${g},${b},${a/255})`; }
+            ctx.fillText(ch, x * charWidth, y * lineHeight);
           }
         }
-        off.toBlob((blob) => {
+        offCanvas.toBlob(blob => {
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
           a.download = 'ascii_art.png';
           a.click();
-          statusHint.textContent = '✅ 原尺寸图片已下载。';
+          statusHint.textContent = '✅ 图片已下载。';
         }, 'image/png');
       });
 
-      // ========== 初始化 ==========
-      charColorSection.style.display = 'flex';
-      pickerType.value = 'native';
-      paletteSection.style.display = 'none';
-      applyToChar.style.display = 'inline-block';
-      updateAllDisplays();
-      statusHint.textContent = '';
+      // 初始化
+      charColorSection.style.display='flex'; pickerType.value='native'; paletteSection.style.display='none'; applyToChar.style.display='inline-block';
+      updateAllDisplays(); currentFontSize=12; statusHint.textContent='';
     })();
   </script>
 </body>
