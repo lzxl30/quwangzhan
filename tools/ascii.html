@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover, maximum-scale=1.0">
   <title>ASCII 字符画 | 图灵魔法</title>
   <style>
     :root {
@@ -19,7 +19,7 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: var(--bg); color: var(--text);
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
       padding: 20px;
@@ -36,6 +36,8 @@
       border: 2px dashed var(--border); border-radius: var(--radius);
       padding: 30px 20px; text-align: center; cursor: pointer;
       transition: 0.2s; margin-bottom: 20px; background: var(--input-bg);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .upload-box:hover { border-color: var(--accent); }
     .upload-box.dragover { border-color: var(--accent2); background: rgba(139,124,247,0.08); }
@@ -70,7 +72,10 @@
     .control-group input[type="color"] {
       width: 36px; height: 36px; border: 1px solid var(--border);
       border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
+      -webkit-appearance: none;
     }
+    .control-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .control-group input[type="color"]::-webkit-color-swatch { border-radius: 6px; border: none; }
     .control-group input[type="text"] {
       background: var(--input-bg); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
@@ -80,8 +85,9 @@
       background: var(--input-bg); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
       padding: 6px 10px; font-size: 0.85rem;
+      cursor: pointer;
     }
-    .control-group input[type="checkbox"] { accent-color: var(--accent); }
+    .control-group input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
     .color-section {
       margin-bottom: 16px;
@@ -90,37 +96,45 @@
       border-radius: var(--radius);
       background: var(--input-bg);
     }
+    .color-section-title {
+      font-weight: 600; font-size: 0.95rem; color: var(--text); margin-bottom: 8px;
+    }
     .color-palette-wrap {
       display: flex; flex-direction: column; gap: 12px;
     }
     .palette-row {
-      display: flex; gap: 16px; flex-wrap: wrap;
+      display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start;
     }
     .color-palette-canvas {
       border: 1px solid var(--border); border-radius: 8px;
       cursor: crosshair; width: 200px; height: 200px;
+      touch-action: none;
     }
     .slider-group {
       display: flex; align-items: center; gap: 8px;
     }
     .apply-buttons {
-      display: flex; gap: 8px; margin-top: 8px;
+      display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
     }
     .apply-btn {
       background: var(--btn-bg); color: var(--text);
-      border: 1px solid var(--border); padding: 6px 12px;
+      border: 1px solid var(--border); padding: 6px 14px;
       border-radius: 20px; font-size: 0.8rem; cursor: pointer;
       transition: 0.2s; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
     }
+    .apply-btn:active { transform: scale(0.95); }
     .apply-btn:hover { border-color: var(--accent); color: var(--accent); }
     .preset-colors {
       display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
     }
     .preset-color-btn {
-      width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+      width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border);
       cursor: pointer; transition: 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .preset-color-btn:hover { border-color: var(--accent); transform: scale(1.1); }
+    .preset-color-btn:active { transform: scale(0.9); }
+    .preset-color-btn:hover { border-color: var(--accent); transform: scale(1.15); }
     .preset-chars {
       display: flex; gap: 6px; flex-wrap: wrap;
     }
@@ -129,7 +143,9 @@
       border: 1px solid var(--border); padding: 4px 10px;
       border-radius: 20px; font-size: 0.75rem; cursor: pointer;
       transition: 0.2s; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
     }
+    .preset-btn:active { transform: scale(0.95); }
     .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     .preview-area {
@@ -147,20 +163,36 @@
       padding: 12px 24px; border-radius: 30px; font-weight: 600;
       cursor: pointer; font-size: 0.95rem; transition: 0.2s;
       display: inline-flex; align-items: center; gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
     }
-    .btn:active { transform: scale(0.97); }
+    .btn:active { transform: scale(0.95); }
     .btn:hover { filter: brightness(1.1); }
     .btn.secondary { background: var(--btn-bg); color: var(--text); }
     .hint { margin-top: 10px; font-size: 0.8rem; color: var(--text2); text-align: center; }
 
+    /* 手机端适配 */
     @media (max-width: 600px) {
-      body { padding: 10px; }
-      .container { padding: 20px 16px; }
+      body { padding: 8px; }
+      .container { padding: 20px 14px; border-radius: 14px; }
       h2 { font-size: 1.3rem; }
-      .upload-box { padding: 24px 14px; }
+      .upload-box { padding: 20px 12px; }
+      .upload-box .upload-hint { font-size: 0.85rem; }
       .controls { gap: 8px; }
-      .btn { font-size: 0.85rem; padding: 10px 16px; }
-      .color-palette-canvas { width: 150px; height: 150px; }
+      .btn { font-size: 0.85rem; padding: 10px 16px; flex: 1; justify-content: center; }
+      .control-group input[type="range"] { width: 80px; }
+      .control-group input[type="number"] { width: 60px; }
+      .color-palette-canvas { width: 140px; height: 140px; }
+      .palette-row { gap: 8px; }
+      .preset-color-btn { width: 26px; height: 26px; }
+      .control-group label { font-size: 0.78rem; }
+      .color-section { padding: 10px; }
+    }
+
+    /* 平板端 */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .color-palette-canvas { width: 180px; height: 180px; }
+      .btn { padding: 12px 20px; }
     }
   </style>
 </head>
@@ -201,9 +233,9 @@
       </div>
     </div>
 
-    <!-- 字符颜色设置（单一颜色模式显示） -->
+    <!-- 字符颜色（仅单一颜色） -->
     <div id="charColorSection" class="color-section" style="display:none;">
-      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">字符颜色</div>
+      <div class="color-section-title">字符颜色</div>
       <div id="charNativePicker" style="display:flex; align-items:center; gap:12px;">
         <div class="control-group">
           <label>颜色</label>
@@ -213,9 +245,9 @@
       </div>
     </div>
 
-    <!-- 背景颜色设置（始终显示） -->
+    <!-- 背景颜色（始终显示） -->
     <div class="color-section">
-      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">背景颜色</div>
+      <div class="color-section-title">背景颜色</div>
       <div id="bgNativePicker" style="display:flex; align-items:center; gap:12px;">
         <div class="control-group">
           <label>颜色</label>
@@ -232,23 +264,26 @@
 
     <!-- 色盘区域 -->
     <div id="paletteSection" class="color-section" style="display:none;">
-      <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">色盘选色</div>
+      <div class="color-section-title">色盘选色</div>
       <div class="color-palette-wrap">
         <div class="palette-row">
           <canvas id="colorPalette" class="color-palette-canvas" width="256" height="256"></canvas>
-          <div style="display:flex; flex-direction: column; gap:12px;">
+          <div style="display:flex; flex-direction: column; gap:12px; flex:1; min-width:140px;">
             <div>
-              <div style="font-size:0.85rem; color:var(--text2);">亮度</div>
-              <input type="range" id="brightnessSlider" min="0" max="100" value="50" step="1" style="width:120px;">
-              <span id="brightnessValue" style="font-size:0.8rem; color:var(--text2);">50%</span>
-            </div>
-            <div>
-              <div style="font-size:0.85rem; color:var(--text2);">当前选中颜色</div>
-              <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-                <span id="palettePreview" style="display:inline-block; width:32px; height:32px; background:#00ff00; border:1px solid var(--border); border-radius:6px;"></span>
-                <span id="paletteHex">#00ff00</span>
+              <div class="slider-group">
+                <label style="font-size:0.85rem; color:var(--text2);">亮度</label>
+                <input type="range" id="brightnessSlider" min="0" max="100" value="50" step="1" style="flex:1; max-width:140px;">
+                <span id="brightnessValue" style="font-size:0.8rem; color:var(--text2); min-width:32px;">50%</span>
               </div>
             </div>
+            <div>
+              <div style="font-size:0.85rem; color:var(--text2);">选中颜色</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                <span id="palettePreview" style="display:inline-block; width:36px; height:36px; background:#00ff00; border:1px solid var(--border); border-radius:6px;"></span>
+                <span id="paletteHex" style="font-size:0.9rem;">#00ff00</span>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text2);">快速选色</div>
             <div class="preset-colors">
               <button class="preset-color-btn" style="background:#000000;" data-color="#000000" title="黑色"></button>
               <button class="preset-color-btn" style="background:#ffffff;" data-color="#ffffff" title="白色"></button>
@@ -272,7 +307,7 @@
     <div class="controls">
       <div class="control-group">
         <label>自定义字符集</label>
-        <input type="text" id="customChars" value="@%#*+=-:. " placeholder="输入字符序列，越暗的像素用越前面的字符">
+        <input type="text" id="customChars" value="@%#*+=-:. " placeholder="输入字符序列">
       </div>
     </div>
     <div class="preset-chars" id="presetChars">
@@ -297,42 +332,44 @@
 
   <script>
     (function() {
-      // DOM 元素
-      const uploadBox = document.getElementById('uploadBox');
-      const fileInput = document.getElementById('fileInput');
-      const uploadHint = document.getElementById('uploadHint');
-      const canvas = document.getElementById('asciiCanvas');
-      const previewArea = document.getElementById('previewArea');
-      const widthSlider = document.getElementById('widthSlider');
-      const widthNumber = document.getElementById('widthNumber');
-      const colorMode = document.getElementById('colorMode');
-      const transparentBg = document.getElementById('transparentBg');
-      const customChars = document.getElementById('customChars');
-      const presetChars = document.getElementById('presetChars');
-      const copyBtn = document.getElementById('copyBtn');
-      const downloadTxtBtn = document.getElementById('downloadTxtBtn');
-      const downloadImgBtn = document.getElementById('downloadImgBtn');
-      const statusHint = document.getElementById('statusHint');
+      // ========== DOM 元素 ==========
+      const $ = (id) => document.getElementById(id);
+      const uploadBox = $('uploadBox');
+      const fileInput = $('fileInput');
+      const uploadHint = $('uploadHint');
+      const canvas = $('asciiCanvas');
+      const previewArea = $('previewArea');
+      const widthSlider = $('widthSlider');
+      const widthNumber = $('widthNumber');
+      const colorMode = $('colorMode');
+      const transparentBg = $('transparentBg');
+      const customChars = $('customChars');
+      const presetChars = $('presetChars');
+      const copyBtn = $('copyBtn');
+      const downloadTxtBtn = $('downloadTxtBtn');
+      const downloadImgBtn = $('downloadImgBtn');
+      const statusHint = $('statusHint');
 
-      const charColorSection = document.getElementById('charColorSection');
-      const charColor = document.getElementById('charColor');
-      const charColorHex = document.getElementById('charColorHex');
-      const bgColorInput = document.getElementById('bgColor');
-      const bgColorHex = document.getElementById('bgColorHex');
-      const bgNativePicker = document.getElementById('bgNativePicker');
-      const charNativePicker = document.getElementById('charNativePicker');
-      const paletteSection = document.getElementById('paletteSection');
-      const pickerType = document.getElementById('pickerType');
-      const colorPalette = document.getElementById('colorPalette');
-      const palettePreview = document.getElementById('palettePreview');
-      const paletteHex = document.getElementById('paletteHex');
-      const applyToChar = document.getElementById('applyToChar');
-      const applyToBg = document.getElementById('applyToBg');
-      const currentCharColor = document.getElementById('currentCharColor');
-      const currentBgColor = document.getElementById('currentBgColor');
-      const brightnessSlider = document.getElementById('brightnessSlider');
-      const brightnessValue = document.getElementById('brightnessValue');
+      const charColorSection = $('charColorSection');
+      const charColor = $('charColor');
+      const charColorHex = $('charColorHex');
+      const bgColorInput = $('bgColor');
+      const bgColorHex = $('bgColorHex');
+      const bgNativePicker = $('bgNativePicker');
+      const charNativePicker = $('charNativePicker');
+      const paletteSection = $('paletteSection');
+      const pickerType = $('pickerType');
+      const colorPalette = $('colorPalette');
+      const palettePreview = $('palettePreview');
+      const paletteHex = $('paletteHex');
+      const applyToChar = $('applyToChar');
+      const applyToBg = $('applyToBg');
+      const currentCharColor = $('currentCharColor');
+      const currentBgColor = $('currentBgColor');
+      const brightnessSlider = $('brightnessSlider');
+      const brightnessValue = $('brightnessValue');
 
+      // ========== 状态变量 ==========
       let originalImage = null;
       let currentAscii = '';
       let currentColors = [];
@@ -341,110 +378,38 @@
 
       let charColorValue = '#00ff00';
       let bgColorValue = '#000000';
-      let selectedHue = 120; // 色盘点击的色相
-      let selectedSat = 100; // 饱和度 0-100
-      let selectedBri = 50;  // 亮度 0-100
+      let selectedHue = 120;
+      let selectedSat = 100;
+      let selectedBri = 50;
 
-      function getPaletteColor() {
-        return hslToHex(selectedHue, selectedSat, selectedBri);
+      // ========== 工具函数 ==========
+      function getPaletteColor() { return hslToHex(selectedHue, selectedSat, selectedBri); }
+      function hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
       }
-
-      function updatePaletteFromRGB(r, g, b) {
-        const hsl = rgbToHsl(r, g, b);
-        selectedHue = hsl[0];
-        selectedSat = hsl[1];
-        selectedBri = hsl[2];
-        brightnessSlider.value = selectedBri;
-        brightnessValue.textContent = selectedBri + '%';
-        updateAllDisplays();
-      }
-
-      function updateAllDisplays() {
-        charColorHex.textContent = charColorValue;
-        bgColorHex.textContent = bgColorValue;
-        currentCharColor.textContent = charColorValue;
-        currentCharColor.style.color = charColorValue;
-        currentBgColor.textContent = bgColorValue;
-        currentBgColor.style.color = bgColorValue;
-
-        const palColor = getPaletteColor();
-        palettePreview.style.backgroundColor = palColor;
-        paletteHex.textContent = palColor;
-      }
-
-      // 颜色模式切换
-      colorMode.addEventListener('change', () => {
-        const single = colorMode.value === 'single';
-        charColorSection.style.display = single ? 'block' : 'none';
-        if (pickerType.value === 'palette') {
-          applyToChar.style.display = single ? 'inline-block' : 'none';
-        }
-        generateAscii();
-      });
-
-      // 取色器类型切换
-      pickerType.addEventListener('change', () => {
-        const isNative = pickerType.value === 'native';
-        charNativePicker.style.display = isNative ? 'flex' : 'none';
-        bgNativePicker.style.display = isNative ? 'flex' : 'none';
-        paletteSection.style.display = isNative ? 'none' : 'block';
-        if (!isNative) {
-          // 同步色相和饱和度
-          const rgb = hexToRgb(charColorValue);
-          const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-          selectedHue = hsl[0];
-          selectedSat = hsl[1];
-          selectedBri = hsl[2];
-          brightnessSlider.value = selectedBri;
-          brightnessValue.textContent = selectedBri + '%';
-          updateAllDisplays();
-        }
-        if (!isNative && colorMode.value === 'single') {
-          applyToChar.style.display = 'inline-block';
-        } else {
-          applyToChar.style.display = 'none';
-        }
-      });
-
-      charColor.addEventListener('input', () => {
-        charColorValue = charColor.value;
-        updateAllDisplays();
-        if (colorMode.value === 'single') drawPreview();
-      });
-      bgColorInput.addEventListener('input', () => {
-        bgColorValue = bgColorInput.value;
-        updateAllDisplays();
-        drawPreview();
-      });
-
-      // 色盘绘制（固定亮度50%的HSL色盘）
-      function drawPalette() {
-        const ctx = colorPalette.getContext('2d');
-        const w = colorPalette.width, h = colorPalette.height;
-        const imageData = ctx.createImageData(w, h);
-        const data = imageData.data;
-        for (let y = 0; y < h; y++) {
-          const sat = y / h * 100;
-          for (let x = 0; x < w; x++) {
-            const hue = (x / w) * 360;
-            const rgb = hslToRgb(hue, sat, 50);
-            const i = (y * w + x) * 4;
-            data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2]; data[i+3] = 255;
+      function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h = 0, s = 0, l = (max + min) / 2;
+        if (max !== min) {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
           }
         }
-        ctx.putImageData(imageData, 0, 0);
+        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
       }
-
-      // 颜色转换工具
       function hslToRgb(h, s, l) {
         h /= 360; s /= 100; l /= 100;
         let r, g, b;
-        if (s === 0) {
-          r = g = b = l;
-        } else {
+        if (s === 0) { r = g = b = l; }
+        else {
           const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
+            if (t < 0) t += 1; if (t > 1) t -= 1;
             if (t < 1/6) return p + (q - p) * 6 * t;
             if (t < 1/2) return q;
             if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
@@ -458,48 +423,75 @@
         }
         return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
       }
-
       function hslToHex(h, s, l) {
         const rgb = hslToRgb(h, s, l);
         return '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('');
       }
-
-      function hexToRgb(hex) {
-        hex = hex.replace('#', '');
-        return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+      function updatePaletteFromRGB(r, g, b) {
+        const hsl = rgbToHsl(r, g, b);
+        selectedHue = hsl[0]; selectedSat = hsl[1]; selectedBri = hsl[2];
+        brightnessSlider.value = selectedBri;
+        brightnessValue.textContent = selectedBri + '%';
+        updateAllDisplays();
+      }
+      function updateAllDisplays() {
+        charColorHex.textContent = charColorValue;
+        bgColorHex.textContent = bgColorValue;
+        currentCharColor.textContent = charColorValue;
+        currentCharColor.style.color = charColorValue;
+        currentBgColor.textContent = bgColorValue;
+        currentBgColor.style.color = bgColorValue;
+        const palColor = getPaletteColor();
+        palettePreview.style.backgroundColor = palColor;
+        paletteHex.textContent = palColor;
       }
 
-      function rgbToHsl(r, g, b) {
-        r /= 255; g /= 255; b /= 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
-        let h, s, l = (max + min) / 2;
-        if (max === min) {
-          h = s = 0;
-        } else {
-          const d = max - min;
-          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-          switch (max) {
-            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-            case g: h = ((b - r) / d + 2) / 6; break;
-            case b: h = ((r - g) / d + 4) / 6; break;
+      // ========== 色盘绘制 ==========
+      function drawPalette() {
+        const ctx = colorPalette.getContext('2d');
+        const w = colorPalette.width, h = colorPalette.height;
+        const imageData = ctx.createImageData(w, h);
+        const data = imageData.data;
+        for (let y = 0; y < h; y++) {
+          const sat = (1 - y / h) * 100;
+          for (let x = 0; x < w; x++) {
+            const hue = (x / w) * 360;
+            const rgb = hslToRgb(hue, sat, 50);
+            const i = (y * w + x) * 4;
+            data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2]; data[i+3] = 255;
           }
         }
-        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+        ctx.putImageData(imageData, 0, 0);
       }
-
       drawPalette();
 
-      // 色盘点击事件
-      colorPalette.addEventListener('click', (e) => {
+      // 色盘事件（同时支持鼠标和触摸）
+      function handlePalettePick(clientX, clientY) {
         const rect = colorPalette.getBoundingClientRect();
-        const sx = colorPalette.width / rect.width, sy = colorPalette.height / rect.height;
-        const x = (e.clientX - rect.left) * sx, y = (e.clientY - rect.top) * sy;
+        const sx = colorPalette.width / rect.width;
+        const sy = colorPalette.height / rect.height;
+        const x = (clientX - rect.left) * sx;
+        const y = (clientY - rect.top) * sy;
         if (x < 0 || y < 0 || x >= colorPalette.width || y >= colorPalette.height) return;
         selectedHue = Math.round((x / colorPalette.width) * 360);
-        selectedSat = Math.round((1 - y / colorPalette.height) * 100); // Y轴反转: 上方饱和度高
-        // 饱和度限制
+        selectedSat = Math.round((1 - y / colorPalette.height) * 100);
         selectedSat = Math.min(100, Math.max(0, selectedSat));
         updateAllDisplays();
+      }
+      colorPalette.addEventListener('mousedown', (e) => {
+        handlePalettePick(e.clientX, e.clientY);
+        const onMove = (ev) => { handlePalettePick(ev.clientX, ev.clientY); };
+        const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      colorPalette.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handlePalettePick(e.touches[0].clientX, e.touches[0].clientY);
+        const onMove = (ev) => { handlePalettePick(ev.touches[0].clientX, ev.touches[0].clientY); };
+        const onUp = () => { document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); };
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onUp);
       });
 
       // 亮度滑块
@@ -529,151 +521,222 @@
         drawPreview();
       });
 
-      // 宽度联动
-      function setWidth(val) { val = Math.max(1, parseInt(val)||80); widthNumber.value=val; widthSlider.value=Math.min(val,300); return val; }
-      widthSlider.addEventListener('input', ()=>{ widthNumber.value=parseInt(widthSlider.value,10); generateAscii(); });
-      widthNumber.addEventListener('input', ()=>{ setWidth(widthNumber.value); generateAscii(); });
-      widthNumber.addEventListener('blur', ()=>{ setWidth(widthNumber.value); generateAscii(); });
+      // ========== 颜色模式与取色器切换 ==========
+      colorMode.addEventListener('change', () => {
+        const single = colorMode.value === 'single';
+        charColorSection.style.display = single ? 'block' : 'none';
+        if (pickerType.value === 'palette') applyToChar.style.display = single ? 'inline-block' : 'none';
+        generateAscii();
+      });
+      pickerType.addEventListener('change', () => {
+        const isNative = pickerType.value === 'native';
+        charNativePicker.style.display = isNative ? 'flex' : 'none';
+        bgNativePicker.style.display = isNative ? 'flex' : 'none';
+        paletteSection.style.display = isNative ? 'none' : 'block';
+        if (!isNative) {
+          const rgb = hexToRgb(charColorValue);
+          const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+          selectedHue = hsl[0]; selectedSat = hsl[1]; selectedBri = hsl[2];
+          brightnessSlider.value = selectedBri;
+          brightnessValue.textContent = selectedBri + '%';
+          updateAllDisplays();
+        }
+        applyToChar.style.display = (!isNative && colorMode.value === 'single') ? 'inline-block' : 'none';
+      });
 
-      // 上传处理
-      uploadBox.addEventListener('click', ()=>fileInput.click());
-      fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleImage(e.target.files[0]); });
-      uploadBox.addEventListener('dragover', e=>{ e.preventDefault(); uploadBox.classList.add('dragover'); });
-      uploadBox.addEventListener('dragleave', ()=>uploadBox.classList.remove('dragover'));
-      uploadBox.addEventListener('drop', e=>{ e.preventDefault(); uploadBox.classList.remove('dragover'); if(e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]); });
+      charColor.addEventListener('input', () => {
+        charColorValue = charColor.value;
+        updateAllDisplays();
+        if (colorMode.value === 'single') drawPreview();
+      });
+      bgColorInput.addEventListener('input', () => {
+        bgColorValue = bgColorInput.value;
+        updateAllDisplays();
+        drawPreview();
+      });
+
+      // ========== 宽度联动 ==========
+      function setWidth(val) {
+        val = Math.max(1, parseInt(val) || 80);
+        widthNumber.value = val;
+        widthSlider.value = Math.min(val, 300);
+        return val;
+      }
+      widthSlider.addEventListener('input', () => { widthNumber.value = parseInt(widthSlider.value, 10); generateAscii(); });
+      widthNumber.addEventListener('input', () => { setWidth(widthNumber.value); generateAscii(); });
+      widthNumber.addEventListener('blur', () => { setWidth(widthNumber.value); generateAscii(); });
+
+      // ========== 上传处理 ==========
+      uploadBox.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleImage(e.target.files[0]); });
+      uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+      uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+      uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
+      });
 
       function handleImage(file) {
-        if(!file.type.startsWith('image/')) { alert('请选择一张图片！'); return; }
+        if (!file.type.startsWith('image/')) { alert('请选择一张图片！'); return; }
         const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image(); img.src = e.target.result;
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
           img.onload = () => {
             originalImage = img;
             uploadHint.innerHTML = `<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`;
             uploadBox.classList.add('has-file');
-            generateAscii(); statusHint.textContent='';
+            generateAscii();
+            statusHint.textContent = '';
           };
         };
         reader.readAsDataURL(file);
       }
 
-      // 生成字符画数据
+      // ========== 生成字符画数据 ==========
       function generateAscii() {
-        if(!originalImage) return;
+        if (!originalImage) return;
         const charSet = customChars.value.trim() || ' ';
         const ow = setWidth(widthNumber.value);
-        const oh = Math.floor(ow * (originalImage.height/originalImage.width) / 2);
-        currentCols=ow; currentRows=oh;
+        const oh = Math.floor(ow * (originalImage.height / originalImage.width) / 2);
+        currentCols = ow; currentRows = oh;
 
-        const tc = document.createElement('canvas'); tc.width=ow; tc.height=oh;
-        const tctx = tc.getContext('2d'); tctx.drawImage(originalImage,0,0,ow,oh);
-        const imgData = tctx.getImageData(0,0,ow,oh); const pixels = imgData.data;
+        const tc = document.createElement('canvas');
+        tc.width = ow; tc.height = oh;
+        const tctx = tc.getContext('2d');
+        tctx.drawImage(originalImage, 0, 0, ow, oh);
+        const imgData = tctx.getImageData(0, 0, ow, oh);
+        const pixels = imgData.data;
 
-        const colors = []; let ascii = '';
-        for(let y=0;y<oh;y++){
-          let line=''; const row=[];
-          for(let x=0;x<ow;x++){
-            const idx = (y*ow+x)*4;
-            const r=pixels[idx], g=pixels[idx+1], b=pixels[idx+2], a=pixels[idx+3];
-            const bright = 0.299*r+0.587*g+0.114*b;
-            const ci = Math.floor(bright/255*(charSet.length-1));
-            line += charSet[ci]||charSet[0];
-            row.push([r,g,b,a]);
+        const colors = [];
+        let ascii = '';
+        for (let y = 0; y < oh; y++) {
+          let line = '';
+          const row = [];
+          for (let x = 0; x < ow; x++) {
+            const idx = (y * ow + x) * 4;
+            const r = pixels[idx], g = pixels[idx + 1], b = pixels[idx + 2], a = pixels[idx + 3];
+            const bright = 0.299 * r + 0.587 * g + 0.114 * b;
+            const ci = Math.floor(bright / 255 * (charSet.length - 1));
+            line += charSet[ci] || charSet[0];
+            row.push([r, g, b, a]);
           }
-          ascii += line+'\n'; colors.push(row);
+          ascii += line + '\n';
+          colors.push(row);
         }
-        currentAscii=ascii; currentColors=colors;
+        currentAscii = ascii;
+        currentColors = colors;
         drawPreview();
       }
 
-      // 预览绘制（整体缩放）
+      // ========== 预览绘制（整体缩放） ==========
       function drawPreview() {
-        if(!originalImage || currentCols===0) return;
-        const cw = previewArea.clientWidth-24; if(cw<=0) return;
-        const fontSize=12, cw2=fontSize*0.6, lh=fontSize*1.2;
-        const aw = currentCols*cw2, ah = currentRows*lh;
-        const maxH = previewArea.clientHeight-24||400;
-        const scale = Math.min(cw/aw, maxH/ah, 1);
+        if (!originalImage || currentCols === 0) return;
+        const cw = previewArea.clientWidth - 24;
+        if (cw <= 0) return;
+        const fontSize = 12, cw2 = fontSize * 0.6, lh = fontSize * 1.2;
+        const aw = currentCols * cw2, ah = currentRows * lh;
+        const maxH = previewArea.clientHeight - 24 || 400;
+        const scale = Math.min(cw / aw, maxH / ah, 1);
 
-        canvas.width = cw; canvas.height = maxH;
-        canvas.style.width = cw+'px'; canvas.style.height = maxH+'px';
+        canvas.width = cw;
+        canvas.height = maxH;
+        canvas.style.width = cw + 'px';
+        canvas.style.height = maxH + 'px';
         const ctx = canvas.getContext('2d');
 
-        if(transparentBg.checked) ctx.clearRect(0,0,cw,maxH);
-        else { ctx.fillStyle=bgColorValue; ctx.fillRect(0,0,cw,maxH); }
+        if (transparentBg.checked) ctx.clearRect(0, 0, cw, maxH);
+        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0, 0, cw, maxH); }
 
         ctx.save();
-        ctx.translate((cw-aw*scale)/2, (maxH-ah*scale)/2);
-        ctx.scale(scale,scale);
+        ctx.translate((cw - aw * scale) / 2, (maxH - ah * scale) / 2);
+        ctx.scale(scale, scale);
         ctx.font = `${fontSize}px 'Courier New', monospace`;
         ctx.textBaseline = 'top';
 
-        const single = colorMode.value==='single';
-        for(let y=0;y<currentRows;y++){
-          const line = currentAscii.split('\n')[y]||'';
-          for(let x=0;x<currentCols;x++){
-            const ch = line[x]||' ';
-            if(single) ctx.fillStyle = charColorValue;
-            else { const [r,g,b,a=255] = (currentColors[y]&&currentColors[y][x])||[0,255,0,255]; ctx.fillStyle=`rgba(${r},${g},${b},${a/255})`; }
-            ctx.fillText(ch, x*cw2, y*lh);
+        const single = colorMode.value === 'single';
+        for (let y = 0; y < currentRows; y++) {
+          const line = currentAscii.split('\n')[y] || '';
+          for (let x = 0; x < currentCols; x++) {
+            const ch = line[x] || ' ';
+            if (single) ctx.fillStyle = charColorValue;
+            else {
+              const [r, g, b, a = 255] = (currentColors[y] && currentColors[y][x]) || [0, 255, 0, 255];
+              ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
+            }
+            ctx.fillText(ch, x * cw2, y * lh);
           }
         }
         ctx.restore();
       }
 
+      // ========== 其他事件 ==========
       transparentBg.addEventListener('change', drawPreview);
       customChars.addEventListener('input', generateAscii);
-      presetChars.addEventListener('click', e=>{
-        const btn = e.target.closest('.preset-btn'); if(!btn) return;
-        customChars.value = btn.dataset.chars; generateAscii();
+      presetChars.addEventListener('click', (e) => {
+        const btn = e.target.closest('.preset-btn');
+        if (!btn) return;
+        customChars.value = btn.dataset.chars;
+        generateAscii();
       });
-      window.addEventListener('resize', ()=>{ if(originalImage) drawPreview(); });
+      window.addEventListener('resize', () => { if (originalImage) drawPreview(); });
 
-      // 复制与下载
-      copyBtn.addEventListener('click', async ()=>{
-        if(!currentAscii) return;
-        try { await navigator.clipboard.writeText(currentAscii); statusHint.textContent='✅ 已复制到剪贴板！'; }
-        catch { statusHint.textContent='❌ 复制失败'; }
+      // ========== 复制与下载 ==========
+      copyBtn.addEventListener('click', async () => {
+        if (!currentAscii) return;
+        try { await navigator.clipboard.writeText(currentAscii); statusHint.textContent = '✅ 已复制到剪贴板！'; }
+        catch { statusHint.textContent = '❌ 复制失败'; }
       });
-      downloadTxtBtn.addEventListener('click', ()=>{
-        if(!currentAscii) return;
-        const blob = new Blob([currentAscii], {type:'text/plain'});
-        const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ascii_art.txt'; a.click();
-        statusHint.textContent='✅ TXT 已下载。';
+      downloadTxtBtn.addEventListener('click', () => {
+        if (!currentAscii) return;
+        const blob = new Blob([currentAscii], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'ascii_art.txt';
+        a.click();
+        statusHint.textContent = '✅ TXT 已下载。';
       });
-      downloadImgBtn.addEventListener('click', ()=>{
-        if(!originalImage || currentCols===0) return;
-        const fontSize=12, cw2=fontSize*0.6, lh=fontSize*1.2;
-        const w = Math.ceil(currentCols*cw2), h = Math.ceil(currentRows*lh);
-        const off = document.createElement('canvas'); off.width=w; off.height=h;
+      downloadImgBtn.addEventListener('click', () => {
+        if (!originalImage || currentCols === 0) return;
+        const fontSize = 12, cw2 = fontSize * 0.6, lh = fontSize * 1.2;
+        const w = Math.ceil(currentCols * cw2), h = Math.ceil(currentRows * lh);
+        const off = document.createElement('canvas');
+        off.width = w; off.height = h;
         const ctx = off.getContext('2d');
-        if(transparentBg.checked) ctx.clearRect(0,0,w,h);
-        else { ctx.fillStyle=bgColorValue; ctx.fillRect(0,0,w,h); }
+        if (transparentBg.checked) ctx.clearRect(0, 0, w, h);
+        else { ctx.fillStyle = bgColorValue; ctx.fillRect(0, 0, w, h); }
         ctx.font = `${fontSize}px 'Courier New', monospace`;
-        ctx.textBaseline='top';
-        const single = colorMode.value==='single';
-        for(let y=0;y<currentRows;y++){
-          const line = currentAscii.split('\n')[y]||'';
-          for(let x=0;x<currentCols;x++){
-            const ch = line[x]||' ';
-            if(single) ctx.fillStyle=charColorValue;
-            else { const [r,g,b,a=255] = (currentColors[y]&&currentColors[y][x])||[0,255,0,255]; ctx.fillStyle=`rgba(${r},${g},${b},${a/255})`; }
-            ctx.fillText(ch, x*cw2, y*lh);
+        ctx.textBaseline = 'top';
+        const single = colorMode.value === 'single';
+        for (let y = 0; y < currentRows; y++) {
+          const line = currentAscii.split('\n')[y] || '';
+          for (let x = 0; x < currentCols; x++) {
+            const ch = line[x] || ' ';
+            if (single) ctx.fillStyle = charColorValue;
+            else {
+              const [r, g, b, a = 255] = (currentColors[y] && currentColors[y][x]) || [0, 255, 0, 255];
+              ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
+            }
+            ctx.fillText(ch, x * cw2, y * lh);
           }
         }
-        off.toBlob(blob=>{
-          const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ascii_art.png'; a.click();
-          statusHint.textContent='✅ 原尺寸图片已下载。';
-        },'image/png');
+        off.toBlob((blob) => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'ascii_art.png';
+          a.click();
+          statusHint.textContent = '✅ 原尺寸图片已下载。';
+        }, 'image/png');
       });
 
-      // 初始化
+      // ========== 初始化 ==========
       charColorSection.style.display = 'flex';
-      pickerType.value='native';
-      paletteSection.style.display='none';
-      applyToChar.style.display='inline-block';
+      pickerType.value = 'native';
+      paletteSection.style.display = 'none';
+      applyToChar.style.display = 'inline-block';
       updateAllDisplays();
-      statusHint.textContent='';
+      statusHint.textContent = '';
     })();
   </script>
 </body>
