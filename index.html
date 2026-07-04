@@ -378,7 +378,7 @@
       </div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
-        <iframe id="modalIframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <iframe id="modalIframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
       </div>
     </div>
   </div>
@@ -392,7 +392,7 @@
         <span class="btn-icon">📡</span> 米游途
       </a>
     </div>
-    <p class="footer-note">⚡ 图灵魔法 · 收藏工具 · 点击卡片即可在当前页面打开</p>
+    <p class="footer-note">⚡ 图灵魔法 · 点击卡片在当前页打开 · 已启用下载权限</p>
   </footer>
 
   <script src="toolsData.js"></script>
@@ -456,11 +456,7 @@
         modalLoading.style.display = 'block';
         modalIframe.src = url;
         modalOverlay.classList.add('active');
-        // 监听iframe加载完成
-        modalIframe.onload = () => {
-          modalLoading.style.display = 'none';
-        };
-        // 防止背景滚动
+        modalIframe.onload = () => { modalLoading.style.display = 'none'; };
         document.body.style.overflow = 'hidden';
       }
 
@@ -475,7 +471,6 @@
       modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) closeModal();
       });
-      // 按ESC关闭
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
       });
@@ -531,7 +526,6 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
-      // 卡片点击事件（委托）
       cardsGridEl.addEventListener('click', (e) => {
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
