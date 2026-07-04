@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>图灵魔法 | 图片工具导航</title>
+  <style>
+    /* ========== 暗色主题（默认） ========== */
+    :root {
+      --bg: #0f1117;
+      --card-bg: #1a1d27;
+      --text: #e8edf2;
+      --text-secondary: #9aa0b4;
+      --primary: #8b7cf7;
+      --primary-light: #b4a7ff;
+      --accent-1: #f97ba8;
+      --accent-2: #2dd4bf;
+      --accent-3: #f6c85b;
+      --accent-4: #5ba0f5;
+      --accent-5: #f07b6c;
+      --border: #2a2e3b;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
+      --radius: 18px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --tag-bg: #232738;
+      --tag-active-bg: var(--primary);
+      --tag-text: #b4bcd0;
+      --footer-bg: #12141c;
+      --input-bg: #1e2130;
+      --card-border: transparent;
+    }
+
+    body.light-mode {
+      --bg: #f4f5fa;
+      --card-bg: #ffffff;
+      --text: #1e1e2f;
+      --text-secondary: #5b5e72;
+      --primary: #6c5ce7;
+      --primary-light: #a29bfe;
+      --accent-1: #e84393;
+      --accent-2: #00b894;
+      --accent-3: #f39c12;
+      --accent-4: #0984e3;
+      --accent-5: #d63031;
+      --border: #e0e3eb;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.1);
+      --tag-bg: #ebeef5;
+      --tag-active-bg: #6c5ce7;
+      --tag-text: #4a4d5e;
+      --footer-bg: #f0f1f6;
+      --input-bg: #f0f2f8;
+      --card-border: #e8ecf5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      background-image:
+        radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(18, 20, 28, 0.85);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      transition: background 0.3s;
+    }
+    body.light-mode .header {
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .header-inner {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b7cf7, #f97ba8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4);
+    }
+    .logo-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(to right, #d4ccff, #f9a8d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo-sub {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-top: 2px;
+      display: none; /* 移动端隐藏副标题，节省空间 */
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 380px;
+      min-width: 180px;
+      margin: 0 8px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition);
+      background: var(--input-bg);
+      color: var(--text);
+      -webkit-appearance: none;
+    }
+    .search-wrap input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(139, 124, 247, 0.15);
+      background: var(--card-bg);
+    }
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: #888ca0;
+      pointer-events: none;
+    }
+
+    .theme-toggle {
+      background: var(--tag-bg);
+      border: none;
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: scale(1.06);
+    }
+
+    .main-container {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 20px 20px 40px;
+    }
+
+    /* 分类标签（仅全部/收藏） */
+    .category-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .category-tag {
+      padding: 8px 18px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: var(--tag-bg);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      white-space: nowrap;
+      user-select: none;
+      color: var(--tag-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .category-tag:active {
+      transform: scale(0.96);
+    }
+    .category-tag:hover {
+      border-color: var(--primary-light);
+      color: var(--primary);
+      background: rgba(139, 124, 247, 0.08);
+    }
+    .category-tag.active {
+      background: var(--tag-active-bg);
+      color: #fff;
+      border-color: var(--tag-active-bg);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+    .category-tag .count {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+    }
+    .category-tag.active .count {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .stats-bar strong {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px 20px 16px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card:active {
+      transform: scale(0.98);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary-light);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      opacity: 0.9;
+    }
+    .card.accent-1::before { background: var(--accent-1); }
+    .card.accent-2::before { background: var(--accent-2); }
+    .card.accent-3::before { background: var(--accent-3); }
+    .card.accent-4::before { background: var(--accent-4); }
+    .card.accent-5::before { background: var(--accent-5); }
+    .card.accent-0::before { background: var(--primary); }
+
+    .card-icon-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .bg-1 { background: linear-gradient(135deg, #f97ba8, #e84393); }
+    .bg-2 { background: linear-gradient(135deg, #2dd4bf, #00cec9); }
+    .bg-3 { background: linear-gradient(135deg, #f6c85b, #f39c12); }
+    .bg-4 { background: linear-gradient(135deg, #5ba0f5, #6c5ce7); }
+    .bg-5 { background: linear-gradient(135deg, #f07b6c, #d63031); }
+    .bg-0 { background: linear-gradient(135deg, #8b7cf7, #b4a7ff); }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.2px;
+      line-height: 1.3;
+    }
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+    .card-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .card-category-badge {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(139, 124, 247, 0.12);
+      color: var(--primary-light);
+      font-weight: 500;
+    }
+    .fav-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      transition: 0.2s;
+      color: #7c8096;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fav-btn:active {
+      transform: scale(0.9);
+    }
+    .fav-btn:hover {
+      background: rgba(249, 123, 168, 0.1);
+      color: #f97ba8;
+    }
+    .fav-btn.favorited {
+      color: #f97ba8;
+      filter: drop-shadow(0 0 6px rgba(249, 123, 168, 0.5));
+    }
+
+    .card-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      color: #5b5f72;
+      transition: var(--transition);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .card:hover .card-arrow {
+      color: var(--primary-light);
+      right: 12px;
+      opacity: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .empty-state .empty-icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      background: var(--footer-bg);
+      border-top: 1px solid var(--border);
+      padding: 24px 20px 30px;
+      margin-top: 24px;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    .footer-channels {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #2a2d3d, #1e2130);
+      border: 1px solid #464b60;
+      color: #f0f2ff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      letter-spacing: 0.3px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .channel-btn:active {
+      transform: scale(0.96);
+    }
+    .channel-btn:hover {
+      background: linear-gradient(135deg, #3d3f5c, #2d2f44);
+      border-color: #8b7cf7;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(139, 124, 247, 0.3);
+      color: #fff;
+    }
+    .channel-btn .btn-icon {
+      font-size: 1.2rem;
+    }
+    body.light-mode .channel-btn {
+      background: #f0f1f6;
+      border-color: #cdd0dd;
+      color: #2d2e3a;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    body.light-mode .channel-btn:hover {
+      background: #e6e8f2;
+      border-color: #6c5ce7;
+      color: #1e1e2f;
+    }
+    .footer-note {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    /* ========== 移动端优化 ========== */
+    @media (max-width: 600px) {
+      .header-inner {
+        gap: 8px;
+      }
+      .logo-text {
+        font-size: 1.1rem;
+      }
+      .search-wrap {
+        min-width: 0;
+        flex: 2;
+      }
+      .search-wrap input {
+        padding: 10px 14px 10px 36px;
+        font-size: 0.85rem;
+      }
+      .search-wrap .search-icon {
+        left: 12px;
+        font-size: 0.9rem;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .category-tag {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+      }
+      .main-container {
+        padding: 16px 12px 32px;
+      }
+      .channel-btn {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      animation: fadeInUp 0.3s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo" title="图灵魔法">
+        <div class="logo-icon">🧠</div>
+        <div>
+          <div class="logo-text">图灵魔法</div>
+          <div class="logo-sub">✨ 图片工具导航</div>
+        </div>
+      </a>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索工具..." aria-label="搜索工具">
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">🌙</button>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="category-tags" id="categoryTags"></div>
+    <div class="stats-bar">
+      <span>📦 共 <strong id="totalCount">0</strong> 个魔法工具</span>
+      <span id="showingInfo"></span>
+    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">🧙</div>
+      <p>还没有添加任何魔法工具</p>
+      <p style="font-size:0.85rem;">请编辑 links/toolsData.js 添加链接 ✨</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-channels">
+      <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn">
+        <span class="btn-icon">🎮</span> 次元ACG
+      </a>
+      <a href="https://pd.qq.com/s/cbffiz2ds?b=9" target="_blank" rel="noopener" class="channel-btn">
+        <span class="btn-icon">📡</span> 米游途
+      </a>
+    </div>
+    <p class="footer-note">⚡ 图灵魔法 · 收藏工具 · 点击卡片跳转</p>
+  </footer>
+
+  <!-- 引入外部链接配置 -->
+  <script src="links/toolsData.js"></script>
+
+  <script>
+    (function() {
+      // ==================== 仅保留“全部”和“收藏”分类 ====================
+      const categories = [
+        { id: 'favorites', name: '收藏', icon: '⭐' },
+        { id: 'all', name: '全部', icon: '📋' }
+      ];
+
+      // 检查 toolsData 是否存在
+      if (typeof toolsData === 'undefined') {
+        console.error('❌ 未找到 toolsData，请检查 links/toolsData.js');
+        var toolsData = [];
+      }
+
+      // ==================== 状态管理 ====================
+      let currentCategory = 'all';
+      let searchQuery = '';
+      let favorites = JSON.parse(localStorage.getItem('turingMagicFavorites') || '[]');
+
+      function saveFavorites() {
+        localStorage.setItem('turingMagicFavorites', JSON.stringify(favorites));
+      }
+
+      function toggleFavorite(toolId) {
+        if (favorites.includes(toolId)) {
+          favorites = favorites.filter(id => id !== toolId);
+        } else {
+          favorites.push(toolId);
+        }
+        saveFavorites();
+      }
+
+      const categoryTagsEl = document.getElementById('categoryTags');
+      const cardsGridEl = document.getElementById('cardsGrid');
+      const emptyStateEl = document.getElementById('emptyState');
+      const totalCountEl = document.getElementById('totalCount');
+      const showingInfoEl = document.getElementById('showingInfo');
+      const searchInput = document.getElementById('searchInput');
+      const themeToggle = document.getElementById('themeToggle');
+
+      // ==================== 主题管理 ====================
+      function applyTheme(mode) {
+        if (mode === 'light') {
+          document.body.classList.add('light-mode');
+          themeToggle.textContent = '☀️';
+        } else {
+          document.body.classList.remove('light-mode');
+          themeToggle.textContent = '🌙';
+        }
+        localStorage.setItem('turingMagicTheme', mode);
+      }
+
+      function initTheme() {
+        const saved = localStorage.getItem('turingMagicTheme');
+        if (saved === 'light') {
+          applyTheme('light');
+        } else {
+          applyTheme('dark');
+        }
+      }
+
+      themeToggle.addEventListener('click', () => {
+        const isLight = document.body.classList.contains('light-mode');
+        applyTheme(isLight ? 'dark' : 'light');
+      });
+
+      // ==================== 过滤逻辑 ====================
+      function getFilteredTools() {
+        let filtered = [...toolsData];
+        if (currentCategory === 'favorites') {
+          filtered = filtered.filter(t => favorites.includes(t.id));
+        }
+        if (searchQuery.trim()) {
+          const q = searchQuery.trim().toLowerCase();
+          filtered = filtered.filter(t =>
+            t.title.toLowerCase().includes(q) ||
+            t.description.toLowerCase().includes(q)
+          );
+        }
+        return filtered;
+      }
+
+      function renderCategoryTags() {
+        categoryTagsEl.innerHTML = categories.map(cat => {
+          let count;
+          if (cat.id === 'favorites') {
+            count = favorites.length;
+          } else {
+            count = toolsData.length;
+          }
+          const activeClass = currentCategory === cat.id ? ' active' : '';
+          return `
+            <button class="category-tag${activeClass}" data-category="${cat.id}">
+              ${cat.icon} ${cat.name}
+              <span class="count">${count}</span>
+            </button>
+          `;
+        }).join('');
+
+        categoryTagsEl.querySelectorAll('.category-tag').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentCategory = btn.dataset.category;
+            searchInput.value = '';
+            searchQuery = '';
+            renderAll();
+          });
+        });
+      }
+
+      function renderCards() {
+        const filtered = getFilteredTools();
+        totalCountEl.textContent = toolsData.length;
+
+        if (filtered.length === 0) {
+          cardsGridEl.innerHTML = '';
+          emptyStateEl.style.display = 'block';
+          showingInfoEl.textContent = '✨ 显示 0 个工具';
+        } else {
+          emptyStateEl.style.display = 'none';
+          showingInfoEl.textContent = `✨ 显示 ${filtered.length} 个工具`;
+          cardsGridEl.innerHTML = filtered.map(tool => {
+            const isFav = favorites.includes(tool.id);
+            return `
+              <div class="card ${tool.accentClass}" data-tool-id="${tool.id}">
+                <a href="${tool.url}" target="_blank" rel="noopener" style="text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:8px; flex:1;">
+                  <div class="card-icon-row">
+                    <div class="card-icon ${tool.iconBgClass}">${tool.icon}</div>
+                    <div class="card-title">${tool.title}</div>
+                  </div>
+                  <div class="card-desc">${tool.description}</div>
+                  <div class="card-footer-row">
+                    <span class="card-category-badge">${tool.category || '工具'}</span>
+                  </div>
+                </a>
+                <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">
+                  ${isFav ? '❤️' : '🤍'}
+                </button>
+                <span class="card-arrow">→</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      function renderAll() {
+        renderCategoryTags();
+        renderCards();
+      }
+
+      cardsGridEl.addEventListener('click', (e) => {
+        const favBtn = e.target.closest('.fav-btn');
+        if (!favBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const toolId = parseInt(favBtn.dataset.toolId, 10);
+        toggleFavorite(toolId);
+        renderAll();
+      });
+
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value;
+        renderCards();
+        categoryTagsEl.querySelectorAll('.category-tag').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.category === currentCategory && !searchQuery.trim());
+        });
+      });
+
+      initTheme();
+      renderAll();
+
+      console.log('🧠 图灵魔法已启动！工具数量：' + toolsData.length);
+      console.log('📁 编辑 links/toolsData.js 即可添加新链接');
+    })();
+  </script>
+</body>
+</html>
