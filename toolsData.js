@@ -18,6 +18,16 @@ const toolsData = [
     icon: '👻',
     iconBgClass: 'bg-4',
     accentClass: 'accent-4'
+  },
+  {
+    id: 3,
+    title: '图片混淆',
+    url: 'https://xfqtphx.netlify.app',
+    description: '在线图片像素混淆/打乱工具，一键生成乱码、马赛克或抽象视觉特效。',
+    category: 'other',
+    icon: '🌀',
+    iconBgClass: 'bg-2',
+    accentClass: 'accent-2'
   }
-  // 👇 后续新链接继续加在这里
+  // 👇 后续新链接继续加在这里，用逗号分隔
 ];
