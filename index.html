@@ -345,9 +345,10 @@
         { id: 'all', name: '全部', icon: '📋' }
       ];
 
+      // ✅ 修正：不声明局部变量，直接检查全局变量
       if (typeof toolsData === 'undefined') {
-        console.error('❌ 未找到 toolsData，请检查 toolsData.js 是否存在');
-        var toolsData = [];
+        console.warn('⚠️ 未加载到 toolsData.js，请检查文件是否存在。');
+        toolsData = [];  // 赋值给全局变量（可能为 undefined 时创建）
       }
 
       let currentCategory = 'all';
