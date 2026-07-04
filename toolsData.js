@@ -38,6 +38,16 @@ const toolsData = [
     icon: '📎',
     iconBgClass: 'bg-1',
     accentClass: 'accent-1'
+  },
+  {
+  id: 5,
+  title: 'ASCII 字符画',
+  url: 'tools/ascii.html',
+  description: '自建 ASCII 字符画生成器，上传图片即可转为字符组成的复古艺术画，可调节密度。',
+  category: 'other',
+  icon: '🅰️',
+  iconBgClass: 'bg-3',
+  accentClass: 'accent-3'
   }
   // 👇 后续新链接继续加在这里，用逗号分隔
 ];
