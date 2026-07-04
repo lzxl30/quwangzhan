@@ -91,12 +91,17 @@
       background: var(--input-bg);
     }
     .color-palette-wrap {
-      display: flex; align-items: flex-start; gap: 16px;
-      margin-top: 8px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .palette-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
     }
     .color-palette-canvas {
       border: 1px solid var(--border); border-radius: 8px;
       cursor: crosshair; width: 200px; height: 200px;
+    }
+    .slider-group {
+      display: flex; align-items: center; gap: 8px;
     }
     .apply-buttons {
       display: flex; gap: 8px; margin-top: 8px;
@@ -108,6 +113,14 @@
       transition: 0.2s; white-space: nowrap;
     }
     .apply-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-colors {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+    }
+    .preset-color-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+      cursor: pointer; transition: 0.2s;
+    }
+    .preset-color-btn:hover { border-color: var(--accent); transform: scale(1.1); }
     .preset-chars {
       display: flex; gap: 6px; flex-wrap: wrap;
     }
@@ -178,7 +191,6 @@
       </div>
     </div>
 
-    <!-- 取色器类型（全局） -->
     <div class="controls">
       <div class="control-group">
         <label>取色器类型</label>
@@ -189,7 +201,7 @@
       </div>
     </div>
 
-    <!-- 字符颜色设置（仅单一颜色模式显示） -->
+    <!-- 字符颜色设置（单一颜色模式显示） -->
     <div id="charColorSection" class="color-section" style="display:none;">
       <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">字符颜色</div>
       <div id="charNativePicker" style="display:flex; align-items:center; gap:12px;">
@@ -218,26 +230,42 @@
       </div>
     </div>
 
-    <!-- 色盘区域（当取色器类型为色盘时显示） -->
+    <!-- 色盘区域 -->
     <div id="paletteSection" class="color-section" style="display:none;">
       <div style="font-weight:600; font-size:0.95rem; color:var(--text); margin-bottom:8px;">色盘选色</div>
       <div class="color-palette-wrap">
-        <canvas id="colorPalette" class="color-palette-canvas" width="256" height="256"></canvas>
-        <div>
-          <div style="font-size:0.85rem; color:var(--text2);">当前选中颜色</div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-            <span id="palettePreview" style="display:inline-block; width:32px; height:32px; background:#00ff00; border:1px solid var(--border); border-radius:6px;"></span>
-            <span id="paletteHex">#00ff00</span>
-          </div>
-          <div class="apply-buttons">
-            <button class="apply-btn" id="applyToChar">应用到字符</button>
-            <button class="apply-btn" id="applyToBg">应用到背景</button>
-          </div>
-          <div style="font-size:0.8rem; color:var(--text2); margin-top:8px;">
-            <div>字符颜色: <span id="currentCharColor" style="color:#00ff00;">#00ff00</span></div>
-            <div>背景颜色: <span id="currentBgColor" style="color:#000000;">#000000</span></div>
+        <div class="palette-row">
+          <canvas id="colorPalette" class="color-palette-canvas" width="256" height="256"></canvas>
+          <div style="display:flex; flex-direction: column; gap:12px;">
+            <div>
+              <div style="font-size:0.85rem; color:var(--text2);">亮度</div>
+              <input type="range" id="brightnessSlider" min="0" max="100" value="50" step="1" style="width:120px;">
+              <span id="brightnessValue" style="font-size:0.8rem; color:var(--text2);">50%</span>
+            </div>
+            <div>
+              <div style="font-size:0.85rem; color:var(--text2);">当前选中颜色</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                <span id="palettePreview" style="display:inline-block; width:32px; height:32px; background:#00ff00; border:1px solid var(--border); border-radius:6px;"></span>
+                <span id="paletteHex">#00ff00</span>
+              </div>
+            </div>
+            <div class="preset-colors">
+              <button class="preset-color-btn" style="background:#000000;" data-color="#000000" title="黑色"></button>
+              <button class="preset-color-btn" style="background:#ffffff;" data-color="#ffffff" title="白色"></button>
+              <button class="preset-color-btn" style="background:#ff0000;" data-color="#ff0000" title="红色"></button>
+              <button class="preset-color-btn" style="background:#00ff00;" data-color="#00ff00" title="绿色"></button>
+              <button class="preset-color-btn" style="background:#0000ff;" data-color="#0000ff" title="蓝色"></button>
+            </div>
+            <div class="apply-buttons">
+              <button class="apply-btn" id="applyToChar">应用到字符</button>
+              <button class="apply-btn" id="applyToBg">应用到背景</button>
+            </div>
           </div>
         </div>
+      </div>
+      <div style="font-size:0.8rem; color:var(--text2); margin-top:8px;">
+        <div>字符颜色: <span id="currentCharColor" style="color:#00ff00;">#00ff00</span></div>
+        <div>背景颜色: <span id="currentBgColor" style="color:#000000;">#000000</span></div>
       </div>
     </div>
 
@@ -269,7 +297,7 @@
 
   <script>
     (function() {
-      // DOM
+      // DOM 元素
       const uploadBox = document.getElementById('uploadBox');
       const fileInput = document.getElementById('fileInput');
       const uploadHint = document.getElementById('uploadHint');
@@ -302,6 +330,8 @@
       const applyToBg = document.getElementById('applyToBg');
       const currentCharColor = document.getElementById('currentCharColor');
       const currentBgColor = document.getElementById('currentBgColor');
+      const brightnessSlider = document.getElementById('brightnessSlider');
+      const brightnessValue = document.getElementById('brightnessValue');
 
       let originalImage = null;
       let currentAscii = '';
@@ -309,10 +339,25 @@
       let currentCols = 80;
       let currentRows = 0;
 
-      // 颜色状态
       let charColorValue = '#00ff00';
       let bgColorValue = '#000000';
-      let paletteSelectedColor = '#00ff00';
+      let selectedHue = 120; // 色盘点击的色相
+      let selectedSat = 100; // 饱和度 0-100
+      let selectedBri = 50;  // 亮度 0-100
+
+      function getPaletteColor() {
+        return hslToHex(selectedHue, selectedSat, selectedBri);
+      }
+
+      function updatePaletteFromRGB(r, g, b) {
+        const hsl = rgbToHsl(r, g, b);
+        selectedHue = hsl[0];
+        selectedSat = hsl[1];
+        selectedBri = hsl[2];
+        brightnessSlider.value = selectedBri;
+        brightnessValue.textContent = selectedBri + '%';
+        updateAllDisplays();
+      }
 
       function updateAllDisplays() {
         charColorHex.textContent = charColorValue;
@@ -321,8 +366,10 @@
         currentCharColor.style.color = charColorValue;
         currentBgColor.textContent = bgColorValue;
         currentBgColor.style.color = bgColorValue;
-        palettePreview.style.backgroundColor = paletteSelectedColor;
-        paletteHex.textContent = paletteSelectedColor;
+
+        const palColor = getPaletteColor();
+        palettePreview.style.backgroundColor = palColor;
+        paletteHex.textContent = palColor;
       }
 
       // 颜色模式切换
@@ -342,10 +389,16 @@
         bgNativePicker.style.display = isNative ? 'flex' : 'none';
         paletteSection.style.display = isNative ? 'none' : 'block';
         if (!isNative) {
-          paletteSelectedColor = charColorValue;
+          // 同步色相和饱和度
+          const rgb = hexToRgb(charColorValue);
+          const hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+          selectedHue = hsl[0];
+          selectedSat = hsl[1];
+          selectedBri = hsl[2];
+          brightnessSlider.value = selectedBri;
+          brightnessValue.textContent = selectedBri + '%';
           updateAllDisplays();
         }
-        // 控制色盘中的应用字符按钮
         if (!isNative && colorMode.value === 'single') {
           applyToChar.style.display = 'inline-block';
         } else {
@@ -364,30 +417,34 @@
         drawPreview();
       });
 
-      // 色盘绘制
+      // 色盘绘制（固定亮度50%的HSL色盘）
       function drawPalette() {
         const ctx = colorPalette.getContext('2d');
         const w = colorPalette.width, h = colorPalette.height;
         const imageData = ctx.createImageData(w, h);
         const data = imageData.data;
         for (let y = 0; y < h; y++) {
-          const sat = y / h;
+          const sat = y / h * 100;
           for (let x = 0; x < w; x++) {
             const hue = (x / w) * 360;
-            const rgb = hslToRgb(hue, sat, 0.5);
+            const rgb = hslToRgb(hue, sat, 50);
             const i = (y * w + x) * 4;
             data[i] = rgb[0]; data[i+1] = rgb[1]; data[i+2] = rgb[2]; data[i+3] = 255;
           }
         }
         ctx.putImageData(imageData, 0, 0);
       }
+
+      // 颜色转换工具
       function hslToRgb(h, s, l) {
-        h /= 360;
+        h /= 360; s /= 100; l /= 100;
         let r, g, b;
-        if (s === 0) r = g = b = l;
-        else {
+        if (s === 0) {
+          r = g = b = l;
+        } else {
           const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1; if (t > 1) t -= 1;
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
             if (t < 1/6) return p + (q - p) * 6 * t;
             if (t < 1/2) return q;
             if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
@@ -399,29 +456,75 @@
           g = hue2rgb(p, q, h);
           b = hue2rgb(p, q, h - 1/3);
         }
-        return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
       }
-      function rgbToHex(r,g,b) { return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+
+      function hslToHex(h, s, l) {
+        const rgb = hslToRgb(h, s, l);
+        return '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('');
+      }
+
+      function hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+      }
+
+      function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) {
+          h = s = 0;
+        } else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+          }
+        }
+        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+      }
 
       drawPalette();
 
+      // 色盘点击事件
       colorPalette.addEventListener('click', (e) => {
         const rect = colorPalette.getBoundingClientRect();
-        const sx = colorPalette.width/rect.width, sy = colorPalette.height/rect.height;
+        const sx = colorPalette.width / rect.width, sy = colorPalette.height / rect.height;
         const x = (e.clientX - rect.left) * sx, y = (e.clientY - rect.top) * sy;
-        if (x<0||y<0||x>=colorPalette.width||y>=colorPalette.height) return;
-        const pixel = colorPalette.getContext('2d').getImageData(Math.floor(x),Math.floor(y),1,1).data;
-        paletteSelectedColor = rgbToHex(pixel[0], pixel[1], pixel[2]);
+        if (x < 0 || y < 0 || x >= colorPalette.width || y >= colorPalette.height) return;
+        selectedHue = Math.round((x / colorPalette.width) * 360);
+        selectedSat = Math.round((1 - y / colorPalette.height) * 100); // Y轴反转: 上方饱和度高
+        // 饱和度限制
+        selectedSat = Math.min(100, Math.max(0, selectedSat));
         updateAllDisplays();
       });
 
+      // 亮度滑块
+      brightnessSlider.addEventListener('input', () => {
+        selectedBri = parseInt(brightnessSlider.value, 10);
+        brightnessValue.textContent = selectedBri + '%';
+        updateAllDisplays();
+      });
+
+      // 预设颜色按钮
+      document.querySelectorAll('.preset-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const hex = btn.dataset.color;
+          const rgb = hexToRgb(hex);
+          updatePaletteFromRGB(rgb[0], rgb[1], rgb[2]);
+        });
+      });
+
       applyToChar.addEventListener('click', () => {
-        charColorValue = paletteSelectedColor;
+        charColorValue = getPaletteColor();
         updateAllDisplays();
         if (colorMode.value === 'single') drawPreview();
       });
       applyToBg.addEventListener('click', () => {
-        bgColorValue = paletteSelectedColor;
+        bgColorValue = getPaletteColor();
         updateAllDisplays();
         drawPreview();
       });
@@ -432,7 +535,7 @@
       widthNumber.addEventListener('input', ()=>{ setWidth(widthNumber.value); generateAscii(); });
       widthNumber.addEventListener('blur', ()=>{ setWidth(widthNumber.value); generateAscii(); });
 
-      // 上传
+      // 上传处理
       uploadBox.addEventListener('click', ()=>fileInput.click());
       fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleImage(e.target.files[0]); });
       uploadBox.addEventListener('dragover', e=>{ e.preventDefault(); uploadBox.classList.add('dragover'); });
@@ -454,7 +557,7 @@
         reader.readAsDataURL(file);
       }
 
-      // 生成数据
+      // 生成字符画数据
       function generateAscii() {
         if(!originalImage) return;
         const charSet = customChars.value.trim() || ' ';
@@ -483,7 +586,7 @@
         drawPreview();
       }
 
-      // 预览
+      // 预览绘制（整体缩放）
       function drawPreview() {
         if(!originalImage || currentCols===0) return;
         const cw = previewArea.clientWidth-24; if(cw<=0) return;
@@ -526,6 +629,7 @@
       });
       window.addEventListener('resize', ()=>{ if(originalImage) drawPreview(); });
 
+      // 复制与下载
       copyBtn.addEventListener('click', async ()=>{
         if(!currentAscii) return;
         try { await navigator.clipboard.writeText(currentAscii); statusHint.textContent='✅ 已复制到剪贴板！'; }
@@ -564,7 +668,7 @@
       });
 
       // 初始化
-      charColorSection.style.display = 'flex'; // 默认单色模式显示
+      charColorSection.style.display = 'flex';
       pickerType.value='native';
       paletteSection.style.display='none';
       applyToChar.style.display='inline-block';
