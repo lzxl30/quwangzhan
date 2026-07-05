@@ -21,6 +21,7 @@
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
       --radius: 18px;
+      --radius-sm: 12px;
       --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       --tag-bg: #232738;
       --tag-active-bg: var(--primary);
@@ -28,7 +29,6 @@
       --footer-bg: #12141c;
       --input-bg: #1e2130;
       --card-border: transparent;
-      --modal-bg: #1e2130;
     }
 
     body.light-mode {
@@ -52,7 +52,6 @@
       --footer-bg: #f0f1f6;
       --input-bg: #f0f2f8;
       --card-border: #e8ecf5;
-      --modal-bg: #ffffff;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -68,21 +67,22 @@
         radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.06) 0%, transparent 60%),
         radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
       -webkit-tap-highlight-color: transparent;
+      padding-bottom: 80px; /* 为固定底栏留出空间 */
     }
 
     .header {
-      background: rgba(18, 20, 28, 0.85);
+      background: var(--card-bg);
       border-bottom: 1px solid var(--border);
       padding: 16px 0;
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(16px);
+      background: rgba(18, 20, 28, 0.85);
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
       transition: background 0.3s;
     }
     body.light-mode .header { background: rgba(255, 255, 255, 0.85); }
-
     .header-inner {
       max-width: 1350px;
       margin: 0 auto;
@@ -147,7 +147,7 @@
     }
     .theme-toggle:hover { background: var(--primary); color: #fff; transform: scale(1.06); }
 
-    .main-container { max-width: 1350px; margin: 0 auto; padding: 20px 20px 40px; }
+    .main-container { max-width: 1350px; margin: 0 auto; padding: 20px 20px 20px; }
 
     .category-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
     .category-tag {
@@ -234,48 +234,6 @@
     }
     .card:hover .card-arrow { color: var(--primary-light); right: 12px; opacity: 1; }
 
-    /* 模态框 */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.75); z-index: 1000;
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      opacity: 0; visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
-    .modal-content {
-      background: var(--modal-bg);
-      border-radius: 16px;
-      width: 100%; max-width: 1100px;
-      height: 85vh; max-height: 800px;
-      display: flex; flex-direction: column;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-      transition: background 0.3s;
-    }
-    .modal-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; border-bottom: 1px solid var(--border);
-      font-weight: 600; font-size: 1rem;
-    }
-    .modal-close {
-      background: none; border: none; color: var(--text);
-      font-size: 1.5rem; cursor: pointer; width: 36px; height: 36px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    .modal-close:hover { background: rgba(255,255,255,0.1); }
-    .modal-iframe-wrap {
-      flex: 1; position: relative; background: #fff;
-    }
-    .modal-iframe-wrap iframe {
-      width: 100%; height: 100%; border: none;
-    }
-    .modal-loading {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      color: #666; font-size: 0.9rem;
-    }
-
     .empty-state {
       text-align: center; padding: 60px 20px; color: var(--text-secondary);
       background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow);
@@ -283,35 +241,70 @@
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
 
-    .footer {
-      background: var(--footer-bg); border-top: 1px solid var(--border);
-      padding: 24px 20px 30px; margin-top: 24px; text-align: center; transition: background 0.3s;
+    /* 固定在底部的频道条 */
+    .fixed-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 8px 16px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 99;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+      backdrop-filter: blur(12px);
+      background: rgba(18, 20, 28, 0.9);
     }
-    .footer-channels { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; }
-    .channel-btn {
-      display: inline-flex; align-items: center; gap: 6px;
+    body.light-mode .fixed-bottom-bar {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .fixed-bottom-bar .channel-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .fixed-bottom-bar .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       background: linear-gradient(135deg, #2a2d3d, #1e2130);
-      border: 1px solid #464b60; color: #f0f2ff;
-      padding: 12px 20px; border-radius: 50px; font-weight: 600;
-      font-size: 0.9rem; text-decoration: none; transition: all 0.25s;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.3); letter-spacing: 0.3px;
+      border: 1px solid #464b60;
+      color: #f0f2ff;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       -webkit-tap-highlight-color: transparent;
     }
-    .channel-btn:active { transform: scale(0.96); }
-    .channel-btn:hover {
+    .fixed-bottom-bar .channel-btn:hover {
       background: linear-gradient(135deg, #3d3f5c, #2d2f44);
-      border-color: #8b7cf7; transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(139, 124, 247, 0.3); color: #fff;
+      border-color: #8b7cf7;
+      transform: translateY(-1px);
+      color: #fff;
     }
-    .channel-btn .btn-icon { font-size: 1.2rem; }
-    body.light-mode .channel-btn {
-      background: #f0f1f6; border-color: #cdd0dd; color: #2d2e3a;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    body.light-mode .fixed-bottom-bar .channel-btn {
+      background: #f0f1f6;
+      border-color: #cdd0dd;
+      color: #2d2e3a;
     }
-    body.light-mode .channel-btn:hover {
-      background: #e6e8f2; border-color: #6c5ce7; color: #1e1e2f;
+    body.light-mode .fixed-bottom-bar .channel-btn:hover {
+      background: #e6e8f2;
+      border-color: #6c5ce7;
     }
-    .footer-note { color: var(--text-secondary); font-size: 0.75rem; }
+    .fixed-bottom-bar .btn-icon { font-size: 1rem; }
+    .footer-note {
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      text-align: center;
+      margin: 0;
+    }
 
     @media (max-width: 600px) {
       .header-inner { gap: 8px; }
@@ -321,9 +314,11 @@
       .search-wrap .search-icon { left: 12px; font-size: 0.9rem; }
       .cards-grid { grid-template-columns: 1fr; gap: 14px; }
       .category-tag { padding: 6px 14px; font-size: 0.8rem; }
-      .main-container { padding: 16px 12px 32px; }
-      .channel-btn { padding: 10px 16px; font-size: 0.8rem; }
-      .modal-content { height: 90vh; max-height: none; }
+      .main-container { padding: 16px 12px 20px; }
+      .fixed-bottom-bar { padding: 6px 10px 8px; gap: 4px; }
+      .fixed-bottom-bar .channel-row { gap: 8px; }
+      .fixed-bottom-bar .channel-btn { padding: 5px 10px; font-size: 0.7rem; }
+      .footer-note { font-size: 0.65rem; }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -369,22 +364,9 @@
     </div>
   </div>
 
-  <!-- 模态框 -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span id="modalTitle">工具加载中...</span>
-        <button class="modal-close" id="modalClose">✕</button>
-      </div>
-      <div class="modal-iframe-wrap">
-        <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
-        <iframe id="modalIframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="footer-channels">
+  <!-- 固定在底部的频道条 -->
+  <div class="fixed-bottom-bar">
+    <div class="channel-row">
       <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn">
         <span class="btn-icon">🎮</span> 次元ACG
       </a>
@@ -392,8 +374,8 @@
         <span class="btn-icon">📡</span> 米游途
       </a>
     </div>
-    <p class="footer-note">⚡ 图灵魔法 ·若下载不了图片，请尝试浏览器打开链接</p>
-  </footer>
+    <p class="footer-note">⚡ 图灵魔法 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
+  </div>
 
   <script src="toolsData.js"></script>
 
@@ -428,14 +410,6 @@
       const searchInput = document.getElementById('searchInput');
       const themeToggle = document.getElementById('themeToggle');
 
-      // 模态框元素
-      const modalOverlay = document.getElementById('modalOverlay');
-      const modalIframe = document.getElementById('modalIframe');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalLoading = document.getElementById('modalLoading');
-      const modalClose = document.getElementById('modalClose');
-
-      // 主题
       function applyTheme(mode) {
         if (mode === 'light') { document.body.classList.add('light-mode'); themeToggle.textContent = '☀️'; }
         else { document.body.classList.remove('light-mode'); themeToggle.textContent = '🌙'; }
@@ -448,31 +422,6 @@
       themeToggle.addEventListener('click', () => {
         const isLight = document.body.classList.contains('light-mode');
         applyTheme(isLight ? 'dark' : 'light');
-      });
-
-      // 打开工具模态框
-      function openTool(url, title) {
-        modalTitle.textContent = title;
-        modalLoading.style.display = 'block';
-        modalIframe.src = url;
-        modalOverlay.classList.add('active');
-        modalIframe.onload = () => { modalLoading.style.display = 'none'; };
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeModal() {
-        modalOverlay.classList.remove('active');
-        modalIframe.src = '';
-        modalLoading.style.display = 'block';
-        document.body.style.overflow = '';
-      }
-
-      modalClose.addEventListener('click', closeModal);
-      modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
       });
 
       function getFilteredTools() {
@@ -538,7 +487,13 @@
         if (card) {
           const url = card.dataset.url;
           const title = card.dataset.title;
-          if (url && title) openTool(url, title);
+          if (url && title) {
+            if (url.startsWith('http')) {
+              window.open(url, '_blank');
+            } else {
+              window.location.href = url;
+            }
+          }
         }
       });
 
