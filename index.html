@@ -180,7 +180,7 @@
     .card {
       background: var(--card-bg); border-radius: var(--radius);
       padding: 20px 20px 16px; box-shadow: var(--shadow);
-      transition: var(--transition); cursor: pointer;
+      transition: var(--transition);
       border: 1px solid var(--card-border); position: relative;
       display: flex; flex-direction: column; gap: 8px;
       text-decoration: none; color: inherit; overflow: hidden;
@@ -196,7 +196,10 @@
     .card.accent-5::before { background: var(--accent-5); }
     .card.accent-0::before { background: var(--primary); }
 
-    .card-icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .card-icon-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+      cursor: pointer; /* 提示可点击 */
+    }
     .card-icon {
       width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
@@ -299,7 +302,7 @@
       border-color: #6c5ce7;
     }
 
-    /* 回到顶部按钮：绝对定位，垂直居中，纯色背景无边框 */
+    /* 回到顶部按钮：完全透明背景，仅图标+文字，垂直居中 */
     .back-to-top-btn {
       position: absolute;
       left: 16px;
@@ -308,7 +311,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: #232738; /* 纯色不透明背景 */
+      background: transparent;
       border: none;
       color: #f0f2ff;
       padding: 6px 14px;
@@ -317,24 +320,22 @@
       font-size: 0.8rem;
       text-decoration: none;
       transition: all 0.25s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: none;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       z-index: 100;
     }
     .back-to-top-btn:hover {
-      background: #3d3f5c; /* 悬停时稍亮 */
-      border-color: #8b7cf7;
-      transform: translateY(-50%) scale(1.02);
+      background: transparent;
       color: #fff;
+      transform: translateY(-50%) scale(1.02);
     }
     body.light-mode .back-to-top-btn {
-      background: #ebeef5;
       color: #2d2e3a;
     }
     body.light-mode .back-to-top-btn:hover {
-      background: #dde0e8;
-      border-color: #6c5ce7;
+      color: #6c5ce7;
+      background: transparent;
     }
 
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
@@ -406,7 +407,6 @@
 
   <!-- 固定在底部的频道条 -->
   <div class="fixed-bottom-bar">
-    <!-- 回到顶部按钮：绝对定位，垂直居中 -->
     <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
       <span class="btn-icon">⬆️</span> 回顶
     </button>
@@ -512,7 +512,10 @@
             const isFav = favorites.includes(tool.id);
             return `
               <div class="card ${tool.accentClass}" data-tool-id="${tool.id}" data-url="${tool.url}" data-title="${tool.title}">
-                <div class="card-icon-row"><div class="card-icon ${tool.iconBgClass}">${tool.icon}</div><div class="card-title">${tool.title}</div></div>
+                <div class="card-icon-row">
+                  <div class="card-icon ${tool.iconBgClass}">${tool.icon}</div>
+                  <div class="card-title">${tool.title}</div>
+                </div>
                 <div class="card-desc">${tool.description}</div>
                 <div class="card-footer-row"><span class="card-category-badge">${tool.category || '工具'}</span></div>
                 <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">${isFav ? '❤️' : '🤍'}</button>
@@ -524,14 +527,22 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
+      // 修改点击事件：仅当点击 card-icon-row 区域时才打开链接
       cardsGridEl.addEventListener('click', (e) => {
+        // 优先处理收藏按钮
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
-          e.preventDefault(); e.stopPropagation();
+          e.preventDefault();
+          e.stopPropagation();
           toggleFavorite(parseInt(favBtn.dataset.toolId, 10));
           renderAll();
           return;
         }
+
+        // 检查是否点击了可点击区域（图标+标题）
+        const clickableArea = e.target.closest('.card-icon-row');
+        if (!clickableArea) return; // 点击其他地方不触发
+
         const card = e.target.closest('.card');
         if (card) {
           const url = card.dataset.url;
