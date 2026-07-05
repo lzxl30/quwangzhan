@@ -232,13 +232,13 @@
     .fav-btn:hover { background: rgba(249, 123, 168, 0.15); color: #f97ba8; }
     .fav-btn.favorited { color: #f97ba8; filter: drop-shadow(0 0 6px rgba(249, 123, 168, 0.5)); }
 
-    /* 打开按钮：CSS 绘制的宽角 V 形 */
+    /* 打开按钮：线条风格，稍大 */
     .open-btn {
       display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-right: 2.5px solid var(--text-secondary);
-      border-bottom: 2.5px solid var(--text-secondary);
+      width: 14px;              /* 增大尺寸 */
+      height: 14px;
+      border-right: 3px solid var(--text-secondary);   /* 线条加粗 */
+      border-bottom: 3px solid var(--text-secondary);
       transform: rotate(-45deg);
       margin-left: auto;
       margin-right: 4px;
@@ -373,7 +373,7 @@
       .fixed-bottom-bar .channel-btn { padding: 5px 10px; font-size: 0.7rem; }
       .back-to-top-btn { padding: 5px 10px; font-size: 0.7rem; left: 10px; }
       .footer-note { font-size: 0.65rem; }
-      .open-btn { width: 8px; height: 8px; border-width: 2px; margin-right: 2px; }
+      .open-btn { width: 12px; height: 12px; border-width: 2.5px; margin-right: 2px; }
       .modal-content { height: 90vh; max-height: none; }
     }
 
@@ -447,7 +447,7 @@
         <span class="btn-icon">📡</span> 米游途
       </a>
     </div>
-    <p class="footer-note">⚡ 图灵魔法 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
+    <p class="footer-note">⚡ 图灵魔法 · 若下载不了图片请尝试浏览器打开</p>
   </div>
 
   <script src="toolsData.js"></script>
@@ -491,7 +491,6 @@
       const modalLoading = document.getElementById('modalLoading');
       const modalClose = document.getElementById('modalClose');
 
-      // 打开模态框
       function openTool(url, title) {
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
@@ -590,7 +589,7 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
-      // 卡片点击事件：收藏按钮和打开按钮
+      // 卡片点击事件
       cardsGridEl.addEventListener('click', (e) => {
         // 收藏按钮
         const favBtn = e.target.closest('.fav-btn');
