@@ -197,7 +197,7 @@
     .card.accent-0::before { background: var(--primary); }
 
     .card-icon-row {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 10px;
     }
     .card-icon {
       width: 40px; height: 40px; border-radius: 10px;
@@ -220,37 +220,37 @@
     }
     .fav-btn {
       background: transparent; border: none; font-size: 1.3rem; cursor: pointer;
-      padding: 0;               /* 去掉内边距，只让爱心字符可点 */
-      border-radius: 50%; 
+      padding: 4px;               /* 保留4px内边距，方便点击 */
+      border-radius: 50%;
       transition: 0.2s; color: #7c8096;
       line-height: 1; display: flex; align-items: center; justify-content: center;
       -webkit-tap-highlight-color: transparent;
       z-index: 5;
     }
-    .fav-btn:active { transform: scale(0.9); }
-    .fav-btn:hover { background: rgba(249, 123, 168, 0.1); color: #f97ba8; }
+    .fav-btn:hover { background: rgba(249, 123, 168, 0.15); color: #f97ba8; }
     .fav-btn.favorited { color: #f97ba8; filter: drop-shadow(0 0 6px rgba(249, 123, 168, 0.5)); }
 
-    /* 右上角打开按钮：纯文字“>”，无背景无边框 */
+    /* 打开按钮：CSS 绘制的宽角 V 形，线条风格，无背景无边框 */
     .open-btn {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 1.5rem;
-      font-weight: 600;
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-right: 2.5px solid var(--text-secondary);
+      border-bottom: 2.5px solid var(--text-secondary);
+      transform: rotate(-45deg);
+      margin-left: auto;          /* 推到最右侧，但不会过于靠边 */
+      margin-right: 4px;
       cursor: pointer;
-      transition: color 0.2s, transform 0.2s;
-      line-height: 1;
-      padding: 0;
-      z-index: 10;
+      opacity: 0.6;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      align-self: center;
       -webkit-tap-highlight-color: transparent;
     }
     .open-btn:hover {
-      color: var(--primary);
-      transform: scale(1.2);
+      border-color: var(--primary-light);
+      opacity: 1;
+      transform: rotate(-45deg) scale(1.2);
     }
 
     .empty-state {
@@ -263,9 +263,7 @@
     /* 固定在底部的频道条 */
     .fixed-bottom-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: var(--card-bg);
       border-top: 1px solid var(--border);
       padding: 8px 16px 10px;
@@ -278,89 +276,44 @@
       backdrop-filter: blur(12px);
       background: rgba(18, 20, 28, 0.9);
     }
-    body.light-mode .fixed-bottom-bar {
-      background: rgba(255, 255, 255, 0.9);
-    }
-    .fixed-bottom-bar .channel-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    body.light-mode .fixed-bottom-bar { background: rgba(255, 255, 255, 0.9); }
+    .fixed-bottom-bar .channel-row { display: flex; align-items: center; gap: 12px; }
     .fixed-bottom-bar .channel-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      display: inline-flex; align-items: center; gap: 4px;
       background: linear-gradient(135deg, #2a2d3d, #1e2130);
-      border: 1px solid #464b60;
-      color: #f0f2ff;
-      padding: 6px 14px;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      text-decoration: none;
-      transition: all 0.25s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border: 1px solid #464b60; color: #f0f2ff;
+      padding: 6px 14px; border-radius: 50px;
+      font-weight: 600; font-size: 0.8rem; text-decoration: none;
+      transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       -webkit-tap-highlight-color: transparent;
     }
     .fixed-bottom-bar .channel-btn:hover {
       background: linear-gradient(135deg, #3d3f5c, #2d2f44);
-      border-color: #8b7cf7;
-      transform: translateY(-1px);
-      color: #fff;
+      border-color: #8b7cf7; transform: translateY(-1px); color: #fff;
     }
     body.light-mode .fixed-bottom-bar .channel-btn {
-      background: #f0f1f6;
-      border-color: #cdd0dd;
-      color: #2d2e3a;
+      background: #f0f1f6; border-color: #cdd0dd; color: #2d2e3a;
     }
     body.light-mode .fixed-bottom-bar .channel-btn:hover {
-      background: #e6e8f2;
-      border-color: #6c5ce7;
+      background: #e6e8f2; border-color: #6c5ce7;
     }
 
     /* 回到顶部按钮 */
     .back-to-top-btn {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: transparent;
-      border: none;
-      color: #f0f2ff;
-      padding: 6px 14px;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      text-decoration: none;
-      transition: all 0.25s;
-      box-shadow: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      z-index: 100;
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      display: inline-flex; align-items: center; gap: 4px;
+      background: transparent; border: none; color: #f0f2ff;
+      padding: 6px 14px; border-radius: 50px;
+      font-weight: 600; font-size: 0.8rem; text-decoration: none;
+      transition: all 0.25s; box-shadow: none; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; z-index: 100;
     }
-    .back-to-top-btn:hover {
-      background: transparent;
-      color: #fff;
-      transform: translateY(-50%) scale(1.02);
-    }
-    body.light-mode .back-to-top-btn {
-      color: #2d2e3a;
-    }
-    body.light-mode .back-to-top-btn:hover {
-      color: #6c5ce7;
-      background: transparent;
-    }
+    .back-to-top-btn:hover { background: transparent; color: #fff; transform: translateY(-50%) scale(1.02); }
+    body.light-mode .back-to-top-btn { color: #2d2e3a; }
+    body.light-mode .back-to-top-btn:hover { color: #6c5ce7; background: transparent; }
 
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
-    .footer-note {
-      color: var(--text-secondary);
-      font-size: 0.7rem;
-      text-align: center;
-      margin: 0;
-    }
+    .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
 
     @media (max-width: 600px) {
       .header-inner { gap: 8px; }
@@ -376,11 +329,7 @@
       .fixed-bottom-bar .channel-btn { padding: 5px 10px; font-size: 0.7rem; }
       .back-to-top-btn { padding: 5px 10px; font-size: 0.7rem; left: 10px; }
       .footer-note { font-size: 0.65rem; }
-      .open-btn {
-        top: 8px;
-        right: 10px;
-        font-size: 1.3rem;
-      }
+      .open-btn { width: 8px; height: 8px; border-width: 2px; margin-right: 2px; }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -536,11 +485,13 @@
                 <div class="card-icon-row">
                   <div class="card-icon ${tool.iconBgClass}">${tool.icon}</div>
                   <div class="card-title">${tool.title}</div>
+                  <span class="open-btn" data-tool-id="${tool.id}" title="打开工具"></span>
                 </div>
                 <div class="card-desc">${tool.description}</div>
-                <div class="card-footer-row"><span class="card-category-badge">${tool.category || '工具'}</span></div>
-                <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">${isFav ? '❤️' : '🤍'}</button>
-                <button class="open-btn" data-tool-id="${tool.id}" title="打开工具">&gt;</button>
+                <div class="card-footer-row">
+                  <span class="card-category-badge">${tool.category || '工具'}</span>
+                  <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">${isFav ? '❤️' : '🤍'}</button>
+                </div>
               </div>`;
           }).join('');
         }
@@ -548,9 +499,9 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
-      // 卡片点击事件：仅响应收藏按钮和打开按钮
+      // 精确的事件处理：只有点击心形按钮或 V 形按钮才触发对应操作
       cardsGridEl.addEventListener('click', (e) => {
-        // 收藏按钮
+        // 心形按钮
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
           e.preventDefault();
@@ -560,7 +511,7 @@
           return;
         }
 
-        // 打开按钮
+        // V 形打开按钮
         const openBtn = e.target.closest('.open-btn');
         if (openBtn) {
           e.preventDefault();
