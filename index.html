@@ -485,8 +485,9 @@
       const modalClose = document.getElementById('modalClose');
 
       let isModalOpen = false;
+      let openedFromShare = false; // 标记弹窗是否由分享链接打开
 
-      function openTool(url, title) {
+      function openTool(url, title, fromShare = false) {
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
         modalIframe.src = url;
@@ -495,8 +496,9 @@
         modalIframe.onload = () => { modalLoading.style.display = 'none'; };
 
         if (!isModalOpen) {
-          history.pushState({ modal: true }, '', window.location.href);
+          history.pushState({ modal: true, fromShare: fromShare }, '', window.location.href);
           isModalOpen = true;
+          openedFromShare = fromShare;
         }
       }
 
@@ -506,28 +508,67 @@
         modalLoading.style.display = 'block';
         document.body.style.overflow = '';
         isModalOpen = false;
+        openedFromShare = false;
+      }
+
+      // 返回首页（移除 open 参数并重新加载）
+      function goHome() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('open');
+        window.location.replace(url.href);
+      }
+
+      // 处理弹窗关闭后的逻辑
+      function handleModalClose() {
+        if (openedFromShare) {
+          goHome(); // 分享链接打开的弹窗，返回首页
+        } else {
+          // 手动打开的弹窗，只关闭弹窗，调用 history.back 恢复状态
+          history.back();
+        }
       }
 
       window.addEventListener('popstate', (e) => {
         if (isModalOpen) {
           closeModal();
-          // 不阻止默认行为，让浏览器弹出历史状态
+          if (openedFromShare) {
+            goHome(); // 分享链接，按返回直接回到首页
+          } else {
+            // 手动打开，popstate 已经被关闭，无需额外操作
+          }
         }
       });
 
-      // 主动关闭弹窗：通过 history.back() 触发 popstate，实现一次返回键的效果
-      function closeModalByUser() {
+      // 主动关闭弹窗（叉号、遮罩、ESC）
+      modalClose.addEventListener('click', () => {
         if (isModalOpen) {
-          history.back();
+          closeModal();
+          if (openedFromShare) {
+            goHome();
+          } else {
+            history.back();
+          }
         }
-      }
-
-      modalClose.addEventListener('click', closeModalByUser);
+      });
       modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModalByUser();
+        if (e.target === modalOverlay && isModalOpen) {
+          closeModal();
+          if (openedFromShare) {
+            goHome();
+          } else {
+            history.back();
+          }
+        }
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isModalOpen) closeModalByUser();
+        if (e.key === 'Escape' && isModalOpen) {
+          closeModal();
+          if (openedFromShare) {
+            goHome();
+          } else {
+            history.back();
+          }
+        }
       });
 
       backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
@@ -693,9 +734,9 @@
         const tool = toolsData.find(t => t.url === decodedUrl);
         if (tool) {
           const fullUrl = tool.url.startsWith('http') ? tool.url : window.location.origin + '/' + tool.url;
-          openTool(fullUrl, tool.title);
+          openTool(fullUrl, tool.title, true); // 标记为分享打开
         } else if (decodedUrl.startsWith('http')) {
-          openTool(decodedUrl, '外部工具');
+          openTool(decodedUrl, '外部工具', true);
         }
       }
 
