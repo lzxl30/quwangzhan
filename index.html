@@ -67,7 +67,7 @@
         radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.06) 0%, transparent 60%),
         radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
       -webkit-tap-highlight-color: transparent;
-      padding-bottom: 90px;
+      padding-bottom: 100px;
     }
 
     .header {
@@ -282,7 +282,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       z-index: 99;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
       backdrop-filter: blur(12px);
@@ -324,7 +324,28 @@
     body.light-mode .back-to-top-btn:hover { color: #6c5ce7; background: transparent; }
 
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
-    .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
+    .footer-note {
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      text-align: center;
+      margin: 0;
+    }
+    .footer-invite {
+      color: var(--text);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-align: center;
+      margin: 0 0 2px 0;
+    }
+    .footer-invite a {
+      color: var(--primary-light);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .footer-invite a:hover {
+      color: var(--accent-1);
+    }
 
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -402,7 +423,7 @@
       .fixed-bottom-bar .channel-row { gap: 8px; }
       .fixed-bottom-bar .channel-btn { padding: 5px 10px; font-size: 0.7rem; }
       .back-to-top-btn { padding: 5px 10px; font-size: 0.7rem; left: 10px; }
-      .footer-note { font-size: 0.65rem; }
+      .footer-invite { font-size: 0.7rem; }
       .open-btn {
         width: 12px;
         height: 12px;
@@ -472,6 +493,9 @@
     <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
       <span class="btn-icon">⬆️</span> 回顶
     </button>
+    <p class="footer-invite">
+      📢 加入<a href="https://pd.qq.com/s/g22heg9e2?b=9" target="_blank" rel="noopener">趣网吧</a>分享有趣网站，你分享的网站有机会出现在趣网站里哦
+    </p>
     <div class="channel-row">
       <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn">
         <span class="btn-icon">🎮</span> 次元ACG
@@ -480,7 +504,6 @@
         <span class="btn-icon">📡</span> 米游途
       </a>
     </div>
-    <p class="footer-note">⚡ 趣网站 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
   </div>
 
   <!-- 1. 加载统一分类配置文件 -->
@@ -559,7 +582,6 @@
       let searchQuery = '';
       let favorites = JSON.parse(localStorage.getItem('turingMagicFavorites_v2') || '[]');
 
-      // 缓存随机顺序：{ categoryId: [toolId, toolId, ...] }
       const shuffledOrders = {};
 
       function getShuffledOrder(categoryId, tools) {
@@ -653,7 +675,6 @@
           filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
         }
 
-        // 非收藏/非分享时使用缓存的随机顺序
         if (currentCategory !== 'favorites' && currentCategory !== 'shared') {
           const order = getShuffledOrder(currentCategory, filtered);
           const orderMap = new Map(order.map((id, index) => [id, index]));
@@ -663,10 +684,9 @@
         return filtered;
       }
 
-      // 切换分类时清除随机缓存（以便重新随机）
       function switchCategory(categoryId) {
         if (categoryId !== 'favorites' && categoryId !== 'shared') {
-          delete shuffledOrders[categoryId]; // 清除旧缓存，下次进入时重新随机
+          delete shuffledOrders[categoryId];
         }
         currentCategory = categoryId;
         searchInput.value = ''; searchQuery = '';
@@ -751,7 +771,6 @@
 
       function renderCards() {
         const filtered = getFilteredTools();
-        // 根据分类控制 infoBar 的显示
         if (currentCategory === 'favorites') {
           infoBarEl.style.display = 'flex';
           infoBarEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>';
