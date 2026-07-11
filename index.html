@@ -494,6 +494,9 @@
 
       // 打开工具弹窗
       function openTool(url, title) {
+        // 防止重复打开
+        if (isModalOpen) return;
+
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
         modalIframe.src = url;
@@ -501,44 +504,53 @@
         document.body.style.overflow = 'hidden';
         modalIframe.onload = () => { modalLoading.style.display = 'none'; };
 
-        if (!isModalOpen) {
-          history.pushState({ modal: true }, '', window.location.href);
-          isModalOpen = true;
-        }
+        // 在历史记录中推入一个状态，使得可以监听返回键
+        history.pushState({ modal: true }, '', window.location.href);
+        isModalOpen = true;
       }
 
-      // 关闭弹窗（仅 DOM 操作）
-      function closeModal() {
+      // 仅执行 DOM 层面的关闭，不触碰历史记录
+      function closeModalDOM() {
         modalOverlay.classList.remove('active');
         modalIframe.src = '';
         modalLoading.style.display = 'block';
         document.body.style.overflow = '';
-        isModalOpen = false;
       }
 
-      // 用户主动关闭弹窗（清理历史记录）
-      function closeModalCleanHistory() {
-        closeModal();
-        if (isModalOpen) {
-          history.replaceState({ modal: false }, '', window.location.href);
-          isModalOpen = false;
-        }
+      // 用户主动关闭（点击关闭按钮、遮罩、ESC）
+      function closeModalFromUser() {
+        if (!isModalOpen) return;
+        // 利用 history.back() 触发 popstate，从而让 popstate 处理真正的关闭
+        history.back();
+        // 注意：这里不立即调用 closeModalDOM，因为 popstate 会异步触发
+      }
+
+      // 由 popstate 事件调用的关闭处理
+      function closeModalByHistory() {
+        if (!isModalOpen) return;
+        closeModalDOM();
+        isModalOpen = false;
       }
 
       // 监听浏览器返回键
       window.addEventListener('popstate', (e) => {
+        // 如果当前是弹窗打开状态，则关闭弹窗，并阻止继续回退
         if (isModalOpen) {
-          closeModalCleanHistory();
+          // 关闭弹窗
+          closeModalByHistory();
+          // 为了防止用户再次按返回键时回退到更早的页面，我们替换当前历史状态为非弹窗状态
+          history.replaceState({ modal: false }, '', window.location.href);
         }
+        // 如果弹窗未打开，则让浏览器正常处理返回（不做干预）
       });
 
-      // 绑定关闭按钮、遮罩层
-      modalClose.addEventListener('click', closeModalCleanHistory);
+      // 绑定关闭按钮、遮罩层、ESC
+      modalClose.addEventListener('click', closeModalFromUser);
       modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModalCleanHistory();
+        if (e.target === modalOverlay) closeModalFromUser();
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isModalOpen) closeModalCleanHistory();
+        if (e.key === 'Escape' && isModalOpen) closeModalFromUser();
       });
 
       backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
