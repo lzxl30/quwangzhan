@@ -216,7 +216,15 @@
     .card-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
     .card-category-badge {
       font-size: 0.7rem; padding: 4px 10px; border-radius: 20px;
-      background: rgba(139, 124, 247, 0.12); color: var(--primary-light); font-weight: 500;
+      background: rgba(139, 124, 247, 0.12); color: var(--primary-light);
+      font-weight: 500; cursor: pointer; border: none;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card-category-badge:hover {
+      background: var(--primary);
+      color: #fff;
     }
     .card-actions {
       display: flex; gap: 8px; align-items: center;
@@ -541,7 +549,8 @@
       }
 
       function getCategories() {
-        const cats = [...dynamicCategories, ...builtInCategories];
+        // 顺序：全部、收藏，然后是动态分类，最后可能插入分享分类
+        const cats = [builtInCategories[0], builtInCategories[1], ...dynamicCategories];
         if (sharedCategory) {
           cats.unshift(sharedCategory);
         }
@@ -663,6 +672,8 @@
           showingInfoEl.textContent = `✨ 显示 ${filtered.length} 个工具`;
           cardsGridEl.innerHTML = filtered.map(tool => {
             const isFav = favorites.includes(tool.id);
+            // 找到分类名称
+            const catName = getCategories().find(c => c.id === tool.category)?.name || tool.category || '工具';
             return `
               <div class="card ${tool.accentClass}" data-tool-id="${tool.id}" data-url="${tool.url}" data-title="${tool.title}">
                 <div class="card-icon-row">
@@ -672,7 +683,7 @@
                 </div>
                 <div class="card-desc">${tool.description}</div>
                 <div class="card-footer-row">
-                  <span class="card-category-badge">${tool.category || '工具'}</span>
+                  <button class="card-category-badge" data-category="${tool.category}">${catName}</button>
                   <div class="card-actions">
                     <button class="action-btn share-btn" data-tool-id="${tool.id}" title="转发">
                       <span class="icon">📤</span>
@@ -692,6 +703,21 @@
       function renderAll() { renderCategoryTags(); renderCards(); }
 
       cardsGridEl.addEventListener('click', (e) => {
+        // 分类标签按钮
+        const badge = e.target.closest('.card-category-badge');
+        if (badge) {
+          e.preventDefault();
+          e.stopPropagation();
+          const categoryId = badge.dataset.category;
+          if (categoryId) {
+            currentCategory = categoryId;
+            searchInput.value = ''; searchQuery = '';
+            renderAll();
+          }
+          return;
+        }
+
+        // 收藏按钮
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
           e.preventDefault();
@@ -701,6 +727,7 @@
           return;
         }
 
+        // 转发按钮
         const shareBtn = e.target.closest('.share-btn');
         if (shareBtn) {
           e.preventDefault();
@@ -714,6 +741,7 @@
           return;
         }
 
+        // 打开按钮
         const openBtn = e.target.closest('.open-btn');
         if (openBtn) {
           e.preventDefault();
