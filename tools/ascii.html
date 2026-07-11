@@ -176,7 +176,6 @@
     .btn.secondary { background: var(--btn-bg); color: var(--text); }
     .hint { margin-top: 10px; font-size: 0.8rem; color: var(--text2); text-align: center; }
 
-    /* 手机端适配 */
     @media (max-width: 600px) {
       body { padding: 8px; }
       .container { padding: 20px 14px; border-radius: 14px; }
@@ -216,12 +215,12 @@
       <div class="control-group">
         <label>输出宽度</label>
         <input type="range" id="widthSlider" min="40" max="300" value="80" step="10">
-        <input type="number" id="widthNumber" value="80" min="1" step="1">
+        <input type="number" id="widthNumber" value="80" step="1">
       </div>
       <div class="control-group">
         <label>字符大小</label>
         <input type="range" id="fontSizeSlider" min="4" max="48" value="12" step="1">
-        <input type="number" id="fontSizeNumber" value="12" min="4" max="48" step="1">
+        <input type="number" id="fontSizeNumber" value="12" step="1">
       </div>
       <div class="control-group">
         <label>颜色模式</label>
@@ -242,7 +241,6 @@
       </div>
     </div>
 
-    <!-- 字符颜色（仅单一颜色） -->
     <div id="charColorSection" class="color-section" style="display:none;">
       <div class="color-section-title">字符颜色</div>
       <div id="charNativePicker" style="display:flex; align-items:center; gap:12px;">
@@ -254,7 +252,6 @@
       </div>
     </div>
 
-    <!-- 背景颜色（始终显示） -->
     <div class="color-section">
       <div class="color-section-title">背景颜色</div>
       <div id="bgNativePicker" style="display:flex; align-items:center; gap:12px;">
@@ -271,7 +268,6 @@
       </div>
     </div>
 
-    <!-- 色盘区域 -->
     <div id="paletteSection" class="color-section" style="display:none;">
       <div class="color-section-title">色盘选色</div>
       <div class="color-palette-wrap">
@@ -368,7 +364,6 @@
       let charColorValue = '#00ff00', bgColorValue = '#000000';
       let selectedHue = 120, selectedSat = 100, selectedBri = 50;
 
-      // ========== 工具函数 ==========
       function getPaletteColor() { return hslToHex(selectedHue, selectedSat, selectedBri); }
       function hexToRgb(hex) { hex = hex.replace('#',''); return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)]; }
       function rgbToHsl(r,g,b) {
@@ -423,15 +418,58 @@
       charColor.addEventListener('input',()=>{ charColorValue=charColor.value; updateAllDisplays(); if(colorMode.value==='single') drawPreview(); });
       bgColorInput.addEventListener('input',()=>{ bgColorValue=bgColorInput.value; updateAllDisplays(); drawPreview(); });
 
-      // 宽度和字号同步
-      function setWidth(val){ val=Math.max(1,parseInt(val)||80); widthNumber.value=val; widthSlider.value=Math.min(val,300); return val; }
-      function setFontSize(val){ val=Math.min(48,Math.max(4,parseInt(val)||12)); fontSizeNumber.value=val; fontSizeSlider.value=val; return val; }
-      widthSlider.addEventListener('input',()=>{ widthNumber.value=parseInt(widthSlider.value,10); generateAscii(); });
-      widthNumber.addEventListener('input',()=>{ setWidth(widthNumber.value); generateAscii(); });
-      widthNumber.addEventListener('blur',()=>{ setWidth(widthNumber.value); generateAscii(); });
-      fontSizeSlider.addEventListener('input',()=>{ fontSizeNumber.value=parseInt(fontSizeSlider.value,10); currentFontSize=parseInt(fontSizeSlider.value,10); drawPreview(); });
-      fontSizeNumber.addEventListener('input',()=>{ currentFontSize=setFontSize(fontSizeNumber.value); drawPreview(); });
-      fontSizeNumber.addEventListener('blur',()=>{ currentFontSize=setFontSize(fontSizeNumber.value); drawPreview(); });
+      // 宽度和字号处理（不再限制输入时的最小值，失焦后自动修正）
+      function getValidWidth(val) {
+        let num = parseInt(val);
+        if (isNaN(num) || num < 1) num = 80; // 默认值
+        return num;
+      }
+      function getValidFontSize(val) {
+        let num = parseInt(val);
+        if (isNaN(num)) num = 12;
+        return Math.min(48, Math.max(4, num)); // 限制在4-48之间
+      }
+
+      widthSlider.addEventListener('input', () => {
+        widthNumber.value = parseInt(widthSlider.value, 10);
+        generateAscii();
+      });
+      widthNumber.addEventListener('input', () => {
+        // 输入过程中只更新滑块和预览，不强制修正值
+        let num = parseInt(widthNumber.value);
+        if (!isNaN(num)) {
+          widthSlider.value = Math.min(num, 300);
+          currentCols = Math.max(1, num);
+          generateAscii();
+        }
+      });
+      widthNumber.addEventListener('blur', () => {
+        const valid = getValidWidth(widthNumber.value);
+        widthNumber.value = valid;
+        widthSlider.value = Math.min(valid, 300);
+        generateAscii();
+      });
+
+      fontSizeSlider.addEventListener('input', () => {
+        fontSizeNumber.value = parseInt(fontSizeSlider.value, 10);
+        currentFontSize = parseInt(fontSizeSlider.value, 10);
+        drawPreview();
+      });
+      fontSizeNumber.addEventListener('input', () => {
+        let num = parseInt(fontSizeNumber.value);
+        if (!isNaN(num)) {
+          fontSizeSlider.value = Math.min(Math.max(num, 4), 48);
+          currentFontSize = num;
+          drawPreview();
+        }
+      });
+      fontSizeNumber.addEventListener('blur', () => {
+        const valid = getValidFontSize(fontSizeNumber.value);
+        fontSizeNumber.value = valid;
+        fontSizeSlider.value = valid;
+        currentFontSize = valid;
+        drawPreview();
+      });
 
       uploadBox.addEventListener('click',()=>fileInput.click());
       fileInput.addEventListener('change',(e)=>{ if(e.target.files.length) handleImage(e.target.files[0]); });
@@ -449,9 +487,9 @@
       function generateAscii(){
         if(!originalImage) return;
         const charSet=customChars.value.trim()||' ';
-        const ow=setWidth(widthNumber.value);
-        const oh=Math.floor(ow*(originalImage.height/originalImage.width)/2);
-        currentCols=ow; currentRows=oh;
+        const ow = Math.max(1, currentCols || getValidWidth(widthNumber.value));
+        const oh = Math.floor(ow * (originalImage.height / originalImage.width) / 2);
+        currentCols = ow; currentRows = oh;
         const tc=document.createElement('canvas'); tc.width=ow; tc.height=oh; const tctx=tc.getContext('2d'); tctx.drawImage(originalImage,0,0,ow,oh);
         const imgData=tctx.getImageData(0,0,ow,oh); const pixels=imgData.data;
         const colors=[]; let ascii='';
@@ -472,7 +510,6 @@
         const actualWidth = currentCols * charWidth;
         const actualHeight = currentRows * lineHeight;
 
-        // 计算缩放比例，使整张图完整显示
         const scale = Math.min(containerWidth / actualWidth, containerHeight / actualHeight, 1);
 
         canvas.width = containerWidth;
@@ -543,7 +580,6 @@
         }, 'image/png');
       });
 
-      // 初始化
       charColorSection.style.display='flex'; pickerType.value='native'; paletteSection.style.display='none'; applyToChar.style.display='inline-block';
       updateAllDisplays(); currentFontSize=12; statusHint.textContent='';
     })();
