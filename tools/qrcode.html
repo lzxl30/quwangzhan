@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>二维码生成 | 图灵魔法</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117; --card: #1a1d27; --text: #e8edf2; --text2: #9aa0b4;
+      --accent: #8b7cf7; --border: #2a2e3b; --radius: 14px; --btn-bg: #232738; --input-bg: #1e2130;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .container {
+      max-width: 750px; width: 100%; background: var(--card); border-radius: 20px;
+      padding: 28px 24px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    h2 { font-size: 1.6rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .subtitle { color: var(--text2); font-size: 0.85rem; margin-bottom: 24px; }
+    textarea {
+      width: 100%; padding: 14px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--input-bg);
+      color: var(--text); font-size: 0.95rem; resize: vertical;
+      min-height: 90px; outline: none; margin-bottom: 20px;
+      font-family: inherit; transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: var(--accent); }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 16px;
+    }
+    .control-group { display: flex; align-items: center; gap: 8px; }
+    .control-group label { font-size: 0.85rem; color: var(--text2); white-space: nowrap; }
+    .control-group input[type="color"] {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer; background: transparent; padding: 2px;
+      -webkit-appearance: none;
+    }
+    .control-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .control-group input[type="color"]::-webkit-color-swatch { border-radius: 6px; border: none; }
+    .control-group input[type="range"] { width: 110px; cursor: pointer; }
+    .control-group select {
+      background: var(--input-bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 0.85rem; cursor: pointer;
+    }
+    .upload-row {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px;
+    }
+    .upload-btn {
+      background: var(--btn-bg); color: var(--text); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; white-space: nowrap;
+    }
+    .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .hint-text {
+      text-align: center; color: var(--text2); font-size: 0.8rem; margin-bottom: 12px;
+    }
+    .preview-wrapper { display: flex; justify-content: center; margin-bottom: 16px; }
+    .preview-container {
+      position: relative; width: 300px; height: 300px;
+      background: repeating-conic-gradient(#ddd 0% 25%, #bbb 0% 50%) 50% / 20px 20px;
+      border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    canvas#mainCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none;
+    }
+    .scan-tip {
+      text-align: center; margin-bottom: 16px; padding: 12px 16px;
+      background: rgba(139, 124, 247, 0.1); border: 1px solid rgba(139, 124, 247, 0.2);
+      border-radius: var(--radius); color: var(--text2); font-size: 0.85rem;
+    }
+    .scan-tip span { color: var(--accent); font-weight: 600; }
+    .btn {
+      background: var(--accent); color: #fff; border: none; padding: 12px 24px;
+      border-radius: 30px; font-weight: 600; cursor: pointer; font-size: 0.95rem;
+      transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+      width: 100%; justify-content: center; margin-bottom: 8px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:hover { filter: brightness(1.1); }
+    .btn.secondary { background: var(--btn-bg); color: var(--text); }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px 16px; }
+      .preview-container { width: 260px; height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📱 二维码生成</h2>
+    <p class="subtitle">输入文字/链接 → QQ风格圆形码块 → 自定义背景与Logo</p>
+
+    <textarea id="qrInput" placeholder="输入文字或网址，例如：https://example.com"></textarea>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>码块颜色</label> <input type="color" id="fgColor" value="#000000">
+      </div>
+      <div class="control-group">
+        <label>透明度</label> <input type="range" id="fgAlpha" min="0" max="100" value="100" step="1"> <span id="alphaValue">100%</span>
+      </div>
+      <div class="control-group">
+        <label>码块形状</label>
+        <select id="shapeSelect">
+          <option value="square">方形</option>
+          <option value="circle">圆形</option>
+        </select>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>背景纯色</label> <input type="color" id="bgColor" value="#ffffff">
+      </div>
+      <div class="control-group">
+        <label>深浅调节</label>
+        <input type="range" id="bgBrightness" min="-100" max="100" value="0" step="1">
+        <span id="brightnessValue">0</span>
+      </div>
+    </div>
+
+    <div class="upload-row">
+      <button class="upload-btn" id="uploadBgBtn">🖼️ 上传背景图</button>
+      <button class="upload-btn" id="clearBgBtn" style="display:none;">✕ 清除背景</button>
+      <button class="upload-btn" id="uploadLogoBtn">⭐ 上传Logo</button>
+      <button class="upload-btn" id="clearLogoBtn" style="display:none;">✕ 清除Logo</button>
+    </div>
+    <input type="file" id="bgFileInput" accept="image/*" hidden>
+    <input type="file" id="logoFileInput" accept="image/*" hidden>
+
+    <div class="hint-text">
+      🖱️ 直接拖拽画面移动背景/Logo · 滚轮缩放（向上放大） · 双指手势同样适用
+    </div>
+
+    <div class="preview-wrapper">
+      <div class="preview-container" id="previewContainer">
+        <canvas id="mainCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="scan-tip">
+      📷 <span>请使用手机扫描二维码</span> 自行检测是否有效 · 确保码块颜色与背景有足够对比度
+    </div>
+
+    <button class="btn" id="downloadBtn">💾 下载二维码</button>
+    <div class="hint" id="statusHint"></div>
+  </div>
+
+  <script>
+    (function() {
+      const $ = id => document.getElementById(id);
+      const qrInput = $('qrInput');
+      const mainCanvas = $('mainCanvas');
+      const previewContainer = $('previewContainer');
+      const fgColor = $('fgColor'), bgColor = $('bgColor'), fgAlpha = $('fgAlpha'), alphaValue = $('alphaValue');
+      const bgBrightness = $('bgBrightness'), brightnessValue = $('brightnessValue');
+      const shapeSelect = $('shapeSelect');
+      const uploadBgBtn = $('uploadBgBtn'), clearBgBtn = $('clearBgBtn'), bgFileInput = $('bgFileInput');
+      const uploadLogoBtn = $('uploadLogoBtn'), clearLogoBtn = $('clearLogoBtn'), logoFileInput = $('logoFileInput');
+      const downloadBtn = $('downloadBtn'), statusHint = $('statusHint');
+
+      let qrModules = null, qrModuleCount = 0;
+      let bgImage = null, bgScale = 1, bgOffsetX = 0, bgOffsetY = 0;
+      let logoImage = null, logoScale = 1, logoOffsetX = 0, logoOffsetY = 0;
+      let activeEdit = 'none';
+
+      const CANVAS_SIZE = 300;
+      let isDragging = false, dragLastX = 0, dragLastY = 0;
+      let initialPinchDistance = 0, initialScale = 1;
+
+      function updateCanvasSize() {
+        const containerW = previewContainer.clientWidth;
+        const size = Math.min(containerW, 300);
+        mainCanvas.width = CANVAS_SIZE;
+        mainCanvas.height = CANVAS_SIZE;
+        mainCanvas.style.width = size + 'px';
+        mainCanvas.style.height = size + 'px';
+      }
+      window.addEventListener('resize', () => { updateCanvasSize(); drawQR(); });
+      updateCanvasSize();
+
+      function generateMatrix(text) {
+        const tempDiv = document.createElement('div');
+        tempDiv.style.cssText = 'position:absolute;left:-9999px;';
+        document.body.appendChild(tempDiv);
+        const qr = new QRCode(tempDiv, {
+          text: text || ' ',
+          width: 256, height: 256,
+          colorDark: '#000', colorLight: '#fff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        setTimeout(() => {
+          const internal = qr._oQRCode;
+          qrModules = internal.modules;
+          qrModuleCount = internal.moduleCount;
+          document.body.removeChild(tempDiv);
+          drawQR();
+        }, 50);
+      }
+
+      function isPositioningModule(row, col) {
+        if (row < 8 && col < 8) return true;
+        if (row < 8 && col >= qrModuleCount - 8) return true;
+        if (row >= qrModuleCount - 8 && col < 8) return true;
+        return false;
+      }
+
+      function getAdjustedColor(hex, brightness) {
+        const r = parseInt(hex.substr(1,2), 16);
+        const g = parseInt(hex.substr(3,2), 16);
+        const b = parseInt(hex.substr(5,2), 16);
+        const factor = brightness / 100;
+        const newR = Math.min(255, Math.max(0, Math.round(r + factor * 255)));
+        const newG = Math.min(255, Math.max(0, Math.round(g + factor * 255)));
+        const newB = Math.min(255, Math.max(0, Math.round(b + factor * 255)));
+        return `rgb(${newR},${newG},${newB})`;
+      }
+
+      function drawPositioningPatterns(ctx, fgColorStr, moduleSize) {
+        const positions = [
+          { cx: 3.5 * moduleSize, cy: 3.5 * moduleSize },
+          { cx: (qrModuleCount - 3.5) * moduleSize, cy: 3.5 * moduleSize },
+          { cx: 3.5 * moduleSize, cy: (qrModuleCount - 3.5) * moduleSize }
+        ];
+        const outerRadius = moduleSize * 3.1;
+        const centerRadius = moduleSize * 1.4;
+        const lineWidth = moduleSize * 0.8;
+        positions.forEach(pos => {
+          ctx.beginPath();
+          ctx.arc(pos.cx, pos.cy, outerRadius, 0, Math.PI * 2);
+          ctx.lineWidth = lineWidth;
+          ctx.strokeStyle = fgColorStr;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(pos.cx, pos.cy, centerRadius, 0, Math.PI * 2);
+          ctx.fillStyle = fgColorStr;
+          ctx.fill();
+        });
+      }
+
+      function drawQR() {
+        const ctx = mainCanvas.getContext('2d');
+        const w = mainCanvas.width, h = mainCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        if (bgImage) {
+          const srcX = -bgOffsetX / bgScale;
+          const srcY = -bgOffsetY / bgScale;
+          const srcW = CANVAS_SIZE / bgScale;
+          const srcH = CANVAS_SIZE / bgScale;
+          ctx.drawImage(bgImage, srcX, srcY, srcW, srcH, 0, 0, w, h);
+        } else {
+          ctx.fillStyle = getAdjustedColor(bgColor.value, parseInt(bgBrightness.value));
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        const brightness = parseInt(bgBrightness.value, 10);
+        if (bgImage && brightness !== 0) {
+          const overlayColor = brightness > 0
+            ? `rgba(255,255,255,${brightness / 100})`
+            : `rgba(0,0,0,${-brightness / 100})`;
+          ctx.fillStyle = overlayColor;
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        const logoSize = w * 0.18;
+        const safeMargin = Math.max(2, w * 0.04);
+        const logoL = (w - logoSize) / 2;
+        const logoT = (h - logoSize) / 2;
+        const logoR = logoL + logoSize;
+        const logoB = logoT + logoSize;
+        const safeL = logoL - safeMargin;
+        const safeT = logoT - safeMargin;
+        const safeR = logoR + safeMargin;
+        const safeB = logoB + safeMargin;
+
+        if (qrModules && qrModuleCount > 0) {
+          const moduleSize = w / qrModuleCount;
+          const half = moduleSize / 2;
+          const alpha = parseInt(fgAlpha.value, 10) / 100;
+          const hex = fgColor.value;
+          const r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+          const fgColorStr = `rgba(${r},${g},${b},${alpha})`;
+          const isCircle = shapeSelect.value === 'circle';
+
+          for (let row = 0; row < qrModuleCount; row++) {
+            for (let col = 0; col < qrModuleCount; col++) {
+              if (!qrModules[row][col]) continue;
+              const x = col * moduleSize;
+              const y = row * moduleSize;
+              const cx = x + half, cy = y + half;
+
+              if (logoImage) {
+                if (cx >= safeL && cx <= safeR && cy >= safeT && cy <= safeB) continue;
+              }
+
+              if (isCircle && isPositioningModule(row, col)) continue;
+
+              ctx.fillStyle = fgColorStr;
+              if (isCircle) {
+                ctx.beginPath();
+                ctx.arc(cx, cy, half * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+              } else {
+                ctx.fillRect(x, y, moduleSize, moduleSize);
+              }
+            }
+          }
+
+          if (isCircle) {
+            drawPositioningPatterns(ctx, fgColorStr, moduleSize);
+          }
+        }
+
+        if (logoImage) {
+          ctx.save();
+          const radius = logoSize * 0.15;
+          ctx.beginPath();
+          ctx.moveTo(logoL + radius, logoT);
+          ctx.lineTo(logoR - radius, logoT);
+          ctx.quadraticCurveTo(logoR, logoT, logoR, logoT + radius);
+          ctx.lineTo(logoR, logoB - radius);
+          ctx.quadraticCurveTo(logoR, logoB, logoR - radius, logoB);
+          ctx.lineTo(logoL + radius, logoB);
+          ctx.quadraticCurveTo(logoL, logoB, logoL, logoB - radius);
+          ctx.lineTo(logoL, logoT + radius);
+          ctx.quadraticCurveTo(logoL, logoT, logoL + radius, logoT);
+          ctx.closePath();
+          ctx.clip();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(logoL, logoT, logoSize, logoSize);
+
+          const imgW = logoImage.width;
+          const imgH = logoImage.height;
+          const srcX = -logoOffsetX / logoScale;
+          const srcY = -logoOffsetY / logoScale;
+          const srcW = logoSize / logoScale;
+          const srcH = logoSize / logoScale;
+          ctx.drawImage(logoImage, srcX, srcY, srcW, srcH, logoL, logoT, logoSize, logoSize);
+          ctx.restore();
+        }
+      }
+
+      function updateScale(editType, newScale) {
+        newScale = Math.max(0.01, newScale);
+        if (editType === 'bg') {
+          const oldScale = bgScale;
+          const centerSrcX = (CANVAS_SIZE/2 - bgOffsetX) / oldScale;
+          const centerSrcY = (CANVAS_SIZE/2 - bgOffsetY) / oldScale;
+          bgScale = newScale;
+          bgOffsetX = CANVAS_SIZE/2 - centerSrcX * newScale;
+          bgOffsetY = CANVAS_SIZE/2 - centerSrcY * newScale;
+          clampBgOffset();
+        } else if (editType === 'logo') {
+          const logoSize = CANVAS_SIZE * 0.18;
+          const oldScale = logoScale;
+          const centerSrcX = (logoSize/2 - logoOffsetX) / oldScale;
+          const centerSrcY = (logoSize/2 - logoOffsetY) / oldScale;
+          logoScale = newScale;
+          logoOffsetX = logoSize/2 - centerSrcX * newScale;
+          logoOffsetY = logoSize/2 - centerSrcY * newScale;
+          clampLogoOffset();
+        }
+        drawQR();
+      }
+
+      function getEventPos(e) {
+        const rect = mainCanvas.getBoundingClientRect();
+        const scaleX = CANVAS_SIZE / rect.width;
+        const scaleY = CANVAS_SIZE / rect.height;
+        if (e.touches) return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+      }
+
+      function isInsideLogo(pos) {
+        if (!logoImage) return false;
+        const size = CANVAS_SIZE * 0.18;
+        const half = size / 2;
+        const cx = CANVAS_SIZE / 2, cy = CANVAS_SIZE / 2;
+        return pos.x >= cx - half && pos.x <= cx + half && pos.y >= cy - half && pos.y <= cy + half;
+      }
+
+      mainCanvas.addEventListener('mousedown', (e) => {
+        const pos = getEventPos(e);
+        if (logoImage && isInsideLogo(pos)) activeEdit = 'logo';
+        else if (bgImage) activeEdit = 'bg';
+        else return;
+        isDragging = true;
+        dragLastX = pos.x; dragLastY = pos.y;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const pos = getEventPos(e);
+        const dx = pos.x - dragLastX, dy = pos.y - dragLastY;
+        if (activeEdit === 'bg') { bgOffsetX += dx; bgOffsetY += dy; clampBgOffset(); }
+        else { logoOffsetX += dx; logoOffsetY += dy; clampLogoOffset(); }
+        dragLastX = pos.x; dragLastY = pos.y;
+        drawQR();
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      mainCanvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          const pos = getEventPos(e);
+          if (logoImage && isInsideLogo(pos)) activeEdit = 'logo';
+          else if (bgImage) activeEdit = 'bg';
+          else return;
+          isDragging = true;
+          dragLastX = pos.x; dragLastY = pos.y;
+        } else if (e.touches.length === 2) {
+          isDragging = false;
+          initialPinchDistance = getPinchDistance(e.touches);
+          if (activeEdit === 'bg') initialScale = bgScale;
+          else if (activeEdit === 'logo') initialScale = logoScale;
+        }
+        e.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+          const pos = getEventPos(e);
+          const dx = pos.x - dragLastX, dy = pos.y - dragLastY;
+          if (activeEdit === 'bg') { bgOffsetX += dx; bgOffsetY += dy; clampBgOffset(); }
+          else { logoOffsetX += dx; logoOffsetY += dy; clampLogoOffset(); }
+          dragLastX = pos.x; dragLastY = pos.y;
+          drawQR();
+        } else if (e.touches.length === 2) {
+          const dist = getPinchDistance(e.touches);
+          if (initialPinchDistance > 0) {
+            const ratio = dist / initialPinchDistance;
+            if (activeEdit === 'bg') updateScale('bg', initialScale * ratio);
+            else if (activeEdit === 'logo') updateScale('logo', initialScale * ratio);
+          }
+        }
+      }, { passive: false });
+      window.addEventListener('touchend', () => { isDragging = false; initialPinchDistance = 0; });
+
+      function getPinchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx*dx + dy*dy);
+      }
+
+      mainCanvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.92 : 1.08;
+        if (activeEdit === 'bg' && bgImage) updateScale('bg', bgScale * delta);
+        else if (activeEdit === 'logo' && logoImage) updateScale('logo', logoScale * delta);
+      }, { passive: false });
+
+      function clampBgOffset() {
+        if (!bgImage) return;
+        const imgW = bgImage.width * bgScale;
+        const imgH = bgImage.height * bgScale;
+        bgOffsetX = Math.min(CANVAS_SIZE, Math.max(-imgW, bgOffsetX));
+        bgOffsetY = Math.min(CANVAS_SIZE, Math.max(-imgH, bgOffsetY));
+      }
+
+      function clampLogoOffset() {
+        if (!logoImage) return;
+        const displaySize = CANVAS_SIZE * 0.18;
+        const imgW = logoImage.width * logoScale;
+        const imgH = logoImage.height * logoScale;
+        logoOffsetX = Math.min(displaySize, Math.max(-imgW, logoOffsetX));
+        logoOffsetY = Math.min(displaySize, Math.max(-imgH, logoOffsetY));
+      }
+
+      let textTimer;
+      qrInput.addEventListener('input', () => {
+        clearTimeout(textTimer);
+        textTimer = setTimeout(() => {
+          const text = qrInput.value.trim();
+          if (text) generateMatrix(text);
+          else { qrModules = null; qrModuleCount = 0; drawQR(); }
+        }, 300);
+      });
+
+      fgColor.addEventListener('input', drawQR);
+      bgColor.addEventListener('input', drawQR);
+      bgBrightness.addEventListener('input', () => {
+        brightnessValue.textContent = bgBrightness.value;
+        drawQR();
+      });
+      shapeSelect.addEventListener('change', drawQR);
+      fgAlpha.addEventListener('input', () => { alphaValue.textContent = fgAlpha.value + '%'; drawQR(); });
+
+      uploadBgBtn.addEventListener('click', () => bgFileInput.click());
+      bgFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            bgImage = img;
+            const scaleX = CANVAS_SIZE / img.width, scaleY = CANVAS_SIZE / img.height;
+            bgScale = Math.min(scaleX, scaleY);
+            bgOffsetX = (CANVAS_SIZE - img.width * bgScale) / 2;
+            bgOffsetY = (CANVAS_SIZE - img.height * bgScale) / 2;
+            clampBgOffset();
+            clearBgBtn.style.display = 'inline-block';
+            uploadBgBtn.textContent = '🖼️ 更换背景图';
+            activeEdit = 'bg';
+            drawQR();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      clearBgBtn.addEventListener('click', () => {
+        bgImage = null; clearBgBtn.style.display = 'none'; uploadBgBtn.textContent = '🖼️ 上传背景图'; bgFileInput.value = ''; drawQR();
+      });
+
+      uploadLogoBtn.addEventListener('click', () => logoFileInput.click());
+      logoFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            logoImage = img;
+            const logoSize = CANVAS_SIZE * 0.18;
+            const scaleX = logoSize / img.width, scaleY = logoSize / img.height;
+            logoScale = Math.min(scaleX, scaleY);
+            logoOffsetX = (logoSize - img.width * logoScale) / 2;
+            logoOffsetY = (logoSize - img.height * logoScale) / 2;
+            clampLogoOffset();
+            clearLogoBtn.style.display = 'inline-block';
+            uploadLogoBtn.textContent = '⭐ 更换Logo';
+            activeEdit = 'logo';
+            drawQR();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      clearLogoBtn.addEventListener('click', () => {
+        logoImage = null; clearLogoBtn.style.display = 'none'; uploadLogoBtn.textContent = '⭐ 上传Logo'; logoFileInput.value = ''; drawQR();
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        if (!qrModules) { statusHint.textContent = '⚠️ 请先生成二维码'; return; }
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = mainCanvas.width + 20;
+        exportCanvas.height = mainCanvas.height + 20;
+        const ctx = exportCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        ctx.drawImage(mainCanvas, 10, 10);
+        exportCanvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'qrcode.png'; a.click();
+          URL.revokeObjectURL(url);
+          statusHint.textContent = '✅ 二维码已下载。';
+        }, 'image/png');
+      });
+
+      // 默认生成更新后的链接
+      qrInput.value = 'https://pd.qq.com/s/hizrn6r4z';
+      generateMatrix('https://pd.qq.com/s/hizrn6r4z');
+    })();
+  </script>
+</body>
+</html>
