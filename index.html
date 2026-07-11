@@ -219,7 +219,10 @@
       background: rgba(139, 124, 247, 0.12); color: var(--primary-light); font-weight: 500;
     }
     .card-actions {
-      display: flex; gap: 6px; align-items: center;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .action-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
     }
     .fav-btn, .share-btn {
       background: transparent; border: none; font-size: 1.3rem; cursor: pointer;
@@ -229,6 +232,9 @@
     }
     .fav-btn:hover, .share-btn:hover { background: rgba(249, 123, 168, 0.15); color: #f97ba8; }
     .fav-btn.favorited { color: #f97ba8; filter: drop-shadow(0 0 6px rgba(249, 123, 168, 0.5)); }
+    .action-label {
+      font-size: 0.65rem; color: var(--text-secondary); line-height: 1; user-select: none;
+    }
     .open-btn {
       display: inline-block;
       width: 10px;
@@ -488,12 +494,16 @@
       const modalClose = document.getElementById('modalClose');
 
       function openTool(url, title) {
+        // 构建完整路径
+        const fullUrl = url.startsWith('http') ? url : new URL(url, window.location.href).href;
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
-        modalIframe.src = url;
+        modalIframe.src = fullUrl;
         modalOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
         modalIframe.onload = () => { modalLoading.style.display = 'none'; };
+        // 添加历史记录，以便返回键关闭模态框
+        history.pushState({ modalOpen: true }, '');
       }
 
       function closeModal() {
@@ -502,9 +512,32 @@
         modalLoading.style.display = 'block';
         document.body.style.overflow = '';
       }
-      modalClose.addEventListener('click', closeModal);
-      modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
+
+      modalClose.addEventListener('click', () => {
+        closeModal();
+        // 移除历史记录（如果存在）
+        if (history.state && history.state.modalOpen) {
+          history.back();
+        }
+      });
+
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+          closeModal();
+          if (history.state && history.state.modalOpen) {
+            history.back();
+          }
+        }
+      });
+
+      // 处理返回键关闭模态框
+      window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.modalOpen) {
+          closeModal();
+          // 阻止进一步后退，再次 push 一个空状态（可选）
+          history.replaceState(null, '');
+        }
+      });
 
       backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
@@ -570,8 +603,14 @@
                 <div class="card-footer-row">
                   <span class="card-category-badge">${tool.category || '工具'}</span>
                   <div class="card-actions">
-                    <button class="share-btn" data-tool-id="${tool.id}" title="分享工具">📤</button>
-                    <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">${isFav ? '❤️' : '🤍'}</button>
+                    <div class="action-item">
+                      <button class="share-btn" data-tool-id="${tool.id}" title="转发">📤</button>
+                      <span class="action-label">转发</span>
+                    </div>
+                    <div class="action-item">
+                      <button class="fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">${isFav ? '❤️' : '🤍'}</button>
+                      <span class="action-label">收藏</span>
+                    </div>
                   </div>
                 </div>
               </div>`;
@@ -593,17 +632,16 @@
           return;
         }
 
-        // 分享按钮
+        // 转发按钮：打开模态框（与 > 相同）
         const shareBtn = e.target.closest('.share-btn');
         if (shareBtn) {
           e.preventDefault();
           e.stopPropagation();
           const card = shareBtn.closest('.card');
           if (card) {
+            const url = card.dataset.url;
             const title = card.dataset.title;
-            if (title) {
-              shareTool(title);
-            }
+            if (url && title) openTool(url, title);
           }
           return;
         }
@@ -617,67 +655,11 @@
           if (card) {
             const url = card.dataset.url;
             const title = card.dataset.title;
-            if (url && title) {
-              if (url.startsWith('http')) {
-                openTool(url, title);
-              } else {
-                openTool(window.location.origin + '/' + url, title);
-              }
-            }
+            if (url && title) openTool(url, title);
           }
           return;
         }
       });
-
-      // 分享功能：生成本站链接，并带上工具名称参数
-      function shareTool(title) {
-        const shareUrl = window.location.origin + window.location.pathname + '?tool=' + encodeURIComponent(title);
-        const shareText = `图灵魔法 - ${title}：${shareUrl}`;
-
-        if (navigator.share) {
-          navigator.share({
-            title: title,
-            text: shareText,
-            url: shareUrl,
-          }).catch((err) => {
-            if (err.name !== 'AbortError') {
-              fallbackCopy(shareUrl);
-            }
-          });
-        } else {
-          fallbackCopy(shareUrl);
-        }
-      }
-
-      function fallbackCopy(text) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(() => {
-            alert('链接已复制到剪贴板，可以粘贴分享');
-          }).catch(() => {
-            promptCopy(text);
-          });
-        } else {
-          promptCopy(text);
-        }
-      }
-
-      function promptCopy(text) {
-        window.prompt('复制下面的链接分享给朋友：', text);
-      }
-
-      // 自动打开工具（从URL参数读取）
-      function autoOpenFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        const toolTitle = params.get('tool');
-        if (toolTitle) {
-          const decodedTitle = decodeURIComponent(toolTitle);
-          const tool = toolsData.find(t => t.title === decodedTitle);
-          if (tool) {
-            const url = tool.url.startsWith('http') ? tool.url : window.location.origin + '/' + tool.url;
-            setTimeout(() => openTool(url, tool.title), 300);
-          }
-        }
-      }
 
       searchInput.addEventListener('input', () => {
         searchQuery = searchInput.value;
@@ -689,7 +671,6 @@
 
       initTheme();
       renderAll();
-      autoOpenFromUrl(); // 根据链接参数自动打开对应工具
     })();
   </script>
 </body>
