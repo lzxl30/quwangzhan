@@ -474,21 +474,57 @@
     <p class="footer-note">⚡ 趣网站 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
   </div>
 
-  <!-- 加载各分类的工具配置 -->
-  <script src="tools/turing/toolsData.js"></script>
-  <!-- 未来添加新分类：
-  <script src="tools/images/toolsData.js"></script>
-  -->
-  <!-- 主配置：合并数据 -->
-  <script src="toolsData.js"></script>
+  <!-- 1. 加载统一分类配置文件 -->
+  <script src="categories.js"></script>
 
+  <!-- 2. 动态加载各个分类的工具列表，然后加载根 toolsData.js 并初始化 -->
   <script>
-    (function() {
-      const baseCategories = [
+    (async function() {
+      if (typeof categoryConfigs === 'undefined') {
+        console.error('❌ categories.js 未加载或 categoryConfigs 未定义');
+        return;
+      }
+
+      function loadScript(url) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = url;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error(`加载失败: ${url}`));
+          document.head.appendChild(script);
+        });
+      }
+
+      try {
+        // 加载每个分类的工具数据
+        for (const cfg of categoryConfigs) {
+          await loadScript(`tools/${cfg.folder}/toolsData.js`);
+        }
+        // 加载根 toolsData.js 合并数据
+        await loadScript('toolsData.js');
+
+        // 初始化应用
+        initApp();
+      } catch (error) {
+        console.error('脚本加载失败:', error);
+      }
+    })();
+
+    function initApp() {
+      const builtInCategories = [
         { id: 'all', name: '全部', icon: '📋' },
-        { id: 'turing', name: '图灵魔法', icon: '🪄' },
         { id: 'favorites', name: '收藏', icon: '⭐' }
       ];
+
+      // 从 categoryConfigs 构建动态分类列表
+      let dynamicCategories = [];
+      if (typeof categoryConfigs !== 'undefined') {
+        dynamicCategories = categoryConfigs.map(cfg => ({
+          id: cfg.id,
+          name: cfg.name,
+          icon: cfg.icon
+        }));
+      }
 
       let sharedCategory = null;
       let sharedToolUrl = null;
@@ -505,7 +541,7 @@
       }
 
       function getCategories() {
-        const cats = [...baseCategories];
+        const cats = [...dynamicCategories, ...builtInCategories];
         if (sharedCategory) {
           cats.unshift(sharedCategory);
         }
@@ -580,8 +616,6 @@
 
       function getFilteredTools() {
         let filtered = [...toolsData];
-
-        // 优先处理分享分类，避免被其他分类过滤
         if (currentCategory === 'shared' && sharedToolUrl) {
           filtered = filtered.filter(t => t.url === sharedToolUrl);
         } else if (currentCategory === 'favorites') {
@@ -603,8 +637,8 @@
           let count;
           if (cat.id === 'favorites') count = favorites.length;
           else if (cat.id === 'shared') count = sharedToolUrl ? toolsData.filter(t => t.url === sharedToolUrl).length : 0;
+          else if (cat.id === 'all') count = toolsData.length;
           else count = toolsData.filter(t => t.category === cat.id).length;
-          if (cat.id === 'all') count = toolsData.length;
           const activeClass = currentCategory === cat.id ? ' active' : '';
           return `<button class="category-tag${activeClass}" data-category="${cat.id}">${cat.icon} ${cat.name}<span class="count">${count}</span></button>`;
         }).join('');
@@ -745,7 +779,7 @@
 
       initTheme();
       renderAll();
-    })();
+    }
   </script>
 </body>
 </html>
