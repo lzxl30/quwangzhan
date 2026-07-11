@@ -169,12 +169,15 @@
     }
     .category-tag.active .count { background: rgba(255, 255, 255, 0.3); }
 
-    .stats-bar {
+    .info-bar {
       display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
-      font-size: 0.85rem; color: var(--text-secondary);
+      flex-wrap: wrap; gap: 8px; margin-bottom: 20px; min-height: 24px;
     }
-    .stats-bar strong { color: var(--primary-light); font-weight: 600; }
+    .drag-hint {
+      font-size: 0.8rem; color: var(--primary-light); font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .drag-hint::before { content: '↕️'; font-size: 0.9rem; }
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card {
@@ -444,10 +447,7 @@
 
   <div class="main-container">
     <div class="category-tags" id="categoryTags"></div>
-    <div class="stats-bar">
-      <span>📦 共 <strong id="totalCount">0</strong> 个魔法工具</span>
-      <span id="showingInfo"></span>
-    </div>
+    <div class="info-bar" id="infoBar"></div>
     <div class="cards-grid" id="cardsGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
       <div class="empty-icon">🧙</div>
@@ -506,14 +506,10 @@
       }
 
       try {
-        // 加载每个分类的工具数据
         for (const cfg of categoryConfigs) {
           await loadScript(`tools/${cfg.folder}/toolsData.js`);
         }
-        // 加载根 toolsData.js 合并数据
         await loadScript('toolsData.js');
-
-        // 初始化应用
         initApp();
       } catch (error) {
         console.error('脚本加载失败:', error);
@@ -526,7 +522,6 @@
         { id: 'favorites', name: '收藏', icon: '⭐' }
       ];
 
-      // 从 categoryConfigs 构建动态分类列表
       let dynamicCategories = [];
       if (typeof categoryConfigs !== 'undefined') {
         dynamicCategories = categoryConfigs.map(cfg => ({
@@ -552,21 +547,33 @@
 
       function getCategories() {
         const cats = [builtInCategories[0], builtInCategories[1], ...dynamicCategories];
-        if (sharedCategory) {
-          cats.unshift(sharedCategory);
-        }
+        if (sharedCategory) cats.unshift(sharedCategory);
         return cats;
       }
 
       if (typeof toolsData === 'undefined') {
-        console.warn('⚠️ 未加载到 toolsData，请检查分类配置文件是否存在。');
+        console.warn('⚠️ 未加载到 toolsData');
         toolsData = [];
       }
 
       let currentCategory = 'all';
       let searchQuery = '';
-      // 收藏数据改为对象数组：{ id: string, time: number }
       let favorites = JSON.parse(localStorage.getItem('turingMagicFavorites_v2') || '[]');
+
+      // 缓存随机顺序：{ categoryId: [toolId, toolId, ...] }
+      const shuffledOrders = {};
+
+      function getShuffledOrder(categoryId, tools) {
+        if (!shuffledOrders[categoryId]) {
+          const ids = tools.map(t => t.id);
+          for (let i = ids.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ids[i], ids[j]] = [ids[j], ids[i]];
+          }
+          shuffledOrders[categoryId] = ids;
+        }
+        return shuffledOrders[categoryId];
+      }
 
       function saveFavorites() { localStorage.setItem('turingMagicFavorites_v2', JSON.stringify(favorites)); }
       function toggleFavorite(toolId) {
@@ -578,15 +585,12 @@
         }
         saveFavorites();
       }
-      function isFavorite(toolId) {
-        return favorites.some(f => f.id === toolId);
-      }
+      function isFavorite(toolId) { return favorites.some(f => f.id === toolId); }
 
       const categoryTagsEl = document.getElementById('categoryTags');
       const cardsGridEl = document.getElementById('cardsGrid');
       const emptyStateEl = document.getElementById('emptyState');
-      const totalCountEl = document.getElementById('totalCount');
-      const showingInfoEl = document.getElementById('showingInfo');
+      const infoBarEl = document.getElementById('infoBar');
       const searchInput = document.getElementById('searchInput');
       const themeToggle = document.getElementById('themeToggle');
       const backToTopBtn = document.getElementById('backToTopBtn');
@@ -632,43 +636,42 @@
         applyTheme(isLight ? 'dark' : 'light');
       });
 
-      // 随机排序函数（Fisher–Yates）
-      function shuffleArray(arr) {
-        const a = [...arr];
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-
       function getFilteredTools() {
         let filtered = [...toolsData];
 
         if (currentCategory === 'shared' && sharedToolUrl) {
           filtered = filtered.filter(t => t.url === sharedToolUrl);
         } else if (currentCategory === 'favorites') {
-          // 按收藏时间降序
           const favIds = favorites.map(f => f.id);
           filtered = filtered.filter(t => favIds.includes(t.id));
-          // 按 favorites 数组的顺序排序
           filtered.sort((a, b) => favIds.indexOf(a.id) - favIds.indexOf(b.id));
         } else if (currentCategory !== 'all') {
           filtered = filtered.filter(t => t.category === currentCategory);
         }
 
-        // 搜索过滤
         if (searchQuery.trim()) {
           const q = searchQuery.trim().toLowerCase();
           filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
         }
 
-        // 除收藏外随机排序
+        // 非收藏/非分享时使用缓存的随机顺序
         if (currentCategory !== 'favorites' && currentCategory !== 'shared') {
-          filtered = shuffleArray(filtered);
+          const order = getShuffledOrder(currentCategory, filtered);
+          const orderMap = new Map(order.map((id, index) => [id, index]));
+          filtered.sort((a, b) => (orderMap.get(a.id) ?? 9999) - (orderMap.get(b.id) ?? 9999));
         }
 
         return filtered;
+      }
+
+      // 切换分类时清除随机缓存（以便重新随机）
+      function switchCategory(categoryId) {
+        if (categoryId !== 'favorites' && categoryId !== 'shared') {
+          delete shuffledOrders[categoryId]; // 清除旧缓存，下次进入时重新随机
+        }
+        currentCategory = categoryId;
+        searchInput.value = ''; searchQuery = '';
+        renderAll();
       }
 
       function renderCategoryTags() {
@@ -683,15 +686,10 @@
           return `<button class="category-tag${activeClass}" data-category="${cat.id}">${cat.icon} ${cat.name}<span class="count">${count}</span></button>`;
         }).join('');
         categoryTagsEl.querySelectorAll('.category-tag').forEach(btn => {
-          btn.addEventListener('click', () => {
-            currentCategory = btn.dataset.category;
-            searchInput.value = ''; searchQuery = '';
-            renderAll();
-          });
+          btn.addEventListener('click', () => switchCategory(btn.dataset.category));
         });
       }
 
-      // 拖拽排序相关
       let dragSrcCard = null;
 
       function setupDragForFavorites() {
@@ -716,32 +714,23 @@
       function handleDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        if (this !== dragSrcCard) {
-          this.classList.add('drag-over');
-        }
+        if (this !== dragSrcCard) this.classList.add('drag-over');
       }
 
-      function handleDragLeave(e) {
-        this.classList.remove('drag-over');
-      }
+      function handleDragLeave(e) { this.classList.remove('drag-over'); }
 
       function handleDrop(e) {
         e.preventDefault();
         this.classList.remove('drag-over');
         if (this === dragSrcCard) return;
-
-        // 交换 DOM 位置
         const cards = Array.from(cardsGridEl.querySelectorAll('.card'));
         const srcIndex = cards.indexOf(dragSrcCard);
         const destIndex = cards.indexOf(this);
-
         if (srcIndex < destIndex) {
           cardsGridEl.insertBefore(dragSrcCard, this.nextSibling);
         } else {
           cardsGridEl.insertBefore(dragSrcCard, this);
         }
-
-        // 更新 favorites 数组顺序
         const srcId = dragSrcCard.dataset.toolId;
         const destId = this.dataset.toolId;
         const srcFav = favorites.find(f => f.id === srcId);
@@ -763,14 +752,18 @@
 
       function renderCards() {
         const filtered = getFilteredTools();
-        totalCountEl.textContent = toolsData.length;
+        // 更新信息栏
+        if (currentCategory === 'favorites') {
+          infoBarEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>';
+        } else {
+          infoBarEl.innerHTML = '';
+        }
+
         if (filtered.length === 0) {
           cardsGridEl.innerHTML = '';
           emptyStateEl.style.display = 'block';
-          showingInfoEl.textContent = '✨ 显示 0 个工具';
         } else {
           emptyStateEl.style.display = 'none';
-          showingInfoEl.textContent = `✨ 显示 ${filtered.length} 个工具`;
           cardsGridEl.innerHTML = filtered.map(tool => {
             const isFav = isFavorite(tool.id);
             const catName = getCategories().find(c => c.id === tool.category)?.name || tool.category || '工具';
@@ -798,7 +791,6 @@
               </div>`;
           }).join('');
 
-          // 如果在收藏分类，开启拖拽排序
           if (currentCategory === 'favorites') {
             setupDragForFavorites();
           }
@@ -808,35 +800,25 @@
       function renderAll() { renderCategoryTags(); renderCards(); }
 
       cardsGridEl.addEventListener('click', (e) => {
-        // 分类标签按钮
         const badge = e.target.closest('.card-category-badge');
         if (badge) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           const categoryId = badge.dataset.category;
-          if (categoryId) {
-            currentCategory = categoryId;
-            searchInput.value = ''; searchQuery = '';
-            renderAll();
-          }
+          if (categoryId) switchCategory(categoryId);
           return;
         }
 
-        // 收藏按钮
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           toggleFavorite(favBtn.dataset.toolId);
-          renderAll();
+          renderAll(); // 更新收藏状态但不改变随机缓存
           return;
         }
 
-        // 转发按钮
         const shareBtn = e.target.closest('.share-btn');
         if (shareBtn) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           const card = shareBtn.closest('.card');
           if (card) {
             const url = card.dataset.url;
@@ -846,21 +828,16 @@
           return;
         }
 
-        // 打开按钮
         const openBtn = e.target.closest('.open-btn');
         if (openBtn) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           const card = openBtn.closest('.card');
           if (card) {
             const url = card.dataset.url;
             const title = card.dataset.title;
             if (url && title) {
-              if (url.startsWith('http')) {
-                openTool(url, title);
-              } else {
-                openTool(window.location.origin + '/' + url, title);
-              }
+              if (url.startsWith('http')) openTool(url, title);
+              else openTool(window.location.origin + '/' + url, title);
             }
           }
           return;
@@ -872,13 +849,8 @@
         const shareUrl = base + '?open=' + encodeURIComponent(url);
 
         if (navigator.share) {
-          navigator.share({
-            title: title,
-            text: `试试这个工具：${title}`,
-            url: shareUrl,
-          }).catch(err => {
-            if (err.name !== 'AbortError') fallbackCopy(shareUrl);
-          });
+          navigator.share({ title: title, text: `试试这个工具：${title}`, url: shareUrl })
+            .catch(err => { if (err.name !== 'AbortError') fallbackCopy(shareUrl); });
         } else {
           fallbackCopy(shareUrl);
         }
@@ -887,16 +859,14 @@
       function fallbackCopy(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {
-            alert('链接已复制，可粘贴分享。打开后会自动显示该工具。');
+            alert('链接已复制，可粘贴分享。');
           }).catch(() => promptCopy(text));
         } else {
           promptCopy(text);
         }
       }
 
-      function promptCopy(text) {
-        window.prompt('复制下面的链接分享给朋友：', text);
-      }
+      function promptCopy(text) { window.prompt('复制下面的链接分享给朋友：', text); }
 
       if (checkSharedUrl()) {
         currentCategory = 'shared';
