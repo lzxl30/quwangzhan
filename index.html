@@ -341,13 +341,34 @@
       font-weight: 600; font-size: 1rem;
     }
     .modal-close {
-      background: none; border: none; color: var(--text);
-      font-size: 0.9rem; cursor: pointer; padding: 6px 14px;
-      border-radius: 8px; transition: background 0.2s;
-      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 25px;
+      transition: all 0.2s;
       -webkit-tap-highlight-color: transparent;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
     }
-    .modal-close:hover { background: rgba(255,255,255,0.1); }
+    .modal-close:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(139, 124, 247, 0.5);
+    }
+    body.light-mode .modal-close {
+      background: #6c5ce7;
+      color: #fff;
+    }
+    body.light-mode .modal-close:hover {
+      background: #5b4cdb;
+    }
     .modal-iframe-wrap {
       flex: 1; position: relative; background: #fff;
     }
@@ -375,6 +396,7 @@
       .footer-note { font-size: 0.65rem; }
       .open-btn { width: 8px; height: 8px; border-width: 2px; margin-right: 2px; }
       .modal-content { height: 90vh; max-height: none; }
+      .modal-close { padding: 8px 16px; font-size: 0.85rem; }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -425,7 +447,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <span id="modalTitle">工具加载中...</span>
-        <button class="modal-close" id="modalClose">返回主页</button>
+        <button class="modal-close" id="modalClose">← 返回主页</button>
       </div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
