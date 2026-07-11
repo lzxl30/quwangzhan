@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>图灵魔法 | 图片工具导航</title>
+  <title>趣网站 | 图片工具导航</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -232,7 +232,6 @@
     .action-btn span.label { font-size: 0.65rem; font-weight: 500; }
     .action-btn:hover { background: rgba(139, 124, 247, 0.1); color: var(--primary-light); }
     .fav-btn.favorited { color: #f97ba8; }
-    /* 放大后的打开按钮 */
     .open-btn {
       display: inline-block;
       width: 14px;
@@ -262,7 +261,6 @@
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
 
-    /* 固定在底部的频道条 */
     .fixed-bottom-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -300,7 +298,6 @@
       background: #e6e8f2; border-color: #6c5ce7;
     }
 
-    /* 回到顶部按钮 */
     .back-to-top-btn {
       position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
       display: inline-flex; align-items: center; gap: 4px;
@@ -317,7 +314,6 @@
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
     .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
 
-    /* 模态框 */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
@@ -401,24 +397,10 @@
         border-width: 2.5px;
         margin-right: 4px;
       }
-
-      /* 手机端弹窗全屏 */
-      .modal-overlay {
-        padding: 0;
-      }
-      .modal-content {
-        border-radius: 0;
-        width: 100%;
-        height: 100%;
-        max-height: 100vh;
-      }
-      .modal-header {
-        padding: 12px 16px;
-      }
-      .modal-close {
-        padding: 8px 16px;
-        font-size: 0.85rem;
-      }
+      .modal-overlay { padding: 0; }
+      .modal-content { border-radius: 0; width: 100%; height: 100%; max-height: 100vh; }
+      .modal-header { padding: 12px 16px; }
+      .modal-close { padding: 8px 16px; font-size: 0.85rem; }
     }
 
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -435,11 +417,11 @@
 <body>
   <header class="header">
     <div class="header-inner">
-      <a href="#" class="logo" title="图灵魔法">
+      <a href="#" class="logo" title="趣网站">
         <div class="logo-icon">🪄</div>
         <div>
-          <div class="logo-text">图灵魔法</div>
-          <div class="logo-sub">✨ 图片工具导航</div>
+          <div class="logo-text">趣网站</div>
+          <div class="logo-sub">✨ 好玩的工具集合</div>
         </div>
       </a>
       <div class="search-wrap">
@@ -464,7 +446,6 @@
     </div>
   </div>
 
-  <!-- 模态框 -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -478,7 +459,6 @@
     </div>
   </div>
 
-  <!-- 固定在底部的频道条 -->
   <div class="fixed-bottom-bar">
     <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
       <span class="btn-icon">⬆️</span> 回顶
@@ -491,16 +471,23 @@
         <span class="btn-icon">📡</span> 米游途
       </a>
     </div>
-    <p class="footer-note">⚡ 图灵魔法 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
+    <p class="footer-note">⚡ 趣网站 · 收藏你喜欢的工具 · 点击卡片即可跳转</p>
   </div>
 
+  <!-- 加载各分类的工具配置 -->
+  <script src="tools/turing/toolsData.js"></script>
+  <!-- 未来添加新分类：
+  <script src="tools/images/toolsData.js"></script>
+  -->
+  <!-- 主配置：合并数据 -->
   <script src="toolsData.js"></script>
 
   <script>
     (function() {
       const baseCategories = [
-        { id: 'favorites', name: '收藏', icon: '⭐' },
-        { id: 'all', name: '全部', icon: '📋' }
+        { id: 'all', name: '全部', icon: '📋' },
+        { id: 'turing', name: '图灵魔法', icon: '🪄' },
+        { id: 'favorites', name: '收藏', icon: '⭐' }
       ];
 
       let sharedCategory = null;
@@ -526,7 +513,7 @@
       }
 
       if (typeof toolsData === 'undefined') {
-        console.warn('⚠️ 未加载到 toolsData.js，请检查文件是否存在。');
+        console.warn('⚠️ 未加载到 toolsData，请检查分类配置文件是否存在。');
         toolsData = [];
       }
 
@@ -594,7 +581,10 @@
       function getFilteredTools() {
         let filtered = [...toolsData];
         if (currentCategory === 'favorites') filtered = filtered.filter(t => favorites.includes(t.id));
-        else if (currentCategory === 'shared' && sharedToolUrl) {
+        else if (currentCategory !== 'all') {
+          filtered = filtered.filter(t => t.category === currentCategory);
+        }
+        if (currentCategory === 'shared' && sharedToolUrl) {
           filtered = filtered.filter(t => t.url === sharedToolUrl);
         }
         if (searchQuery.trim()) {
@@ -610,7 +600,8 @@
           let count;
           if (cat.id === 'favorites') count = favorites.length;
           else if (cat.id === 'shared') count = sharedToolUrl ? toolsData.filter(t => t.url === sharedToolUrl).length : 0;
-          else count = toolsData.length;
+          else count = toolsData.filter(t => t.category === cat.id).length;
+          if (cat.id === 'all') count = toolsData.length;
           const activeClass = currentCategory === cat.id ? ' active' : '';
           return `<button class="category-tag${activeClass}" data-category="${cat.id}">${cat.icon} ${cat.name}<span class="count">${count}</span></button>`;
         }).join('');
