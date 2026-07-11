@@ -600,10 +600,9 @@
           e.stopPropagation();
           const card = shareBtn.closest('.card');
           if (card) {
-            const url = card.dataset.url;
             const title = card.dataset.title;
-            if (url && title) {
-              shareTool(url, title);
+            if (title) {
+              shareTool(title);
             }
           }
           return;
@@ -630,16 +629,11 @@
         }
       });
 
-      // 分享功能
-      function shareTool(url, title) {
-        // 构建完整URL
-        let shareUrl = url;
-        if (!url.startsWith('http')) {
-          shareUrl = window.location.origin + '/' + url;
-        }
-        const shareText = `试试这个工具：${title} - ${shareUrl}`;
+      // 分享功能：生成本站链接，并带上工具名称参数
+      function shareTool(title) {
+        const shareUrl = window.location.origin + window.location.pathname + '?tool=' + encodeURIComponent(title);
+        const shareText = `图灵魔法 - ${title}：${shareUrl}`;
 
-        // 尝试使用 Web Share API
         if (navigator.share) {
           navigator.share({
             title: title,
@@ -671,6 +665,20 @@
         window.prompt('复制下面的链接分享给朋友：', text);
       }
 
+      // 自动打开工具（从URL参数读取）
+      function autoOpenFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const toolTitle = params.get('tool');
+        if (toolTitle) {
+          const decodedTitle = decodeURIComponent(toolTitle);
+          const tool = toolsData.find(t => t.title === decodedTitle);
+          if (tool) {
+            const url = tool.url.startsWith('http') ? tool.url : window.location.origin + '/' + tool.url;
+            setTimeout(() => openTool(url, tool.title), 300);
+          }
+        }
+      }
+
       searchInput.addEventListener('input', () => {
         searchQuery = searchInput.value;
         renderCards();
@@ -681,6 +689,7 @@
 
       initTheme();
       renderAll();
+      autoOpenFromUrl(); // 根据链接参数自动打开对应工具
     })();
   </script>
 </body>
