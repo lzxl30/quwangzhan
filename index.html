@@ -261,6 +261,7 @@
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
 
+    /* 固定在底部的频道条 */
     .fixed-bottom-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -298,6 +299,7 @@
       background: #e6e8f2; border-color: #6c5ce7;
     }
 
+    /* 回到顶部按钮 */
     .back-to-top-btn {
       position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
       display: inline-flex; align-items: center; gap: 4px;
@@ -314,6 +316,7 @@
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
     .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
 
+    /* 模态框 */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
@@ -416,6 +419,7 @@
     </div>
   </div>
 
+  <!-- 模态框 -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -429,6 +433,7 @@
     </div>
   </div>
 
+  <!-- 固定在底部的频道条 -->
   <div class="fixed-bottom-bar">
     <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
       <span class="btn-icon">⬆️</span> 回顶
@@ -448,14 +453,17 @@
 
   <script>
     (function() {
+      // 基础分类
       const baseCategories = [
         { id: 'favorites', name: '收藏', icon: '⭐' },
         { id: 'all', name: '全部', icon: '📋' }
       ];
 
+      // 动态分类（来自分享）
       let sharedCategory = null;
       let sharedToolUrl = null;
 
+      // 检查 URL 参数，提取分享工具链接
       function checkSharedUrl() {
         const params = new URLSearchParams(window.location.search);
         const openUrl = params.get('open');
@@ -467,16 +475,18 @@
         return false;
       }
 
+      // 获取最终分类列表
       function getCategories() {
         const cats = [...baseCategories];
         if (sharedCategory) {
+          // 插入在“收藏”之后，“全部”之前？这里放在最前面
           cats.unshift(sharedCategory);
         }
         return cats;
       }
 
       if (typeof toolsData === 'undefined') {
-        console.warn('⚠️ 未加载到 toolsData.js');
+        console.warn('⚠️ 未加载到 toolsData.js，请检查文件是否存在。');
         toolsData = [];
       }
 
@@ -500,16 +510,14 @@
       const themeToggle = document.getElementById('themeToggle');
       const backToTopBtn = document.getElementById('backToTopBtn');
 
+      // 模态框
       const modalOverlay = document.getElementById('modalOverlay');
       const modalIframe = document.getElementById('modalIframe');
       const modalTitle = document.getElementById('modalTitle');
       const modalLoading = document.getElementById('modalLoading');
       const modalClose = document.getElementById('modalClose');
 
-      let isModalOpen = false;
-      let modalHistoryLength = 0;
-
-      function doOpenModal(url, title) {
+      function openTool(url, title) {
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
         modalIframe.src = url;
@@ -518,50 +526,15 @@
         modalIframe.onload = () => { modalLoading.style.display = 'none'; };
       }
 
-      function doCloseModal() {
+      function closeModal() {
         modalOverlay.classList.remove('active');
         modalIframe.src = '';
         modalLoading.style.display = 'block';
         document.body.style.overflow = '';
       }
-
-      // 打开弹窗，并添加历史记录
-      function openTool(url, title) {
-        if (isModalOpen) {
-          // 先关闭前一个，清理历史
-          closeModal();
-        }
-        doOpenModal(url, title);
-        isModalOpen = true;
-        modalHistoryLength = window.history.length;
-        history.pushState({ modalOpen: true }, '', window.location.href);
-      }
-
-      // 关闭弹窗（由用户点击关闭按钮触发）
-      function closeModal() {
-        if (!isModalOpen) return;
-        // 调用 history.back() 触发 popstate，在 popstate 中关闭并阻止页面回退
-        history.back();
-      }
-
       modalClose.addEventListener('click', closeModal);
-      modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isModalOpen) closeModal();
-      });
-
-      // 监听浏览器返回/前进
-      window.addEventListener('popstate', (event) => {
-        if (isModalOpen) {
-          // 关闭弹窗
-          doCloseModal();
-          isModalOpen = false;
-          // 阻止页面回退：replaceState 当前状态
-          history.replaceState(null, '', window.location.href);
-        }
-      });
+      modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
 
       backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
@@ -583,6 +556,7 @@
         let filtered = [...toolsData];
         if (currentCategory === 'favorites') filtered = filtered.filter(t => favorites.includes(t.id));
         else if (currentCategory === 'shared' && sharedToolUrl) {
+          // 精确匹配 URL
           filtered = filtered.filter(t => t.url === sharedToolUrl);
         }
         if (searchQuery.trim()) {
@@ -651,6 +625,7 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
+      // 卡片事件
       cardsGridEl.addEventListener('click', (e) => {
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
@@ -725,7 +700,7 @@
         window.prompt('复制下面的链接分享给朋友：', text);
       }
 
-      // 初始化
+      // 初始化：检查分享参数并设置初始分类
       if (checkSharedUrl()) {
         currentCategory = 'shared';
       }
