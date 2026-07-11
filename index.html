@@ -261,6 +261,7 @@
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
 
+    /* 固定在底部的频道条 */
     .fixed-bottom-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -298,6 +299,7 @@
       background: #e6e8f2; border-color: #6c5ce7;
     }
 
+    /* 回到顶部按钮 */
     .back-to-top-btn {
       position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
       display: inline-flex; align-items: center; gap: 4px;
@@ -314,6 +316,7 @@
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
     .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
 
+    /* 模态框 */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
@@ -416,6 +419,7 @@
     </div>
   </div>
 
+  <!-- 模态框 -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -429,6 +433,7 @@
     </div>
   </div>
 
+  <!-- 固定在底部的频道条 -->
   <div class="fixed-bottom-bar">
     <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
       <span class="btn-icon">⬆️</span> 回顶
@@ -478,6 +483,7 @@
       const themeToggle = document.getElementById('themeToggle');
       const backToTopBtn = document.getElementById('backToTopBtn');
 
+      // 模态框
       const modalOverlay = document.getElementById('modalOverlay');
       const modalIframe = document.getElementById('modalIframe');
       const modalTitle = document.getElementById('modalTitle');
@@ -486,6 +492,7 @@
 
       let isModalOpen = false;
 
+      // 打开工具弹窗，添加浏览器历史记录
       function openTool(url, title) {
         modalTitle.textContent = title;
         modalLoading.style.display = 'block';
@@ -495,12 +502,14 @@
         modalIframe.onload = () => { modalLoading.style.display = 'none'; };
 
         if (!isModalOpen) {
-          history.pushState({ modal: true }, '', window.location.href);
+          history.pushState({ modalOpen: true }, '', window.location.href);
           isModalOpen = true;
         }
       }
 
+      // 关闭弹窗（不触发返回，供内部调用）
       function closeModal() {
+        if (!isModalOpen) return;
         modalOverlay.classList.remove('active');
         modalIframe.src = '';
         modalLoading.style.display = 'block';
@@ -508,33 +517,30 @@
         isModalOpen = false;
       }
 
-      // 返回首页（移除 open 参数并重新加载）
-      function goHome() {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('open');
-        window.location.replace(url.href);
+      // 用户主动关闭弹窗，通过 history.back 触发 popstate 来关闭
+      function closeModalFromUser() {
+        if (isModalOpen) {
+          history.back();
+        }
       }
 
-      // 统一关闭弹窗并返回首页
-      function closeModalAndGoHome() {
-        closeModal();
-        goHome();
-      }
-
-      // 监听返回键：关闭弹窗并返回首页
+      // 监听浏览器返回/前进
       window.addEventListener('popstate', (e) => {
         if (isModalOpen) {
-          closeModalAndGoHome();
+          // 用户按了返回，关闭弹窗
+          closeModal();
+          // 不再次 pushState，让浏览器保持在弹窗前的状态
+          // 这样用户再按一次返回就会真正离开页面
         }
       });
 
-      // 叉号、遮罩、ESC 关闭弹窗并返回首页
-      modalClose.addEventListener('click', closeModalAndGoHome);
+      // 绑定关闭事件
+      modalClose.addEventListener('click', closeModalFromUser);
       modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModalAndGoHome();
+        if (e.target === modalOverlay) closeModalFromUser();
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isModalOpen) closeModalAndGoHome();
+        if (e.key === 'Escape' && isModalOpen) closeModalFromUser();
       });
 
       backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
@@ -618,6 +624,7 @@
 
       function renderAll() { renderCategoryTags(); renderCards(); }
 
+      // 卡片点击事件
       cardsGridEl.addEventListener('click', (e) => {
         const favBtn = e.target.closest('.fav-btn');
         if (favBtn) {
@@ -661,6 +668,7 @@
         }
       });
 
+      // 分享功能：链接带上 open 参数，打开后自动弹出
       function shareTool(url, title) {
         const base = window.location.origin + window.location.pathname;
         const shareUrl = base + '?open=' + encodeURIComponent(url);
@@ -692,6 +700,7 @@
         window.prompt('复制下面的链接分享给朋友，打开后会自动打开工具：', text);
       }
 
+      // 页面加载时检查 open 参数，自动打开对应工具
       function checkAutoOpen() {
         const params = new URLSearchParams(window.location.search);
         const openUrl = params.get('open');
