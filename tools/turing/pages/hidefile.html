@@ -1,1 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>图片隐写 | 图灵魔法</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --text: #e8edf2;
+      --text2: #9aa0b4;
+      --accent: #8b7cf7;
+      --accent2: #f97ba8;
+      --border: #2a2e3b;
+      --radius: 14px;
+      --btn-bg: #232738;
+      --input-bg: #1e2130;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 720px; width: 100%;
+      background: var(--card); border-radius: 20px;
+      padding: 28px 24px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    h2 { font-size: 1.6rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .subtitle { color: var(--text2); font-size: 0.85rem; margin-bottom: 24px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+    .tab {
+      flex: 1; text-align: center; padding: 10px;
+      background: var(--btn-bg); border-radius: 30px;
+      cursor: pointer; font-weight: 600; transition: 0.2s;
+      border: 2px solid transparent;
+    }
+    .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .section { display: none; }
+    .section.active { display: block; }
 
+    .upload-box {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 30px 20px; text-align: center; cursor: pointer;
+      transition: 0.2s; margin-bottom: 20px; background: var(--input-bg);
+      position: relative;
+    }
+    .upload-box:hover { border-color: var(--accent); }
+    .upload-box.dragover { border-color: var(--accent2); background: rgba(139,124,247,0.08); }
+    .upload-box.has-file { border-color: var(--accent2); }
+    .upload-box .upload-hint {
+      color: var(--text2); font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      flex-wrap: wrap;
+    }
+    .upload-box .upload-hint img, .upload-box .upload-hint video {
+      max-height: 150px; max-width: 100%; border-radius: 10px; margin-top: 8px;
+    }
+    .upload-box input[type="file"] { display: none; }
+    .file-name { font-weight: 600; color: var(--accent); word-break: break-all; }
+
+    .capacity-bar { height: 6px; background: var(--border); border-radius: 3px; margin: 12px 0; overflow: hidden; }
+    .capacity-fill { height: 100%; border-radius: 3px; background: var(--accent2); transition: width 0.3s; }
+
+    .btn {
+      background: var(--accent); color: #fff; border: none;
+      padding: 12px 24px; border-radius: 30px; font-weight: 600;
+      cursor: pointer; font-size: 0.95rem; transition: 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      width: 100%; justify-content: center; margin-top: 8px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
+    .hint { margin-top: 10px; font-size: 0.8rem; color: var(--text2); text-align: center; }
+
+    .preview-panel {
+      background: var(--input-bg); border-radius: var(--radius);
+      padding: 16px; margin-top: 16px;
+    }
+    .preview-panel img, .preview-panel video { max-width: 100%; max-height: 300px; border-radius: 8px; }
+    .preview-panel pre {
+      white-space: pre-wrap; word-break: break-all;
+      max-height: 200px; overflow: auto; font-size: 0.85rem;
+    }
+    .download-link {
+      display: inline-block; background: var(--btn-bg); color: var(--accent);
+      padding: 8px 16px; border-radius: 20px; text-decoration: none;
+      font-weight: 600; margin-top: 8px;
+    }
+    .action-row {
+      display: flex; gap: 10px; align-items: center; margin-top: 10px;
+    }
+    .action-row .download-link { margin-top: 0; }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px 16px; border-radius: 14px; }
+      h2 { font-size: 1.3rem; }
+      .upload-box { padding: 24px 14px; }
+      .upload-box .upload-hint { font-size: 0.85rem; }
+      .tab { padding: 8px; font-size: 0.85rem; }
+      .btn { font-size: 0.9rem; padding: 12px 16px; }
+      .preview-panel img, .preview-panel video { max-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📁 图片隐写</h2>
+    <p class="subtitle">将任意文件（txt/exe/压缩包/图片等）隐写进图片载体中 · 支持 JPG/PNG/WEBP 等</p>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="hide">🔒 隐藏文件</div>
+      <div class="tab" data-tab="extract">🔓 提取文件</div>
+    </div>
+
+    <!-- 隐藏文件 -->
+    <div class="section active" id="hideSection">
+      <div class="upload-box" id="carrierBox">
+        <div class="upload-hint" id="carrierHint">
+          🖼️ <span>点击或拖放一张载体图片（JPG/PNG/WEBP等）</span>
+        </div>
+        <input type="file" id="carrierFileInput" accept="image/*" hidden>
+      </div>
+
+      <div class="upload-box" id="secretBox">
+        <div class="upload-hint" id="secretHint">
+          📎 <span>点击或拖放要隐藏的文件（任意格式）</span>
+        </div>
+        <input type="file" id="secretFileInput" hidden>
+      </div>
+
+      <div class="capacity-bar" id="capacityBar" style="display:none;">
+        <div class="capacity-fill" id="capacityFill" style="width:0%;"></div>
+      </div>
+      <div class="hint" id="capacityHint"></div>
+      <button class="btn" id="hideBtn">💾 生成隐藏文件后的图片</button>
+
+      <div class="preview-panel" id="resultPreview" style="display:none;">
+        <p>🔍 生成结果预览（PNG格式）</p>
+        <img id="resultImg" style="max-height:200px; display:block; margin:10px auto;">
+        <div class="action-row">
+          <a href="#" id="resultDownload" class="download-link" download="hidden_file.png">⬇️ 下载图片</a>
+          <span class="hint" id="hideHint" style="margin:0;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提取文件 -->
+    <div class="section" id="extractSection">
+      <div class="upload-box" id="extractBox">
+        <div class="upload-hint" id="extractHintBox">
+          📁 <span>点击或拖放含有隐藏文件的图片（任意格式）</span>
+        </div>
+        <input type="file" id="extractFileInput" accept="image/*" hidden>
+      </div>
+      <button class="btn" id="extractBtn">🔍 提取隐藏文件</button>
+      <div class="preview-panel" id="previewPanel" style="display:none;"></div>
+      <div class="hint" id="extractHint"></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      document.documentElement.style.colorScheme = 'dark';
+
+      const tabs = document.querySelectorAll('.tab');
+      const sections = {
+        hide: document.getElementById('hideSection'),
+        extract: document.getElementById('extractSection')
+      };
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          Object.values(sections).forEach(s => s.classList.remove('active'));
+          sections[tab.dataset.tab].classList.add('active');
+        });
+      });
+
+      // ========== 隐藏文件逻辑 ==========
+      const carrierBox = document.getElementById('carrierBox');
+      const carrierFileInput = document.getElementById('carrierFileInput');
+      const carrierHint = document.getElementById('carrierHint');
+      const secretBox = document.getElementById('secretBox');
+      const secretFileInput = document.getElementById('secretFileInput');
+      const secretHint = document.getElementById('secretHint');
+      const capacityBar = document.getElementById('capacityBar');
+      const capacityFill = document.getElementById('capacityFill');
+      const capacityHint = document.getElementById('capacityHint');
+      const hideBtn = document.getElementById('hideBtn');
+      const hideHint = document.getElementById('hideHint');
+      const resultPreview = document.getElementById('resultPreview');
+      const resultImg = document.getElementById('resultImg');
+      const resultDownload = document.getElementById('resultDownload');
+
+      let carrierCanvas = null;
+      let secretFile = null, secretBytes = null;
+
+      function setupUploadBox(box, input, hintElement, accept, callback) {
+        box.addEventListener('click', () => input.click());
+        input.addEventListener('change', (e) => {
+          if (e.target.files.length) callback(e.target.files[0], box, hintElement);
+        });
+        box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('dragover'); });
+        box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+        box.addEventListener('drop', (e) => {
+          e.preventDefault(); box.classList.remove('dragover');
+          if (e.dataTransfer.files.length) callback(e.dataTransfer.files[0], box, hintElement);
+        });
+      }
+
+      function loadImageToCanvas(file, callback) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            callback(canvas, img);
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function handleCarrier(file, box, hintEl) {
+        if (!file || !file.type.startsWith('image/')) {
+          alert('请选择一张图片作为载体！');
+          return;
+        }
+        loadImageToCanvas(file, (canvas, img) => {
+          carrierCanvas = canvas;
+          hintEl.innerHTML = `<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`;
+          box.classList.add('has-file');
+          updateCapacity();
+        });
+      }
+
+      function handleSecret(file, box, hintEl) {
+        secretFile = file;
+        hintEl.innerHTML = `<span class="file-name">📎 ${file.name}</span> (${(file.size/1024).toFixed(1)} KB)`;
+        box.classList.add('has-file');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          secretBytes = new Uint8Array(e.target.result);
+          updateCapacity();
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      setupUploadBox(carrierBox, carrierFileInput, carrierHint, 'image/*', handleCarrier);
+      setupUploadBox(secretBox, secretFileInput, secretHint, '*', handleSecret);
+
+      function updateCapacity() {
+        if (!carrierCanvas || !secretBytes) return;
+        const pixelCount = carrierCanvas.width * carrierCanvas.height;
+        const maxBits = pixelCount * 3;
+        const headerSize = 4 + 255 + 4;
+        const totalBitsNeeded = (headerSize + secretFile.size) * 8;
+        const percent = Math.min(100, (totalBitsNeeded / maxBits) * 100);
+        capacityBar.style.display = 'block';
+        capacityFill.style.width = percent + '%';
+        if (totalBitsNeeded > maxBits) {
+          capacityHint.textContent = `⚠️ 文件太大！需要 ${(totalBitsNeeded/8/1024).toFixed(1)} KB，图片仅能容纳 ${(maxBits/8/1024).toFixed(1)} KB`;
+        } else {
+          capacityHint.textContent = `✅ 容量充足，使用 ${(totalBitsNeeded/8).toFixed(1)} / ${(maxBits/8/1024).toFixed(1)} KB`;
+        }
+      }
+
+      function encodeFileToImage(imageData, fileName, fileBytes) {
+        const data = imageData.data;
+        const fileNameBytes = new TextEncoder().encode(fileName);
+        if (fileNameBytes.length > 255) throw new Error('文件名过长（最多255字节）');
+        const header = new Uint8Array(4 + fileNameBytes.length + 4);
+        new DataView(header.buffer).setUint32(0, fileNameBytes.length, false);
+        header.set(fileNameBytes, 4);
+        new DataView(header.buffer).setUint32(4 + fileNameBytes.length, fileBytes.length, false);
+        const fullBytes = new Uint8Array(header.length + fileBytes.length);
+        fullBytes.set(header);
+        fullBytes.set(fileBytes, header.length);
+        const maxBytes = Math.floor(data.length / 8) * 3;
+        if (fullBytes.length > maxBytes) throw new Error('载体容量不足');
+        const bits = [];
+        for (let i = 0; i < fullBytes.length; i++) {
+          for (let j = 7; j >= 0; j--) bits.push((fullBytes[i] >> j) & 1);
+        }
+        for (let i = 0; i < bits.length; i++) {
+          const pixelIndex = Math.floor(i / 3);
+          const channel = i % 3;
+          const dataIndex = pixelIndex * 4 + channel;
+          if (dataIndex >= data.length) break;
+          if (bits[i] === 1) data[dataIndex] |= 1;
+          else data[dataIndex] &= 0xFE;
+        }
+        return imageData;
+      }
+
+      // 修改点：隐藏按钮只生成预览和下载链接，不再自动下载
+      hideBtn.addEventListener('click', () => {
+        if (!carrierCanvas) { alert('请先选择载体图片！'); return; }
+        if (!secretFile) { alert('请选择要隐藏的文件！'); return; }
+        try {
+          const ctx = carrierCanvas.getContext('2d');
+          const imgData = ctx.getImageData(0, 0, carrierCanvas.width, carrierCanvas.height);
+          const modified = encodeFileToImage(imgData, secretFile.name, new Uint8Array(secretBytes));
+          ctx.putImageData(modified, 0, 0);
+          carrierCanvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            resultImg.src = url;
+            resultDownload.href = url;
+            resultPreview.style.display = 'block';
+            hideHint.textContent = '✅ 图片已生成，可点击下方链接下载。';
+            // 不再自动触发下载，只保留手动下载链接
+          }, 'image/png');
+        } catch (err) {
+          alert('隐藏失败：' + err.message);
+        }
+      });
+
+      // ========== 提取文件逻辑 ==========
+      const extractBox = document.getElementById('extractBox');
+      const extractFileInput = document.getElementById('extractFileInput');
+      const extractHintBox = document.getElementById('extractHintBox');
+      const extractBtn = document.getElementById('extractBtn');
+      const extractHint = document.getElementById('extractHint');
+      const previewPanel = document.getElementById('previewPanel');
+
+      let extractImageData = null;
+
+      function handleExtractImage(file, box, hintEl) {
+        if (!file || !file.type.startsWith('image/')) {
+          alert('请选择一张图片！');
+          return;
+        }
+        loadImageToCanvas(file, (canvas, img) => {
+          hintEl.innerHTML = `<img src="${img.src}" style="max-height:120px; border-radius:8px; display:block; margin:0 auto;"><span class="file-name">${file.name}</span>`;
+          box.classList.add('has-file');
+          const ctx = canvas.getContext('2d');
+          extractImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          previewPanel.style.display = 'none';
+          extractHint.textContent = '';
+        });
+      }
+
+      setupUploadBox(extractBox, extractFileInput, extractHintBox, 'image/*', handleExtractImage);
+
+      function decodeFileFromImage(imageData) {
+        const data = imageData.data;
+        const bits = [];
+        for (let i = 0; i < data.length; i += 4) {
+          for (let j = 0; j < 3; j++) {
+            if (i + j < data.length) bits.push(data[i + j] & 1);
+          }
+        }
+        const bytes = [];
+        for (let i = 0; i + 7 < bits.length; i += 8) {
+          let byte = 0;
+          for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
+          bytes.push(byte);
+        }
+        if (bytes.length < 8) throw new Error('数据太短，不是有效的隐写图片。');
+        const nameLen = new DataView(new Uint8Array(bytes.slice(0, 4)).buffer).getUint32(0, false);
+        if (4 + nameLen + 4 > bytes.length) throw new Error('文件名长度异常。');
+        const nameBytes = bytes.slice(4, 4 + nameLen);
+        const fileName = new TextDecoder().decode(new Uint8Array(nameBytes));
+        const contentLenOffset = 4 + nameLen;
+        const contentLen = new DataView(new Uint8Array(bytes.slice(contentLenOffset, contentLenOffset + 4)).buffer).getUint32(0, false);
+        const contentStart = contentLenOffset + 4;
+        if (contentStart + contentLen > bytes.length) throw new Error('文件内容长度异常。');
+        const fileBytes = new Uint8Array(bytes.slice(contentStart, contentStart + contentLen));
+        return { fileName, fileBytes };
+      }
+
+      function showPreview(fileName, fileBytes) {
+        const mime = getMimeType(fileName);
+        const blob = new Blob([fileBytes], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = `<a href="${url}" download="${fileName}" class="download-link">⬇️ 下载文件</a>`;
+        let previewHtml = '';
+        if (mime.startsWith('image/')) {
+          previewHtml = `<p>📷 <strong>${fileName}</strong></p><img src="${url}" alt="${fileName}">`;
+        } else if (mime.startsWith('video/')) {
+          previewHtml = `<p>🎬 <strong>${fileName}</strong></p><video controls src="${url}"></video>`;
+        } else if (mime.startsWith('audio/')) {
+          previewHtml = `<p>🔊 <strong>${fileName}</strong></p><audio controls src="${url}"></audio>`;
+        } else if (mime === 'text/plain' || fileName.endsWith('.txt') || fileName.endsWith('.log') || fileName.endsWith('.md')) {
+          const text = new TextDecoder().decode(fileBytes);
+          previewHtml = `<p>📄 <strong>${fileName}</strong></p><pre>${escapeHtml(text)}</pre>`;
+        } else {
+          previewHtml = `<p>📦 <strong>${fileName}</strong></p><p>无法预览此文件类型。</p>`;
+        }
+        previewPanel.innerHTML = previewHtml + downloadLink;
+        previewPanel.style.display = 'block';
+      }
+
+      function getMimeType(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        const mimes = {
+          png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+          webp: 'image/webp', bmp: 'image/bmp', svg: 'image/svg+xml',
+          mp4: 'video/mp4', webm: 'video/webm', ogg: 'video/ogg',
+          mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+          txt: 'text/plain', html: 'text/html', css: 'text/css', js: 'text/javascript',
+          json: 'application/json', pdf: 'application/pdf', zip: 'application/zip',
+          rar: 'application/x-rar-compressed', '7z': 'application/x-7z-compressed',
+          exe: 'application/octet-stream', dll: 'application/octet-stream'
+        };
+        return mimes[ext] || 'application/octet-stream';
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      extractBtn.addEventListener('click', () => {
+        if (!extractImageData) { alert('请先选择含有隐藏文件的图片！'); return; }
+        try {
+          const result = decodeFileFromImage(extractImageData);
+          showPreview(result.fileName, result.fileBytes);
+          extractHint.textContent = `✅ 成功提取文件：${result.fileName}`;
+        } catch (err) {
+          alert('提取失败：' + err.message);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
