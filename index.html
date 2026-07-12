@@ -73,40 +73,22 @@
     .header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(16px);
-      background: rgba(18, 20, 28, 0.88);
-      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(16px); background: rgba(18, 20, 28, 0.88);
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3); transition: background 0.3s;
     }
     body.light-mode .header { background: rgba(255, 255, 255, 0.88); }
     .header-top {
-      max-width: 1350px;
-      margin: 0 auto;
-      padding: 10px 20px 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px 12px;
+      max-width: 1350px; margin: 0 auto; padding: 10px 20px 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px 12px;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-      flex-shrink: 0;
-    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); flex-shrink: 0; }
     .logo-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
+      width: 36px; height: 36px; border-radius: 10px;
       background: linear-gradient(135deg, #8b7cf7, #f97ba8);
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #fff;
-      box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4);
+      font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4);
     }
     .logo-text {
       font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px;
@@ -116,50 +98,36 @@
     }
     .logo-sub { font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; margin-top: 1px; display: none; }
 
-    .search-wrap {
-      position: relative; flex: 1; max-width: 360px; min-width: 160px; margin: 0 8px;
-    }
+    .search-wrap { position: relative; flex: 1; max-width: 360px; min-width: 160px; margin: 0 8px; }
     .search-wrap input {
-      width: 100%; padding: 9px 16px 9px 38px;
-      border: 2px solid var(--border); border-radius: 50px;
-      font-size: 0.85rem; outline: none;
-      transition: var(--transition);
-      background: var(--input-bg); color: var(--text);
+      width: 100%; padding: 9px 16px 9px 38px; border: 2px solid var(--border);
+      border-radius: 50px; font-size: 0.85rem; outline: none;
+      transition: var(--transition); background: var(--input-bg); color: var(--text);
       -webkit-appearance: none;
     }
     .search-wrap input:focus {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(139, 124, 247, 0.12);
+      border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(139, 124, 247, 0.12);
       background: var(--card-bg);
     }
-    .search-wrap .search-icon {
-      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-      font-size: 0.95rem; color: #888ca0; pointer-events: none;
-    }
+    .search-wrap .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 0.95rem; color: #888ca0; pointer-events: none; }
 
     .theme-toggle {
       background: var(--tag-bg); border: none; color: var(--text);
-      width: 36px; height: 36px; border-radius: 50%;
-      font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: var(--transition);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: var(--transition); box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;
     }
     .theme-toggle:hover { background: var(--primary); color: #fff; transform: scale(1.06); }
 
     .header-hint {
       max-width: 1350px; margin: 0 auto; padding: 0 20px 4px;
-      text-align: center; font-size: 0.7rem; color: var(--text-secondary);
-      font-weight: 500;
+      text-align: center; font-size: 0.7rem; color: var(--text-secondary); font-weight: 500;
     }
-    .header-hint a {
-      color: var(--primary-light); font-weight: 700;
-      text-decoration: underline; text-underline-offset: 2px;
-    }
+    .header-hint a { color: var(--primary-light); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
     .header-hint a:hover { color: var(--accent-1); }
 
     .category-bar-wrap {
-      position: relative;
-      max-width: 1350px; margin: 0 auto; padding: 0 0 4px 16px;
+      position: relative; max-width: 1350px; margin: 0 auto; padding: 0 0 4px 16px;
       display: flex; align-items: center;
     }
     .category-scroll {
@@ -262,8 +230,7 @@
     .card-category-badge {
       font-size: 0.7rem; padding: 4px 10px; border-radius: 20px;
       background: rgba(139, 124, 247, 0.12); color: var(--primary-light);
-      font-weight: 500; cursor: pointer; border: none;
-      transition: background 0.2s, color 0.2s;
+      font-weight: 500; cursor: pointer; border: none; transition: background 0.2s, color 0.2s;
     }
     .card-category-badge:hover { background: var(--primary); color: #fff; }
     .card-actions { display: flex; gap: 8px; align-items: center; }
@@ -279,11 +246,9 @@
     .fav-btn.favorited { color: #f97ba8; }
     .open-btn {
       display: inline-block; width: 14px; height: 14px;
-      border-right: 3px solid var(--text-secondary);
-      border-bottom: 3px solid var(--text-secondary);
+      border-right: 3px solid var(--text-secondary); border-bottom: 3px solid var(--text-secondary);
       transform: rotate(-45deg); margin-left: auto; margin-right: 6px;
-      cursor: pointer; opacity: 0.6; transition: all 0.2s;
-      flex-shrink: 0; align-self: center;
+      cursor: pointer; opacity: 0.6; transition: all 0.2s; flex-shrink: 0; align-self: center;
     }
     .open-btn:hover { border-color: var(--primary-light); opacity: 1; transform: rotate(-45deg) scale(1.2); }
 
@@ -341,14 +306,12 @@
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
       display: flex; align-items: center; justify-content: center;
-      padding: 0; opacity: 0; visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
+      padding: 0; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
     }
     .modal-overlay.active { opacity: 1; visibility: visible; }
     .modal-content {
-      background: var(--card-bg); border-radius: 0;
-      width: 100%; height: 100%; max-height: 100vh;
-      display: flex; flex-direction: column;
+      background: var(--card-bg); border-radius: 0; width: 100%; height: 100%;
+      max-height: 100vh; display: flex; flex-direction: column;
       box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
     .modal-header {
@@ -358,11 +321,10 @@
     }
     .modal-close {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--primary); border: none;
-      color: #fff; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; padding: 10px 20px; border-radius: 25px;
-      transition: all 0.2s; letter-spacing: 0.3px;
-      box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
+      background: var(--primary); border: none; color: #fff;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      padding: 10px 20px; border-radius: 25px; transition: all 0.2s;
+      letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
     }
     .modal-close:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(139, 124, 247, 0.5); }
     body.light-mode .modal-close { background: #6c5ce7; color: #fff; }
@@ -475,16 +437,6 @@
         return arr;
       }
 
-      function generateCardHTML(tool) {
-        const fav = isFav(tool.id);
-        const cn = getCats().find(c => c.id === tool.category)?.name || tool.category || '工具';
-        return `<div class="card ${tool.accentClass}" data-tool-id="${tool.id}" data-url="${tool.url}" data-title="${tool.title}">
-          <div class="card-icon-row"><div class="card-icon ${tool.iconBgClass}">${tool.icon}</div><div class="card-title">${tool.title}</div><span class="open-btn" data-tool-id="${tool.id}" title="打开工具"></span></div>
-          <div class="card-desc">${tool.description}</div>
-          <div class="card-footer-row"><button class="card-category-badge" data-category="${tool.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${tool.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${tool.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div>
-        </div>`;
-      }
-
       function isFav(tid) { return favs.some(f => f.id === tid); }
       function getCats() { 
         const saved = getSavedOrder(); let ordered = []; 
@@ -493,6 +445,16 @@
         const cats = [builtIn[0], builtIn[1], ...ordered]; 
         if (sharedCat) cats.unshift(sharedCat); 
         return cats; 
+      }
+
+      function generateCardHTML(tool) {
+        const fav = isFav(tool.id);
+        const cn = getCats().find(c => c.id === tool.category)?.name || tool.category || '工具';
+        return `<div class="card ${tool.accentClass}" data-tool-id="${tool.id}" data-url="${tool.url}" data-title="${tool.title}">
+          <div class="card-icon-row"><div class="card-icon ${tool.iconBgClass}">${tool.icon}</div><div class="card-title">${tool.title}</div><span class="open-btn" data-tool-id="${tool.id}" title="打开工具"></span></div>
+          <div class="card-desc">${tool.description}</div>
+          <div class="card-footer-row"><button class="card-category-badge" data-category="${tool.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${tool.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${tool.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div>
+        </div>`;
       }
 
       function initFramework() {
@@ -542,29 +504,25 @@
         // 流式追加卡片
         function appendCards(newTools) {
           if (!newTools || newTools.length === 0) return;
-          // 过滤出应该在当前分类下显示的新工具
+          // 确定在当前分类下应该显示的工具
           let visible = newTools;
           if (curCat !== 'all' && curCat !== 'shared') {
             visible = newTools.filter(t => t.category === curCat);
           }
           if (visible.length === 0) {
-            renderTags(); // 只更新计数
+            renderTags();
             return;
           }
-          // 如果之前是空状态，先清空并隐藏空状态
-          if (gridEl.querySelector('.empty-state') || gridEl.innerHTML === '') {
-            gridEl.innerHTML = '';
-            emptyEl.style.display = 'none';
-          }
+          // 隐藏空状态（首次追加时生效）
+          emptyEl.style.display = 'none';
           // 生成 HTML 并追加
           const html = visible.map(t => generateCardHTML(t)).join('');
           gridEl.insertAdjacentHTML('beforeend', html);
-          // 如果当前是收藏分类，需要重新绑定拖拽
           if (curCat === 'favorites') setupDrag();
           renderTags();
         }
 
-        // 完整渲染（用于切换分类或首次加载）
+        // 完整渲染
         function fullRender(filtered) {
           if (filtered.length === 0) {
             gridEl.innerHTML = '';
@@ -616,7 +574,6 @@
 
         function switchCat(cid) { curCat = cid; searchInp.value = ''; searchQ = ''; renderAll(); }
 
-        // 分类拖拽
         let catDragSrc = null;
         function handleCatDragStart(e) { catDragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', this.dataset.category); }
         function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) this.classList.add('drag-over'); }
@@ -632,7 +589,6 @@
         }
         function handleCatDragEnd(e) { this.classList.remove('dragging'); scrollEl.querySelectorAll('.category-tag').forEach(c => c.classList.remove('drag-over')); catDragSrc = null; }
 
-        // 卡片拖拽
         let dragCard = null;
         function setupDrag() {
           gridEl.querySelectorAll('.card').forEach(card => {
@@ -657,28 +613,24 @@
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
-        // 初始空状态
+        // 初始显示空状态
         emptyEl.style.display = 'block';
         renderTags();
       }
 
-      // 工具加载完毕后调用
       function addCategoryTools(newTools) {
         if (!newTools || newTools.length === 0) return;
-        // 合并到全局数据
         toolsData = toolsData.concat(newTools);
         if (appInit) {
-          // 如果当前是收藏或分享分类，需要完全重新渲染
           if (curCat === 'favorites' || curCat === 'shared') {
             renderAll();
           } else {
-            // 否则流式追加
             appendCards(newTools);
           }
         }
       }
 
-      // 启动
+      // 启动并行加载
       (async function() {
         initFramework();
         const loadPromises = categoryConfigs.map(cfg => {
