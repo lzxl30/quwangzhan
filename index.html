@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>趣网站 | 图片工具导航</title>
+  <title>趣网站 | 有趣网站导航</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -494,11 +494,11 @@
     <div class="header-top">
       <a href="#" class="logo" title="趣网站">
         <div class="logo-icon">🪄</div>
-        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的工具集合</div></div>
+        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的网站集合</div></div>
       </a>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="搜索工具..." aria-label="搜索工具">
+        <input type="text" id="searchInput" placeholder="搜索网站..." aria-label="搜索网站">
       </div>
       <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">🌙</button>
     </div>
@@ -519,14 +519,14 @@
     <div class="cards-grid" id="cardsGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
       <div class="empty-icon">⏳</div>
-      <p>正在加载工具…</p>
-      <p style="font-size:0.85rem;">请稍候，工具卡片即将呈现</p>
+      <p>正在加载网站…</p>
+      <p style="font-size:0.85rem;">请稍候，网站卡片即将呈现</p>
     </div>
   </div>
 
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <div class="modal-header"><span id="modalTitle">工具加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
+      <div class="modal-header"><span id="modalTitle">网站加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
         <iframe id="modalIframe" src=""></iframe>
@@ -654,7 +654,7 @@
           if (isExpanded) {
             const hint = document.createElement('div');
             hint.className = 'sort-hint';
-            hint.textContent = '↕️ 拖拽调整分类顺序';
+            hint.textContent = '↕️ 拖拽调整分类顺序，点击分类可刷新网站排序';
             scrollEl.appendChild(hint);
           }
           scrollEl.querySelectorAll('.category-tag').forEach(btn => {
@@ -728,12 +728,11 @@
           if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
           if (f.length === 0) {
-            // 如果当前分类真的没有工具，才显示空状态
             gridEl.innerHTML = '';
             emptyEl.style.display = 'block';
           } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开工具"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
+            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
         };
 
         renderAll = function() { renderTags(); renderCards(); };
@@ -745,12 +744,12 @@
           const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title); else openTool(location.origin + '/' + u, card.dataset.title); } } return; }
         });
 
-        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个工具：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
+        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
 
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
-        // 初始状态：显示“正在加载…”
+        // 初始显示加载提示
         emptyEl.style.display = 'block';
         renderTags();
       }
@@ -760,7 +759,6 @@
           toolsData = toolsData.concat(arr);
         }
         if (appInit) {
-          // 有数据后立即隐藏加载提示
           if (toolsData.length > 0) {
             emptyEl.style.display = 'none';
           }
@@ -768,7 +766,7 @@
         }
       }
 
-      // 并行加载所有分类
+      // 并行加载
       (async function() {
         initFramework();
         const promises = categoryConfigs.map(cfg => {
@@ -781,7 +779,6 @@
           });
         });
         await Promise.allSettled(promises);
-        // 所有分类加载完成后确保空状态不再显示（如果确实有数据）
         if (toolsData.length > 0) {
           emptyEl.style.display = 'none';
           renderCards();
