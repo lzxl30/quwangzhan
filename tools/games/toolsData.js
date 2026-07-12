@@ -10,14 +10,14 @@ var gamesTools = [
     accentClass: 'accent-3'
   },
   {
-    id: 'games-2',
-    title: '井字棋',
-    url: 'https://playtictactoe.org/',
-    description: '经典井字棋游戏，与朋友或电脑对战，简单有趣。',
+   id: 'games-2',
+    title: '在线《我的世界》',
+    url: 'https://mcjs.cc/',
+    description: '网页版我的世界，无需安装即可体验创造与生存模式。',
     category: 'games',
-    icon: '⭕',
-    iconBgClass: 'bg-0',
-    accentClass: 'accent-0'
+    icon: '🧊',
+    iconBgClass: 'bg-4',
+    accentClass: 'accent-4'
   }
   // 在这里继续添加更多游戏工具
 ];
