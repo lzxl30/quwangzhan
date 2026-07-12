@@ -5,6 +5,12 @@ var categoryConfigs = [
     id: 'turing',
     name: '图灵魔法',
     icon: ''
+  },
+  {
+    folder: 'games',       // 新分类
+    id: 'games',
+    name: '游戏',
+    icon: ''
   }
   // 未来添加新分类，只需在这里追加，例如：
   // {
