@@ -504,7 +504,6 @@
         // 流式追加卡片
         function appendCards(newTools) {
           if (!newTools || newTools.length === 0) return;
-          // 确定在当前分类下应该显示的工具
           let visible = newTools;
           if (curCat !== 'all' && curCat !== 'shared') {
             visible = newTools.filter(t => t.category === curCat);
@@ -513,16 +512,13 @@
             renderTags();
             return;
           }
-          // 隐藏空状态（首次追加时生效）
           emptyEl.style.display = 'none';
-          // 生成 HTML 并追加
           const html = visible.map(t => generateCardHTML(t)).join('');
           gridEl.insertAdjacentHTML('beforeend', html);
           if (curCat === 'favorites') setupDrag();
           renderTags();
         }
 
-        // 完整渲染
         function fullRender(filtered) {
           if (filtered.length === 0) {
             gridEl.innerHTML = '';
@@ -613,8 +609,9 @@
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
-        // 初始显示空状态
-        emptyEl.style.display = 'block';
+        // 初始显示加载中，而非空状态
+        gridEl.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>正在加载工具…</p></div>';
+        emptyEl.style.display = 'none';
         renderTags();
       }
 
@@ -630,7 +627,6 @@
         }
       }
 
-      // 启动并行加载
       (async function() {
         initFramework();
         const loadPromises = categoryConfigs.map(cfg => {
