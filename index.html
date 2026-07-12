@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>趣网站 | 有趣网站导航</title>
+  <title>趣网站 | 图片工具导航</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -263,7 +263,7 @@
     .category-scroll.expanded ~ .fade-mask,
     .fade-mask.hidden { opacity: 0; pointer-events: none; }
 
-    /* 展开按钮：浮在遮罩上方 */
+    /* 展开按钮 */
     .category-expand-btn {
       flex-shrink: 0;
       width: 34px; height: 34px;
@@ -736,7 +736,22 @@
 
       function addTools(arr) { if (arr && Array.isArray(arr)) toolsData = toolsData.concat(arr); if (appInit) renderAll(); }
 
-      (async function() { initFramework(); for (const cfg of categoryConfigs) { try { await loadScript(`tools/${cfg.folder}/toolsData.js`); const vn = cfg.folder + 'Tools'; const t = window[vn]; if (t) addTools(t); } catch (e) { console.error(`加载 ${cfg.folder} 失败:`, e); } } })();
+      // 并行加载，每完成一个就更新
+      (async function() {
+        initFramework();
+        const loadPromises = categoryConfigs.map(cfg => {
+          return loadScript(`tools/${cfg.folder}/toolsData.js`)
+            .then(() => {
+              const varName = cfg.folder + 'Tools';
+              const categoryTools = window[varName];
+              if (categoryTools) addTools(categoryTools);
+            })
+            .catch(error => {
+              console.error(`加载分类 ${cfg.folder} 失败:`, error);
+            });
+        });
+        await Promise.all(loadPromises);
+      })();
     })();
   </script>
 </body>
