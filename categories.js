@@ -3,7 +3,7 @@ var categoryConfigs = [
   {
     folder: 'turing',
     id: 'turing',
-    name: '图灵魔法',
+    name: '图灵',
     icon: ''
   },
   {
