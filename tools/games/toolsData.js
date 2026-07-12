@@ -13,7 +13,7 @@ var gamesTools = [
    id: 'games-2',
     title: '在线《我的世界》',
     url: 'https://mcjs.cc/',
-    description: '网页版我的世界，无需安装即可体验创造与生存模式。加载可能较慢，尤其是手机端',
+    description: '网页版我的世界，无需安装即可体验创造与生存模式。打不开多试几个按钮，手机端加载可能较慢',
     category: 'games',
     icon: '🧊',
     iconBgClass: 'bg-4',
