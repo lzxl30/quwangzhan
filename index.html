@@ -569,6 +569,9 @@
       let mo, mIframe, mTitle, mLoad, mClose;
       let renderTags, renderCards, renderAll, switchCat, setupDrag;
 
+      // 防抖定时器
+      let debounceRender = null;
+
       const ORDER_KEY = 'categoryOrder_v1';
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
       function saveOrder(order) { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }
@@ -732,7 +735,7 @@
             emptyEl.style.display = 'block';
           } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
+            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
         };
 
         renderAll = function() { renderTags(); renderCards(); };
@@ -754,15 +757,22 @@
         renderTags();
       }
 
+      // 添加数据并防抖渲染
       function addTools(arr) {
         if (arr && Array.isArray(arr)) {
           toolsData = toolsData.concat(arr);
         }
         if (appInit) {
-          if (toolsData.length > 0) {
-            emptyEl.style.display = 'none';
-          }
-          renderAll();
+          // 清除之前的防抖
+          if (debounceRender) clearTimeout(debounceRender);
+          // 设置新的防抖，100ms 内如果有新数据则重置
+          debounceRender = setTimeout(() => {
+            if (toolsData.length > 0) {
+              emptyEl.style.display = 'none';
+            }
+            renderAll();
+            debounceRender = null;
+          }, 100);
         }
       }
 
@@ -779,9 +789,14 @@
           });
         });
         await Promise.allSettled(promises);
+        // 最终确保渲染（防抖可能已经触发，这里作为兜底）
+        if (debounceRender) {
+          clearTimeout(debounceRender);
+          debounceRender = null;
+        }
         if (toolsData.length > 0) {
           emptyEl.style.display = 'none';
-          renderCards();
+          renderAll();
         }
       })();
     })();
