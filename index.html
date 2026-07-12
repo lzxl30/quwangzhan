@@ -157,7 +157,6 @@
     }
     .header-hint a:hover { color: var(--accent-1); }
 
-    /* 分类标签栏 */
     .category-bar-wrap {
       position: relative;
       max-width: 1350px;
@@ -518,9 +517,9 @@
     <div class="info-bar" id="infoBar"></div>
     <div class="cards-grid" id="cardsGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
-      <div class="empty-icon">⏳</div>
-      <p>正在加载网站…</p>
-      <p style="font-size:0.85rem;">请稍候，网站卡片即将呈现</p>
+      <div class="empty-icon">📭</div>
+      <p id="emptyText">暂无内容</p>
+      <p style="font-size:0.85rem;" id="emptySubText"></p>
     </div>
   </div>
 
@@ -543,7 +542,6 @@
     <p class="footer-note" id="versionNote"></p>
   </div>
 
-  <!-- 注册 Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -565,9 +563,10 @@
       let builtIn, dynCats, sharedCat, sharedUrl, curCat, searchQ;
       let favs, shuffled;
       let scrollEl, expandBtn, fadeMask;
-      let gridEl, emptyEl, infoEl, searchInp, themeBtn, topBtn;
+      let gridEl, emptyEl, emptyText, emptySubText, infoEl, searchInp, themeBtn, topBtn;
       let mo, mIframe, mTitle, mLoad, mClose;
       let renderTags, renderCards, renderAll, switchCat, setupDrag;
+      let dataLoaded = false;  // 标记数据是否全部加载完成
 
       const ORDER_KEY = 'categoryOrder_v1';
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
@@ -604,6 +603,8 @@
         fadeMask = document.getElementById('fadeMask');
         gridEl = document.getElementById('cardsGrid');
         emptyEl = document.getElementById('emptyState');
+        emptyText = document.getElementById('emptyText');
+        emptySubText = document.getElementById('emptySubText');
         infoEl = document.getElementById('infoBar');
         searchInp = document.getElementById('searchInput');
         themeBtn = document.getElementById('themeToggle');
@@ -671,45 +672,11 @@
         };
 
         let catDragSrc = null;
-        function handleCatDragStart(e) {
-          catDragSrc = this;
-          this.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', this.dataset.category);
-        }
-        function handleCatDragOver(e) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) {
-            this.classList.add('drag-over');
-          }
-        }
+        function handleCatDragStart(e) { catDragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', this.dataset.category); }
+        function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) { this.classList.add('drag-over'); } }
         function handleCatDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleCatDrop(e) {
-          e.preventDefault();
-          this.classList.remove('drag-over');
-          if (this === catDragSrc || ['all', 'favorites', 'shared'].includes(this.dataset.category)) return;
-          const buttons = Array.from(scrollEl.querySelectorAll('.category-tag[draggable]'));
-          const srcIdx = buttons.indexOf(catDragSrc);
-          const destIdx = buttons.indexOf(this);
-          if (srcIdx < destIdx) {
-            scrollEl.insertBefore(catDragSrc, this.nextSibling);
-          } else {
-            scrollEl.insertBefore(catDragSrc, this);
-          }
-          const order = [];
-          scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => {
-            const cid = btn.dataset.category;
-            if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid);
-          });
-          saveOrder(order);
-          renderTags();
-        }
-        function handleCatDragEnd(e) {
-          this.classList.remove('dragging');
-          scrollEl.querySelectorAll('.category-tag').forEach(c => c.classList.remove('drag-over'));
-          catDragSrc = null;
-        }
+        function handleCatDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); if (this === catDragSrc || ['all', 'favorites', 'shared'].includes(this.dataset.category)) return; const buttons = Array.from(scrollEl.querySelectorAll('.category-tag[draggable]')); const srcIdx = buttons.indexOf(catDragSrc); const destIdx = buttons.indexOf(this); if (srcIdx < destIdx) { scrollEl.insertBefore(catDragSrc, this.nextSibling); } else { scrollEl.insertBefore(catDragSrc, this); } const order = []; scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => { const cid = btn.dataset.category; if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid); }); saveOrder(order); renderTags(); }
+        function handleCatDragEnd(e) { this.classList.remove('dragging'); scrollEl.querySelectorAll('.category-tag').forEach(c => c.classList.remove('drag-over')); catDragSrc = null; }
 
         let dragCard = null;
         setupDrag = function() {
@@ -727,9 +694,24 @@
           const f = getFiltered();
           if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
+
           if (f.length === 0) {
             gridEl.innerHTML = '';
             emptyEl.style.display = 'block';
+            // 根据当前分类和加载状态显示不同提示
+            if (!dataLoaded) {
+              emptyText.textContent = '正在加载网站…';
+              emptySubText.textContent = '请稍候，网站卡片即将呈现';
+            } else if (curCat === 'favorites') {
+              emptyText.textContent = '暂无收藏';
+              emptySubText.textContent = '点击心形图标收藏喜欢的网站吧';
+            } else if (curCat === 'shared') {
+              emptyText.textContent = '未找到该网站';
+              emptySubText.textContent = '请检查链接是否正确';
+            } else {
+              emptyText.textContent = '暂无内容';
+              emptySubText.textContent = '该分类下还没有网站';
+            }
           } else {
             emptyEl.style.display = 'none';
             gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
@@ -751,6 +733,8 @@
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
         // 初始显示加载提示
         emptyEl.style.display = 'block';
+        emptyText.textContent = '正在加载网站…';
+        emptySubText.textContent = '请稍候，网站卡片即将呈现';
         renderTags();
       }
 
@@ -768,44 +752,29 @@
       function flushTools(isFinal) {
         if (finalFlushDone) return;
         if (isFinal) {
-          // 最终合并：清除定时器，合并所有数据，应用随机排序
           if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
           pendingTools.forEach(arr => { toolsData = toolsData.concat(arr); });
           pendingTools.length = 0;
           finalFlushDone = true;
-          if (toolsData.length > 0) {
-            emptyEl.style.display = 'none';
-          }
+          dataLoaded = true;
           if (appInit) renderAll();
         } else {
-          // 超时触发：合并当前已收集的数据，但不标记最终完成
           if (finalFlushDone) return;
           if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
-          // 只合并目前 pendingTools 中的数据，不清空数组（保留供最终合并）
           const snapshot = [];
           pendingTools.forEach(arr => { snapshot.push(...arr); });
-          // 暂存到临时变量，不修改 toolsData，避免后续重复合并
           const tempData = [...toolsData, ...snapshot];
-          if (tempData.length > 0) {
-            // 替换 toolsData 以便渲染
-            const oldTools = toolsData;
-            toolsData = tempData;
-            // 渲染临时数据（不应用随机排序？为了快速展示，可以使用原始顺序，但后续最终渲染会随机）
-            // 临时渲染使用非随机顺序（保持分类加载顺序）
-            // 我们暂时禁用随机排序？可以通过修改 getFiltered 跳过随机，这里简单处理：使用当前 curCat 过滤，但不随机
-            const originalShuf = shuffled;
-            // 保存 shuffled 并临时清空，使随机失效
-            const tempShuffled = {};
-            for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
-            if (appInit) renderAll();
-            // 恢复 shuffled
-            Object.assign(shuffled, tempShuffled);
-            toolsData = oldTools; // 恢复，最终渲染时再正式合并
-          }
+          const oldTools = toolsData;
+          toolsData = tempData;
+          const originalShuf = shuffled;
+          const tempShuffled = {};
+          for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
+          if (appInit) renderAll();
+          Object.assign(shuffled, tempShuffled);
+          toolsData = oldTools;
         }
       }
 
-      // 启动超时收集
       function startCollectTimer() {
         if (collectTimer) clearTimeout(collectTimer);
         collectTimer = setTimeout(() => {
@@ -813,7 +782,6 @@
         }, 200);
       }
 
-      // ---------- 并行加载 ----------
       (async function() {
         initFramework();
         startCollectTimer();
@@ -827,7 +795,6 @@
           });
         });
         await Promise.allSettled(promises);
-        // 全部加载完成，最终合并渲染
         flushTools(true);
       })();
     })();
