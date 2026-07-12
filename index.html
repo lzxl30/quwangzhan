@@ -70,7 +70,6 @@
       padding-bottom: 100px;
     }
 
-    /* ========== 头部 ========== */
     .header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
@@ -222,13 +221,13 @@
     }
     .category-tag.active .count { color: var(--primary-light); }
 
-    /* 展开按钮 */
+    /* 展开按钮：大开口V形 */
     .category-expand-btn {
       flex-shrink: 0;
-      width: 32px; height: 32px;
+      width: 34px; height: 34px;
       display: flex; align-items: center; justify-content: center;
       background: none; border: none;
-      color: var(--text-secondary); font-size: 0.9rem;
+      color: var(--text-secondary);
       cursor: pointer; transition: 0.2s;
       -webkit-tap-highlight-color: transparent;
       border-radius: 6px;
@@ -236,34 +235,62 @@
     }
     .category-expand-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
     .category-expand-btn:active { opacity: 0.7; }
+    /* V形箭头 */
+    .arrow-v {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-right: 2.5px solid currentColor;
+      border-bottom: 2.5px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.25s;
+    }
+    .category-expand-btn.open .arrow-v {
+      transform: rotate(-135deg);
+    }
 
-    /* 展开面板 */
+    /* 下拉面板 */
     .category-dropdown {
       position: absolute;
       top: 100%;
+      left: 12px;
       right: 12px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       z-index: 110;
-      min-width: 140px;
-      padding: 6px 0;
-      display: none;
+      padding: 8px 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s;
     }
-    .category-dropdown.show { display: block; }
+    .category-dropdown.show {
+      max-height: 500px;
+      padding: 8px 0;
+    }
     .category-dropdown-item {
       display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
+      padding: 8px 16px; font-size: 0.85rem;
+      color: var(--text-secondary); cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+      user-select: none;
     }
     .category-dropdown-item:hover { background: rgba(139,124,247,0.1); color: var(--text); }
     .category-dropdown-item.active { color: var(--primary-light); font-weight: 700; }
     .category-dropdown-item .count { font-size: 0.7rem; margin-left: auto; }
+    /* 拖拽状态 */
+    .category-dropdown-item.dragging { opacity: 0.4; }
+    .category-dropdown-item.drag-over { background: rgba(139,124,247,0.2); }
+    /* 拖拽手柄 */
+    .drag-handle {
+      cursor: grab; color: var(--text-secondary); font-size: 0.8rem;
+      margin-right: 2px; opacity: 0.5;
+    }
+    .category-dropdown-item:hover .drag-handle { opacity: 1; }
+    .dropdown-hint {
+      font-size: 0.68rem; color: var(--text-secondary);
+      text-align: center; padding: 4px 0 0 0; opacity: 0.7;
+    }
 
     /* ========== 主内容区 ========== */
     .main-container { max-width: 1350px; margin: 0 auto; padding: 16px 20px 20px; }
@@ -320,8 +347,7 @@
       background: rgba(139, 124, 247, 0.12); color: var(--primary-light);
       font-weight: 500; cursor: pointer; border: none;
       transition: background 0.2s, color 0.2s;
-      text-decoration: none;
-      -webkit-tap-highlight-color: transparent;
+      text-decoration: none; -webkit-tap-highlight-color: transparent;
     }
     .card-category-badge:hover { background: var(--primary); color: #fff; }
     .card-actions { display: flex; gap: 8px; align-items: center; }
@@ -354,15 +380,13 @@
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
 
-    /* ========== 底部栏 ========== */
     .fixed-bottom-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--card-bg); border-top: 1px solid var(--border);
       padding: 8px 16px 10px; display: flex; flex-direction: column;
       align-items: center; gap: 4px; z-index: 99;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-      backdrop-filter: blur(12px);
-      background: rgba(18, 20, 28, 0.9);
+      backdrop-filter: blur(12px); background: rgba(18, 20, 28, 0.9);
     }
     body.light-mode .fixed-bottom-bar { background: rgba(255, 255, 255, 0.9); }
     .fixed-bottom-bar .channel-row { display: flex; align-items: center; gap: 12px; }
@@ -398,12 +422,8 @@
     body.light-mode .back-to-top-btn { color: #2d2e3a; }
     body.light-mode .back-to-top-btn:hover { color: #6c5ce7; background: transparent; }
     .fixed-bottom-bar .btn-icon { font-size: 1rem; }
-    .footer-note {
-      color: var(--text-secondary); font-size: 0.7rem;
-      text-align: center; margin: 0;
-    }
+    .footer-note { color: var(--text-secondary); font-size: 0.7rem; text-align: center; margin: 0; }
 
-    /* ========== 模态框全屏 ========== */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
@@ -417,7 +437,6 @@
       width: 100%; height: 100%; max-height: 100vh;
       display: flex; flex-direction: column;
       box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-      transition: background 0.3s;
     }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -429,23 +448,16 @@
       background: var(--primary); border: none;
       color: #fff; font-size: 0.95rem; font-weight: 600;
       cursor: pointer; padding: 10px 20px; border-radius: 25px;
-      transition: all 0.2s; -webkit-tap-highlight-color: transparent;
-      letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
+      transition: all 0.2s; letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
     }
-    .modal-close:hover {
-      background: var(--primary-light); transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(139, 124, 247, 0.5);
-    }
+    .modal-close:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(139, 124, 247, 0.5); }
     body.light-mode .modal-close { background: #6c5ce7; color: #fff; }
     body.light-mode .modal-close:hover { background: #5b4cdb; }
     .modal-iframe-wrap { flex: 1; position: relative; background: #fff; }
     .modal-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
-    .modal-loading {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      color: #666; font-size: 0.9rem;
-    }
+    .modal-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #666; font-size: 0.9rem; }
 
-    /* ========== 响应式 ========== */
     @media (max-width: 600px) {
       .header-top { padding: 8px 12px 4px; gap: 6px; }
       .logo-text { font-size: 1.1rem; }
@@ -465,11 +477,9 @@
       .modal-header { padding: 12px 16px; }
       .modal-close { padding: 8px 16px; font-size: 0.85rem; }
     }
-
     @media (min-width: 601px) and (max-width: 1024px) {
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
-
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
@@ -482,10 +492,7 @@
     <div class="header-top">
       <a href="#" class="logo" title="趣网站">
         <div class="logo-icon">🪄</div>
-        <div>
-          <div class="logo-text">趣网站</div>
-          <div class="logo-sub">✨ 好玩的工具集合</div>
-        </div>
+        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的工具集合</div></div>
       </a>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
@@ -496,10 +503,11 @@
     <div class="header-hint">
       📢 加入<a href="https://pd.qq.com/s/g22heg9e2?b=9" target="_blank" rel="noopener">趣网吧</a>分享有趣网站，你分享的网站有机会出现在这里哦
     </div>
-    <!-- 分类标签栏（QQ频道风格） -->
     <div class="category-bar-wrap" id="categoryBarWrap">
       <div class="category-scroll" id="categoryScroll"></div>
-      <button class="category-expand-btn" id="categoryExpandBtn" title="展开全部分类">▾</button>
+      <button class="category-expand-btn" id="categoryExpandBtn" title="展开分类排序">
+        <span class="arrow-v"></span>
+      </button>
       <div class="category-dropdown" id="categoryDropdown"></div>
     </div>
   </header>
@@ -508,18 +516,14 @@
     <div class="info-bar" id="infoBar"></div>
     <div class="cards-grid" id="cardsGrid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
-      <div class="empty-icon">🧙</div>
-      <p>还没有添加任何魔法工具</p>
+      <div class="empty-icon">🧙</div><p>还没有添加任何魔法工具</p>
       <p style="font-size:0.85rem;">请编辑 toolsData.js 添加链接 ✨</p>
     </div>
   </div>
 
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <div class="modal-header">
-        <span id="modalTitle">工具加载中...</span>
-        <button class="modal-close" id="modalClose">← 返回主页</button>
-      </div>
+      <div class="modal-header"><span id="modalTitle">工具加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
         <iframe id="modalIframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
@@ -528,392 +532,187 @@
   </div>
 
   <div class="fixed-bottom-bar">
-    <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部">
-      <span class="btn-icon">⬆️</span> 回顶
-    </button>
+    <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部"><span class="btn-icon">⬆️</span> 回顶</button>
     <div class="channel-row">
-      <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn">
-        <span class="btn-icon">🎮</span> 次元ACG
-      </a>
-      <a href="https://pd.qq.com/s/cbffiz2ds?b=9" target="_blank" rel="noopener" class="channel-btn">
-        <span class="btn-icon">📡</span> 米游途
-      </a>
+      <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn"><span class="btn-icon">🎮</span> 次元ACG</a>
+      <a href="https://pd.qq.com/s/cbffiz2ds?b=9" target="_blank" rel="noopener" class="channel-btn"><span class="btn-icon">📡</span> 米游途</a>
     </div>
     <p class="footer-note" id="versionNote"></p>
   </div>
 
-  <!-- 加载配置文件 -->
   <script src="categories.js"></script>
   <script src="version.js"></script>
 
   <script>
     (function() {
-      if (typeof categoryConfigs === 'undefined') {
-        console.error('❌ categories.js 未加载或 categoryConfigs 未定义');
-        return;
-      }
-
+      if (typeof categoryConfigs === 'undefined') { console.error('❌ categories.js 未加载'); return; }
       window.toolsData = [];
+      function loadScript(url) { return new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = url; s.onload = resolve; s.onerror = () => reject(new Error(`加载失败: ${url}`)); document.head.appendChild(s); }); }
 
-      function loadScript(url) {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = url;
-          script.onload = resolve;
-          script.onerror = () => reject(new Error(`加载失败: ${url}`));
-          document.head.appendChild(script);
-        });
-      }
+      let appInit = false;
+      let builtIn, dynCats, sharedCat, sharedUrl, curCat, searchQ;
+      let favs, shuffled;
+      let scrollEl, dropEl, expandBtn;
+      let gridEl, emptyEl, infoEl, searchInp, themeBtn, topBtn;
+      let mo, mIframe, mTitle, mLoad, mClose;
+      let renderTags, renderCards, renderAll, switchCat, setupDrag;
 
-      let appInitialized = false;
-      let builtInCategories, dynamicCategories;
-      let sharedCategory, sharedToolUrl;
-      let currentCategory, searchQuery;
-      let favorites, shuffledOrders;
-      let categoryScrollEl, categoryDropdownEl, categoryExpandBtn;
-      let cardsGridEl, emptyStateEl, infoBarEl, searchInput, themeToggle, backToTopBtn;
-      let modalOverlay, modalIframe, modalTitle, modalLoading, modalClose;
-      let renderCategoryTags, renderCards, renderAll, switchCategory;
-      let setupDragForFavorites;
+      // 分类排序存储
+      const ORDER_KEY = 'categoryOrder_v1';
+      function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
+      function saveOrder(order) { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }
 
-      // 关闭下拉面板
-      function closeDropdown() {
-        if (categoryDropdownEl) categoryDropdownEl.classList.remove('show');
-      }
+      function closeDrop() { if (dropEl) { dropEl.classList.remove('show'); expandBtn.classList.remove('open'); } }
       document.addEventListener('click', (e) => {
-        if (categoryExpandBtn && categoryDropdownEl &&
-            !categoryExpandBtn.contains(e.target) &&
-            !categoryDropdownEl.contains(e.target)) {
-          closeDropdown();
-        }
+        if (expandBtn && dropEl && !expandBtn.contains(e.target) && !dropEl.contains(e.target)) closeDrop();
       });
 
       function initFramework() {
-        if (appInitialized) return;
-        appInitialized = true;
+        if (appInit) return; appInit = true;
+        builtIn = [{ id: 'all', name: '全部', icon: '📋' }, { id: 'favorites', name: '收藏', icon: '⭐' }];
+        dynCats = categoryConfigs.map(c => ({ id: c.id, name: c.name, icon: c.icon }));
+        sharedCat = null; sharedUrl = null;
 
-        builtInCategories = [
-          { id: 'all', name: '全部', icon: '📋' },
-          { id: 'favorites', name: '收藏', icon: '⭐' }
-        ];
-        dynamicCategories = categoryConfigs.map(cfg => ({
-          id: cfg.id, name: cfg.name, icon: cfg.icon
-        }));
-        sharedCategory = null; sharedToolUrl = null;
+        function checkShared() { const p = new URLSearchParams(location.search); const o = p.get('open'); if (o) { sharedUrl = decodeURIComponent(o); sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' }; return true; } return false; }
+        function getCats() { const saved = getSavedOrder(); let ordered = []; if (saved.length) { const map = new Map(dynCats.map(c => [c.id, c])); saved.forEach(id => { if (map.has(id)) ordered.push(map.get(id)); }); dynCats.forEach(c => { if (!saved.includes(c.id)) ordered.push(c); }); } else { ordered = [...dynCats]; } const cats = [builtIn[0], builtIn[1], ...ordered]; if (sharedCat) cats.unshift(sharedCat); return cats; }
 
-        function checkSharedUrl() {
-          const params = new URLSearchParams(window.location.search);
-          const openUrl = params.get('open');
-          if (openUrl) {
-            sharedToolUrl = decodeURIComponent(openUrl);
-            sharedCategory = { id: 'shared', name: '来自分享', icon: '🔗' };
-            return true;
-          }
-          return false;
+        curCat = 'all'; searchQ = '';
+        favs = JSON.parse(localStorage.getItem('turingMagicFavorites_v2') || '[]');
+        shuffled = {};
+        function shuf(cid, tools) { if (!shuffled[cid]) { const ids = tools.map(t => t.id); for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; } shuffled[cid] = ids; } return shuffled[cid]; }
+        function saveFavs() { localStorage.setItem('turingMagicFavorites_v2', JSON.stringify(favs)); }
+        function togFav(tid) { const idx = favs.findIndex(f => f.id === tid); if (idx !== -1) favs.splice(idx, 1); else favs.unshift({ id: tid, time: Date.now() }); saveFavs(); }
+        function isFav(tid) { return favs.some(f => f.id === tid); }
+
+        scrollEl = document.getElementById('categoryScroll');
+        dropEl = document.getElementById('categoryDropdown');
+        expandBtn = document.getElementById('categoryExpandBtn');
+        gridEl = document.getElementById('cardsGrid');
+        emptyEl = document.getElementById('emptyState');
+        infoEl = document.getElementById('infoBar');
+        searchInp = document.getElementById('searchInput');
+        themeBtn = document.getElementById('themeToggle');
+        topBtn = document.getElementById('backToTopBtn');
+        mo = document.getElementById('modalOverlay'); mIframe = document.getElementById('modalIframe'); mTitle = document.getElementById('modalTitle'); mLoad = document.getElementById('modalLoading'); mClose = document.getElementById('modalClose');
+
+        expandBtn.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = dropEl.classList.contains('show'); if (isOpen) closeDrop(); else { dropEl.classList.add('show'); expandBtn.classList.add('open'); renderDropdown(); } });
+
+        function openTool(url, title) { mTitle.textContent = title; mLoad.style.display = 'block'; mIframe.src = url; mo.classList.add('active'); document.body.style.overflow = 'hidden'; mIframe.onload = () => { mLoad.style.display = 'none'; }; }
+        function closeModal() { mo.classList.remove('active'); mIframe.src = ''; mLoad.style.display = 'block'; document.body.style.overflow = ''; }
+        mClose.addEventListener('click', closeModal);
+        mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
+        topBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        function applyTheme(m) { if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '☀️'; } else { document.body.classList.remove('light-mode'); themeBtn.textContent = '🌙'; } localStorage.setItem('turingMagicTheme', m); }
+        (function initTheme() { const s = localStorage.getItem('turingMagicTheme'); applyTheme(s === 'light' ? 'light' : 'dark'); })();
+        themeBtn.addEventListener('click', () => { applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'); });
+
+        function getFiltered() {
+          let f = [...toolsData];
+          if (curCat === 'shared' && sharedUrl) f = f.filter(t => t.url === sharedUrl);
+          else if (curCat === 'favorites') { const ids = favs.map(x => x.id); f = f.filter(t => ids.includes(t.id)); f.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); }
+          else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
+          if (searchQ.trim()) { const q = searchQ.trim().toLowerCase(); f = f.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)); }
+          if (curCat !== 'favorites' && curCat !== 'shared') { const order = shuf(curCat, f); const map = new Map(order.map((id, i) => [id, i])); f.sort((a, b) => (map.get(a.id) ?? 9999) - (map.get(b.id) ?? 9999)); }
+          return f;
         }
-        function getCategories() {
-          const cats = [builtInCategories[0], builtInCategories[1], ...dynamicCategories];
-          if (sharedCategory) cats.unshift(sharedCategory);
-          return cats;
-        }
 
-        currentCategory = 'all'; searchQuery = '';
-        favorites = JSON.parse(localStorage.getItem('turingMagicFavorites_v2') || '[]');
-        shuffledOrders = {};
+        switchCat = function(cid) { if (cid !== 'favorites' && cid !== 'shared') delete shuffled[cid]; curCat = cid; searchInp.value = ''; searchQ = ''; closeDrop(); renderAll(); };
 
-        function getShuffledOrder(categoryId, tools) {
-          if (!shuffledOrders[categoryId]) {
-            const ids = tools.map(t => t.id);
-            for (let i = ids.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [ids[i], ids[j]] = [ids[j], ids[i]];
+        renderTags = function() {
+          const cats = getCats();
+          scrollEl.innerHTML = cats.map(c => {
+            let n; if (c.id === 'favorites') n = favs.length; else if (c.id === 'shared') n = sharedUrl ? toolsData.filter(t => t.url === sharedUrl).length : 0; else if (c.id === 'all') n = toolsData.length; else n = toolsData.filter(t => t.category === c.id).length;
+            return `<button class="category-tag${curCat === c.id ? ' active' : ''}" data-category="${c.id}">${c.name}<span class="count">${n}</span></button>`;
+          }).join('');
+          scrollEl.querySelectorAll('.category-tag').forEach(b => { b.addEventListener('click', () => switchCat(b.dataset.category)); });
+        };
+
+        function renderDropdown() {
+          const cats = getCats();
+          dropEl.innerHTML = cats.map(c => {
+            let n; if (c.id === 'favorites') n = favs.length; else if (c.id === 'shared') n = sharedUrl ? toolsData.filter(t => t.url === sharedUrl).length : 0; else if (c.id === 'all') n = toolsData.length; else n = toolsData.filter(t => t.category === c.id).length;
+            const isBuiltIn = c.id === 'all' || c.id === 'favorites' || c.id === 'shared';
+            return `<div class="category-dropdown-item${curCat === c.id ? ' active' : ''}" data-category="${c.id}" ${isBuiltIn ? '' : 'draggable="true"'}>${isBuiltIn ? '' : '<span class="drag-handle">⋮⋮</span>'}<span>${c.name}</span><span class="count">${n}</span></div>`;
+          }).join('');
+          // 添加提示
+          const hint = document.createElement('div');
+          hint.className = 'dropdown-hint';
+          hint.textContent = '↕️ 拖拽排序分类（全部和收藏除外）';
+          dropEl.appendChild(hint);
+
+          dropEl.querySelectorAll('.category-dropdown-item').forEach(item => {
+            item.addEventListener('click', () => switchCat(item.dataset.category));
+            if (item.draggable) {
+              item.addEventListener('dragstart', handleCatDragStart);
+              item.addEventListener('dragover', handleCatDragOver);
+              item.addEventListener('dragleave', handleCatDragLeave);
+              item.addEventListener('drop', handleCatDrop);
+              item.addEventListener('dragend', handleCatDragEnd);
             }
-            shuffledOrders[categoryId] = ids;
-          }
-          return shuffledOrders[categoryId];
-        }
-
-        function saveFavorites() { localStorage.setItem('turingMagicFavorites_v2', JSON.stringify(favorites)); }
-        function toggleFavorite(toolId) {
-          const index = favorites.findIndex(f => f.id === toolId);
-          if (index !== -1) favorites.splice(index, 1);
-          else favorites.unshift({ id: toolId, time: Date.now() });
-          saveFavorites();
-        }
-        function isFavorite(toolId) { return favorites.some(f => f.id === toolId); }
-
-        categoryScrollEl = document.getElementById('categoryScroll');
-        categoryDropdownEl = document.getElementById('categoryDropdown');
-        categoryExpandBtn = document.getElementById('categoryExpandBtn');
-        cardsGridEl = document.getElementById('cardsGrid');
-        emptyStateEl = document.getElementById('emptyState');
-        infoBarEl = document.getElementById('infoBar');
-        searchInput = document.getElementById('searchInput');
-        themeToggle = document.getElementById('themeToggle');
-        backToTopBtn = document.getElementById('backToTopBtn');
-
-        modalOverlay = document.getElementById('modalOverlay');
-        modalIframe = document.getElementById('modalIframe');
-        modalTitle = document.getElementById('modalTitle');
-        modalLoading = document.getElementById('modalLoading');
-        modalClose = document.getElementById('modalClose');
-
-        // 展开按钮
-        categoryExpandBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          categoryDropdownEl.classList.toggle('show');
-        });
-
-        function openTool(url, title) {
-          modalTitle.textContent = title;
-          modalLoading.style.display = 'block';
-          modalIframe.src = url;
-          modalOverlay.classList.add('active');
-          document.body.style.overflow = 'hidden';
-          modalIframe.onload = () => { modalLoading.style.display = 'none'; };
-        }
-        function closeModal() {
-          modalOverlay.classList.remove('active');
-          modalIframe.src = '';
-          modalLoading.style.display = 'block';
-          document.body.style.overflow = '';
-        }
-        modalClose.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal(); });
-        backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
-        function applyTheme(mode) {
-          if (mode === 'light') { document.body.classList.add('light-mode'); themeToggle.textContent = '☀️'; }
-          else { document.body.classList.remove('light-mode'); themeToggle.textContent = '🌙'; }
-          localStorage.setItem('turingMagicTheme', mode);
-        }
-        function initTheme() {
-          const saved = localStorage.getItem('turingMagicTheme');
-          applyTheme(saved === 'light' ? 'light' : 'dark');
-        }
-        themeToggle.addEventListener('click', () => {
-          const isLight = document.body.classList.contains('light-mode');
-          applyTheme(isLight ? 'dark' : 'light');
-        });
-        initTheme();
-
-        function getFilteredTools() {
-          let filtered = [...toolsData];
-          if (currentCategory === 'shared' && sharedToolUrl) {
-            filtered = filtered.filter(t => t.url === sharedToolUrl);
-          } else if (currentCategory === 'favorites') {
-            const favIds = favorites.map(f => f.id);
-            filtered = filtered.filter(t => favIds.includes(t.id));
-            filtered.sort((a, b) => favIds.indexOf(a.id) - favIds.indexOf(b.id));
-          } else if (currentCategory !== 'all') {
-            filtered = filtered.filter(t => t.category === currentCategory);
-          }
-          if (searchQuery.trim()) {
-            const q = searchQuery.trim().toLowerCase();
-            filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
-          }
-          if (currentCategory !== 'favorites' && currentCategory !== 'shared') {
-            const order = getShuffledOrder(currentCategory, filtered);
-            const orderMap = new Map(order.map((id, index) => [id, index]));
-            filtered.sort((a, b) => (orderMap.get(a.id) ?? 9999) - (orderMap.get(b.id) ?? 9999));
-          }
-          return filtered;
-        }
-
-        switchCategory = function(categoryId) {
-          if (categoryId !== 'favorites' && categoryId !== 'shared') {
-            delete shuffledOrders[categoryId];
-          }
-          currentCategory = categoryId;
-          searchInput.value = ''; searchQuery = '';
-          closeDropdown();
-          renderAll();
-        };
-
-        renderCategoryTags = function() {
-          const categories = getCategories();
-          // 滚动区标签
-          categoryScrollEl.innerHTML = categories.map(cat => {
-            let count;
-            if (cat.id === 'favorites') count = favorites.length;
-            else if (cat.id === 'shared') count = sharedToolUrl ? toolsData.filter(t => t.url === sharedToolUrl).length : 0;
-            else if (cat.id === 'all') count = toolsData.length;
-            else count = toolsData.filter(t => t.category === cat.id).length;
-            const activeClass = currentCategory === cat.id ? ' active' : '';
-            return `<button class="category-tag${activeClass}" data-category="${cat.id}">${cat.name}<span class="count">${count}</span></button>`;
-          }).join('');
-          // 下拉面板
-          categoryDropdownEl.innerHTML = categories.map(cat => {
-            let count;
-            if (cat.id === 'favorites') count = favorites.length;
-            else if (cat.id === 'shared') count = sharedToolUrl ? toolsData.filter(t => t.url === sharedToolUrl).length : 0;
-            else if (cat.id === 'all') count = toolsData.length;
-            else count = toolsData.filter(t => t.category === cat.id).length;
-            const activeClass = currentCategory === cat.id ? ' active' : '';
-            return `<div class="category-dropdown-item${activeClass}" data-category="${cat.id}"><span>${cat.name}</span><span class="count">${count}</span></div>`;
-          }).join('');
-
-          // 绑定点击事件
-          categoryScrollEl.querySelectorAll('.category-tag').forEach(btn => {
-            btn.addEventListener('click', () => switchCategory(btn.dataset.category));
           });
-          categoryDropdownEl.querySelectorAll('.category-dropdown-item').forEach(item => {
-            item.addEventListener('click', () => switchCategory(item.dataset.category));
-          });
-        };
+        }
 
-        let dragSrcCard = null;
-        setupDragForFavorites = function() {
-          const cards = cardsGridEl.querySelectorAll('.card');
-          cards.forEach(card => {
-            card.setAttribute('draggable', 'true');
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragover', handleDragOver);
-            card.addEventListener('dragleave', handleDragLeave);
-            card.addEventListener('drop', handleDrop);
-            card.addEventListener('dragend', handleDragEnd);
-          });
-        };
-        function handleDragStart(e) {
-          dragSrcCard = this; this.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', this.dataset.toolId);
-        }
-        function handleDragOver(e) {
-          e.preventDefault(); e.dataTransfer.dropEffect = 'move';
-          if (this !== dragSrcCard) this.classList.add('drag-over');
-        }
-        function handleDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleDrop(e) {
+        let catDragSrc = null;
+        function handleCatDragStart(e) { catDragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', this.dataset.category); }
+        function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) this.classList.add('drag-over'); }
+        function handleCatDragLeave(e) { this.classList.remove('drag-over'); }
+        function handleCatDrop(e) {
           e.preventDefault(); this.classList.remove('drag-over');
-          if (this === dragSrcCard) return;
-          const cards = Array.from(cardsGridEl.querySelectorAll('.card'));
-          const srcIndex = cards.indexOf(dragSrcCard);
-          const destIndex = cards.indexOf(this);
-          if (srcIndex < destIndex) cardsGridEl.insertBefore(dragSrcCard, this.nextSibling);
-          else cardsGridEl.insertBefore(dragSrcCard, this);
-          const srcId = dragSrcCard.dataset.toolId;
-          const destId = this.dataset.toolId;
-          const srcFav = favorites.find(f => f.id === srcId);
-          const destFav = favorites.find(f => f.id === destId);
-          if (srcFav && destFav) {
-            const srcIdx = favorites.indexOf(srcFav);
-            const destIdx = favorites.indexOf(destFav);
-            favorites.splice(srcIdx, 1); favorites.splice(destIdx, 0, srcFav);
-            saveFavorites();
-          }
+          if (this === catDragSrc || ['all', 'favorites', 'shared'].includes(this.dataset.category)) return;
+          const items = Array.from(dropEl.querySelectorAll('.category-dropdown-item'));
+          const srcIdx = items.indexOf(catDragSrc); const destIdx = items.indexOf(this);
+          if (srcIdx < destIdx) dropEl.insertBefore(catDragSrc, this.nextSibling);
+          else dropEl.insertBefore(catDragSrc, this);
+          // 更新排序存储
+          const order = [];
+          dropEl.querySelectorAll('.category-dropdown-item[data-category]').forEach(el => { const cid = el.dataset.category; if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid); });
+          saveOrder(order);
+          // 刷新标签栏
+          renderTags();
         }
-        function handleDragEnd(e) {
-          this.classList.remove('dragging');
-          cardsGridEl.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-          dragSrcCard = null;
-        }
+        function handleCatDragEnd(e) { this.classList.remove('dragging'); dropEl.querySelectorAll('.category-dropdown-item').forEach(c => c.classList.remove('drag-over')); catDragSrc = null; }
+
+        let dragCard = null;
+        setupDrag = function() {
+          gridEl.querySelectorAll('.card').forEach(card => {
+            card.setAttribute('draggable', 'true');
+            card.addEventListener('dragstart', (e) => { dragCard = card; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', card.dataset.toolId); });
+            card.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (card !== dragCard) card.classList.add('drag-over'); });
+            card.addEventListener('dragleave', () => { card.classList.remove('drag-over'); });
+            card.addEventListener('drop', (e) => { e.preventDefault(); card.classList.remove('drag-over'); if (card === dragCard) return; const cards = Array.from(gridEl.querySelectorAll('.card')); const si = cards.indexOf(dragCard); const di = cards.indexOf(card); if (si < di) gridEl.insertBefore(dragCard, card.nextSibling); else gridEl.insertBefore(dragCard, card); const sid = dragCard.dataset.toolId; const did = card.dataset.toolId; const sf = favs.find(f => f.id === sid); const df = favs.find(f => f.id === did); if (sf && df) { const sIdx = favs.indexOf(sf); const dIdx = favs.indexOf(df); favs.splice(sIdx, 1); favs.splice(dIdx, 0, sf); saveFavs(); } });
+            card.addEventListener('dragend', () => { card.classList.remove('dragging'); gridEl.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over')); dragCard = null; });
+          });
+        };
 
         renderCards = function() {
-          const filtered = getFilteredTools();
-          if (currentCategory === 'favorites') {
-            infoBarEl.style.display = 'flex';
-            infoBarEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>';
-          } else {
-            infoBarEl.style.display = 'none';
-            infoBarEl.innerHTML = '';
-          }
-          if (filtered.length === 0) {
-            cardsGridEl.innerHTML = '';
-            emptyStateEl.style.display = 'block';
-          } else {
-            emptyStateEl.style.display = 'none';
-            cardsGridEl.innerHTML = filtered.map(tool => {
-              const isFav = isFavorite(tool.id);
-              const catName = getCategories().find(c => c.id === tool.category)?.name || tool.category || '工具';
-              return `
-                <div class="card ${tool.accentClass}" data-tool-id="${tool.id}" data-url="${tool.url}" data-title="${tool.title}">
-                  <div class="card-icon-row">
-                    <div class="card-icon ${tool.iconBgClass}">${tool.icon}</div>
-                    <div class="card-title">${tool.title}</div>
-                    <span class="open-btn" data-tool-id="${tool.id}" title="打开工具"></span>
-                  </div>
-                  <div class="card-desc">${tool.description}</div>
-                  <div class="card-footer-row">
-                    <button class="card-category-badge" data-category="${tool.category}">${catName}</button>
-                    <div class="card-actions">
-                      <button class="action-btn share-btn" data-tool-id="${tool.id}" title="转发">
-                        <span class="icon">📤</span><span class="label">转发</span>
-                      </button>
-                      <button class="action-btn fav-btn ${isFav ? 'favorited' : ''}" data-tool-id="${tool.id}" title="${isFav ? '取消收藏' : '添加收藏'}">
-                        <span class="icon">${isFav ? '❤️' : '🤍'}</span><span class="label">收藏</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>`;
-            }).join('');
-            if (currentCategory === 'favorites') setupDragForFavorites();
-          }
+          const f = getFiltered();
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
+          else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
+          if (f.length === 0) { gridEl.innerHTML = ''; emptyEl.style.display = 'block'; }
+          else { emptyEl.style.display = 'none'; gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开工具"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
         };
 
-        renderAll = function() { renderCategoryTags(); renderCards(); };
+        renderAll = function() { renderTags(); renderCards(); };
 
-        cardsGridEl.addEventListener('click', (e) => {
-          const badge = e.target.closest('.card-category-badge');
-          if (badge) { e.preventDefault(); e.stopPropagation(); const cid = badge.dataset.category; if (cid) switchCategory(cid); return; }
-          const favBtn = e.target.closest('.fav-btn');
-          if (favBtn) { e.preventDefault(); e.stopPropagation(); toggleFavorite(favBtn.dataset.toolId); renderAll(); return; }
-          const shareBtn = e.target.closest('.share-btn');
-          if (shareBtn) { e.preventDefault(); e.stopPropagation(); const card = shareBtn.closest('.card'); if (card) shareTool(card.dataset.url, card.dataset.title); return; }
-          const openBtn = e.target.closest('.open-btn');
-          if (openBtn) { e.preventDefault(); e.stopPropagation(); const card = openBtn.closest('.card'); if (card) { const u = card.dataset.url; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title); else openTool(window.location.origin + '/' + u, card.dataset.title); } } return; }
+        gridEl.addEventListener('click', (e) => {
+          const badge = e.target.closest('.card-category-badge'); if (badge) { e.preventDefault(); e.stopPropagation(); if (badge.dataset.category) switchCat(badge.dataset.category); return; }
+          const fb = e.target.closest('.fav-btn'); if (fb) { e.preventDefault(); e.stopPropagation(); togFav(fb.dataset.toolId); renderAll(); return; }
+          const sb = e.target.closest('.share-btn'); if (sb) { e.preventDefault(); e.stopPropagation(); const card = sb.closest('.card'); if (card) shareTool(card.dataset.url, card.dataset.title); return; }
+          const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title); else openTool(location.origin + '/' + u, card.dataset.title); } } return; }
         });
 
-        function shareTool(url, title) {
-          const base = window.location.origin + window.location.pathname;
-          const shareUrl = base + '?open=' + encodeURIComponent(url);
-          if (navigator.share) {
-            navigator.share({ title, text: `试试这个工具：${title}`, url: shareUrl }).catch(() => {});
-          } else {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(shareUrl).then(() => alert('链接已复制，可粘贴分享。'));
-            } else { prompt('复制下面的链接分享给朋友：', shareUrl); }
-          }
-        }
+        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个工具：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
 
-        if (checkSharedUrl()) currentCategory = 'shared';
-
-        searchInput.addEventListener('input', () => {
-          searchQuery = searchInput.value;
-          renderCards();
-          const cats = getCategories();
-          document.querySelectorAll('.category-tag').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.category === currentCategory && !searchQuery.trim());
-          });
-        });
-
-        if (typeof siteFooterText !== 'undefined') {
-          document.getElementById('versionNote').textContent = siteFooterText;
-        }
+        if (checkShared()) curCat = 'shared';
+        searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
+        if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
         renderAll();
       }
 
-      function addCategoryTools(toolsArray) {
-        if (toolsArray && Array.isArray(toolsArray)) {
-          toolsData = toolsData.concat(toolsArray);
-        }
-        if (appInitialized) renderAll();
-      }
+      function addTools(arr) { if (arr && Array.isArray(arr)) toolsData = toolsData.concat(arr); if (appInit) renderAll(); }
 
-      (async function() {
-        initFramework();
-        for (const cfg of categoryConfigs) {
-          try {
-            await loadScript(`tools/${cfg.folder}/toolsData.js`);
-            const varName = cfg.folder + 'Tools';
-            const categoryTools = window[varName];
-            if (categoryTools) addCategoryTools(categoryTools);
-          } catch (error) {
-            console.error(`加载分类 ${cfg.folder} 失败:`, error);
-          }
-        }
-      })();
+      (async function() { initFramework(); for (const cfg of categoryConfigs) { try { await loadScript(`tools/${cfg.folder}/toolsData.js`); const vn = cfg.folder + 'Tools'; const t = window[vn]; if (t) addTools(t); } catch (e) { console.error(`加载 ${cfg.folder} 失败:`, e); } } })();
     })();
   </script>
 </body>
