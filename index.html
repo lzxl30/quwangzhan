@@ -569,9 +569,6 @@
       let mo, mIframe, mTitle, mLoad, mClose;
       let renderTags, renderCards, renderAll, switchCat, setupDrag;
 
-      // 防抖定时器
-      let debounceRender = null;
-
       const ORDER_KEY = 'categoryOrder_v1';
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
       function saveOrder(order) { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }
@@ -757,28 +754,69 @@
         renderTags();
       }
 
-      // 添加数据并防抖渲染
+      // ---------- 超时收集逻辑 ----------
+      const pendingTools = [];
+      let collectTimer = null;
+      let finalFlushDone = false;
+
       function addTools(arr) {
         if (arr && Array.isArray(arr)) {
-          toolsData = toolsData.concat(arr);
-        }
-        if (appInit) {
-          // 清除之前的防抖
-          if (debounceRender) clearTimeout(debounceRender);
-          // 设置新的防抖，100ms 内如果有新数据则重置
-          debounceRender = setTimeout(() => {
-            if (toolsData.length > 0) {
-              emptyEl.style.display = 'none';
-            }
-            renderAll();
-            debounceRender = null;
-          }, 100);
+          pendingTools.push(arr);
         }
       }
 
-      // 并行加载
+      function flushTools(isFinal) {
+        if (finalFlushDone) return;
+        if (isFinal) {
+          // 最终合并：清除定时器，合并所有数据，应用随机排序
+          if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
+          pendingTools.forEach(arr => { toolsData = toolsData.concat(arr); });
+          pendingTools.length = 0;
+          finalFlushDone = true;
+          if (toolsData.length > 0) {
+            emptyEl.style.display = 'none';
+          }
+          if (appInit) renderAll();
+        } else {
+          // 超时触发：合并当前已收集的数据，但不标记最终完成
+          if (finalFlushDone) return;
+          if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
+          // 只合并目前 pendingTools 中的数据，不清空数组（保留供最终合并）
+          const snapshot = [];
+          pendingTools.forEach(arr => { snapshot.push(...arr); });
+          // 暂存到临时变量，不修改 toolsData，避免后续重复合并
+          const tempData = [...toolsData, ...snapshot];
+          if (tempData.length > 0) {
+            // 替换 toolsData 以便渲染
+            const oldTools = toolsData;
+            toolsData = tempData;
+            // 渲染临时数据（不应用随机排序？为了快速展示，可以使用原始顺序，但后续最终渲染会随机）
+            // 临时渲染使用非随机顺序（保持分类加载顺序）
+            // 我们暂时禁用随机排序？可以通过修改 getFiltered 跳过随机，这里简单处理：使用当前 curCat 过滤，但不随机
+            const originalShuf = shuffled;
+            // 保存 shuffled 并临时清空，使随机失效
+            const tempShuffled = {};
+            for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
+            if (appInit) renderAll();
+            // 恢复 shuffled
+            Object.assign(shuffled, tempShuffled);
+            toolsData = oldTools; // 恢复，最终渲染时再正式合并
+          }
+        }
+      }
+
+      // 启动超时收集
+      function startCollectTimer() {
+        if (collectTimer) clearTimeout(collectTimer);
+        collectTimer = setTimeout(() => {
+          flushTools(false);
+        }, 200);
+      }
+
+      // ---------- 并行加载 ----------
       (async function() {
         initFramework();
+        startCollectTimer();
         const promises = categoryConfigs.map(cfg => {
           return loadScript(`tools/${cfg.folder}/toolsData.js`).then(() => {
             const varName = cfg.folder + 'Tools';
@@ -789,15 +827,8 @@
           });
         });
         await Promise.allSettled(promises);
-        // 最终确保渲染（防抖可能已经触发，这里作为兜底）
-        if (debounceRender) {
-          clearTimeout(debounceRender);
-          debounceRender = null;
-        }
-        if (toolsData.length > 0) {
-          emptyEl.style.display = 'none';
-          renderAll();
-        }
+        // 全部加载完成，最终合并渲染
+        flushTools(true);
       })();
     })();
   </script>
