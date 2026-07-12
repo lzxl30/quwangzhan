@@ -590,6 +590,7 @@
       let gridEl, emptyEl, infoEl, searchInp, themeBtn, topBtn, loadingEl;
       let mo, mIframe, mTitle, mLoad, mClose;
       let renderTags, renderCards, renderAll, switchCat, setupDrag;
+      let priorityFolder = null; // 转发链接优先加载的分类文件夹
 
       const ORDER_KEY = 'categoryOrder_v1';
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
@@ -610,7 +611,24 @@
         dynCats = categoryConfigs.map(c => ({ id: c.id, name: c.name, icon: c.icon }));
         sharedCat = null; sharedUrl = null;
 
-        function checkShared() { const p = new URLSearchParams(location.search); const o = p.get('open'); if (o) { sharedUrl = decodeURIComponent(o); sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' }; return true; } return false; }
+        function checkShared() {
+          const p = new URLSearchParams(location.search);
+          const o = p.get('open');
+          if (o) {
+            sharedUrl = decodeURIComponent(o);
+            sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' };
+            // 尝试提取分类文件夹名，用于优先加载
+            if (sharedUrl.startsWith('tools/')) {
+              const parts = sharedUrl.split('/');
+              if (parts.length >= 2) {
+                priorityFolder = parts[1]; // 例如 'turing'
+              }
+            }
+            return true;
+          }
+          return false;
+        }
+
         function getCats() { const saved = getSavedOrder(); let ordered = []; if (saved.length) { const map = new Map(dynCats.map(c => [c.id, c])); saved.forEach(id => { if (map.has(id)) ordered.push(map.get(id)); }); dynCats.forEach(c => { if (!saved.includes(c.id)) ordered.push(c); }); } else { ordered = [...dynCats]; } const cats = [builtIn[0], builtIn[1], ...ordered]; if (sharedCat) cats.unshift(sharedCat); return cats; }
 
         curCat = 'all'; searchQ = '';
@@ -658,7 +676,6 @@
           else if (curCat === 'favorites') { const ids = favs.map(x => x.id); f = f.filter(t => ids.includes(t.id)); f.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); }
           else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
           if (searchQ.trim()) { const q = searchQ.trim().toLowerCase(); f = f.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)); }
-          // 随机排序
           if (curCat !== 'favorites' && curCat !== 'shared') {
             for (let i = f.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [f[i], f[j]] = [f[j], f[i]]; }
           }
@@ -719,7 +736,6 @@
           if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
 
-          // 隐藏加载动画
           if (loadingEl) { loadingEl.style.display = 'none'; }
 
           if (f.length === 0) {
@@ -732,7 +748,6 @@
               const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站';
               return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`;
             }).join('');
-            // 使用 requestAnimationFrame 延迟渲染，避免阻塞动画
             requestAnimationFrame(() => {
               gridEl.innerHTML = cardsHTML;
               if (curCat === 'favorites') setupDrag();
@@ -757,12 +772,19 @@
         // 注意：此处不再调用 renderAll()，避免闪现占位符
       }
 
+      // 加载动画（可提前结束）
+      let animationResolve = null;
       function startLoadingAnimation() {
         if (loadingEl) loadingEl.style.display = 'flex';
         return new Promise(resolve => {
+          animationResolve = resolve;
           const minLoadTime = 600;
           const startTime = Date.now();
           const checkDone = () => {
+            if (animationResolve !== resolve) { // 被提前结束
+              resolve();
+              return;
+            }
             const elapsed = Date.now() - startTime;
             if (elapsed >= minLoadTime) resolve();
             else setTimeout(checkDone, 50);
@@ -771,20 +793,47 @@
         });
       }
 
+      // 加载单个分类的工具数据，并合并到全局 toolsData
+      async function loadCategory(cfg) {
+        await loadScript(`tools/${cfg.folder}/toolsData.js`);
+        const vn = cfg.folder + 'Tools';
+        const t = window[vn];
+        if (t && Array.isArray(t)) {
+          toolsData = toolsData.concat(t);
+        }
+      }
+
       (async function() {
         initFramework();
         const animationPromise = startLoadingAnimation();
-        const loadPromises = categoryConfigs.map(async (cfg) => {
-          try {
-            await loadScript(`tools/${cfg.folder}/toolsData.js`);
-            const vn = cfg.folder + 'Tools';
-            const t = window[vn];
-            if (t && Array.isArray(t)) {
-              toolsData = toolsData.concat(t);
-            }
-          } catch (e) { console.error(`加载 ${cfg.folder} 失败:`, e); }
-        });
+
+        // 如果有优先分类（转发链接对应的分类）
+        if (priorityFolder) {
+          const priorityCfg = categoryConfigs.find(c => c.folder === priorityFolder);
+          if (priorityCfg) {
+            // 优先加载该分类，并立即渲染
+            try {
+              await loadCategory(priorityCfg);
+            } catch (e) { console.error('优先加载失败:', e); }
+            // 立即结束动画并显示
+            if (animationResolve) { animationResolve(); animationResolve = null; }
+            await animationPromise;
+            if (appInit) renderAll();
+            // 继续后台加载剩余分类
+            const remaining = categoryConfigs.filter(c => c.folder !== priorityFolder);
+            remaining.forEach(cfg => {
+              loadCategory(cfg).then(() => {
+                if (appInit) renderAll(); // 更新标签计数，但不会改变 shared 分类下的卡片
+              }).catch(e => console.error(`加载 ${cfg.folder} 失败:`, e));
+            });
+            return;
+          }
+        }
+
+        // 普通情况：并行加载所有分类
+        const loadPromises = categoryConfigs.map(cfg => loadCategory(cfg).catch(e => console.error(`加载 ${cfg.folder} 失败:`, e)));
         await Promise.all(loadPromises);
+        if (animationResolve) { animationResolve(); animationResolve = null; }
         await animationPromise;
         if (appInit) renderAll();
       })();
