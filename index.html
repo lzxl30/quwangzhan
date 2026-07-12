@@ -516,11 +516,11 @@
     <div class="header-top">
       <a href="#" class="logo" title="趣网站">
         <div class="logo-icon">🪄</div>
-        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的工具集合</div></div>
+        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的网站集合</div></div>
       </a>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="搜索工具..." aria-label="搜索工具">
+        <input type="text" id="searchInput" placeholder="搜索网站..." aria-label="搜索网站">
       </div>
       <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">🌙</button>
     </div>
@@ -546,18 +546,18 @@
           <div class="loading-dot"></div>
           <div class="loading-dot"></div>
         </div>
-        <div style="font-size:0.9rem;">正在发现有趣工具...</div>
+        <div style="font-size:0.9rem;">正在发现有趣网站...</div>
       </div>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">
-      <div class="empty-icon">🧙</div><p>还没有添加任何魔法工具</p>
+      <div class="empty-icon">🧙</div><p>还没有添加任何魔法网站</p>
       <p style="font-size:0.85rem;">请编辑 toolsData.js 添加链接 ✨</p>
     </div>
   </div>
 
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <div class="modal-header"><span id="modalTitle">工具加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
+      <div class="modal-header"><span id="modalTitle">网站加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
         <iframe id="modalIframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
@@ -679,7 +679,7 @@
           if (isExpanded) {
             const hint = document.createElement('div');
             hint.className = 'sort-hint';
-            hint.textContent = '↕️ 拖拽调整分类顺序';
+            hint.textContent = '↕️ 拖拽调整分类顺序，点击分类可刷新网站排序';
             scrollEl.appendChild(hint);
           }
           scrollEl.querySelectorAll('.category-tag').forEach(btn => {
@@ -729,8 +729,8 @@
             emptyEl.style.display = 'none';
             const cardsHTML = f.map(t => {
               const fav = isFav(t.id);
-              const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具';
-              return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开工具"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`;
+              const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站';
+              return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`;
             }).join('');
             // 使用 requestAnimationFrame 延迟渲染，避免阻塞动画
             requestAnimationFrame(() => {
@@ -749,7 +749,7 @@
           const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title); else openTool(location.origin + '/' + u, card.dataset.title); } } return; }
         });
 
-        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个工具：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
+        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。打开后会自动显示该网站。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
 
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
@@ -786,7 +786,6 @@
         });
         await Promise.all(loadPromises);
         await animationPromise;
-        // 数据加载完毕，首次渲染
         if (appInit) renderAll();
       })();
     })();
