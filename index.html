@@ -658,7 +658,7 @@
           else if (curCat === 'favorites') { const ids = favs.map(x => x.id); f = f.filter(t => ids.includes(t.id)); f.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); }
           else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
           if (searchQ.trim()) { const q = searchQ.trim().toLowerCase(); f = f.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)); }
-          // 随机排序（每次过滤后都重新随机）
+          // 随机排序
           if (curCat !== 'favorites' && curCat !== 'shared') {
             for (let i = f.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [f[i], f[j]] = [f[j], f[i]]; }
           }
@@ -732,7 +732,6 @@
               const cn = getCats().find(c => c.id === t.category)?.name || t.category || '工具';
               return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开工具"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`;
             }).join('');
-
             // 使用 requestAnimationFrame 延迟渲染，避免阻塞动画
             requestAnimationFrame(() => {
               gridEl.innerHTML = cardsHTML;
@@ -755,14 +754,13 @@
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
-        renderAll();
+        // 注意：此处不再调用 renderAll()，避免闪现占位符
       }
 
-      // 使用固定最短加载时间，然后一次性随机显示所有工具
       function startLoadingAnimation() {
         if (loadingEl) loadingEl.style.display = 'flex';
         return new Promise(resolve => {
-          const minLoadTime = 600; // 最短加载动画显示时间（ms）
+          const minLoadTime = 600;
           const startTime = Date.now();
           const checkDone = () => {
             const elapsed = Date.now() - startTime;
@@ -776,7 +774,6 @@
       (async function() {
         initFramework();
         const animationPromise = startLoadingAnimation();
-        // 并行加载所有分类数据
         const loadPromises = categoryConfigs.map(async (cfg) => {
           try {
             await loadScript(`tools/${cfg.folder}/toolsData.js`);
@@ -789,7 +786,7 @@
         });
         await Promise.all(loadPromises);
         await animationPromise;
-        // 数据加载完毕且动画时间到，渲染卡片
+        // 数据加载完毕，首次渲染
         if (appInit) renderAll();
       })();
     })();
