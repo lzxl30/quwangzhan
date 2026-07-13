@@ -8,5 +8,15 @@ var musicTools = [
   icon: '🎵',
   iconBgClass: 'bg-4',
   accentClass: 'accent-4'
+},
+{
+  id: 'music-2',
+  title: 'Ableton 学音乐',
+  url: 'https://learningmusic.ableton.com/',
+  description: 'Ableton 官方出品的互动音乐学习网站，从节拍到歌曲创作，零基础也能轻松上手。',
+  category: 'music',
+  icon: '🎼',
+  iconBgClass: 'bg-4',
+  accentClass: 'accent-4'
 }
 ];
