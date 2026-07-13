@@ -812,15 +812,18 @@
 
         // 唯一修改的地方：转发链接中增加工具名称参数
         function shareTool(url, title) {
-          const base = location.origin + location.pathname;
-          const su = base + '?name=' + encodeURI(title) + '&open=' + encodeURIComponent(url);
-          if (navigator.share) {
-            navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {});
-          } else {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。'));
-            } else {
-              prompt('复制下面的链接分享给朋友：', su);
+         const base = location.origin + location.pathname;
+          // 链接里只保留 open 参数，不再携带 name，简短干净
+         const su = base + '?open=' + encodeURIComponent(url);
+         // 分享/复制的文本带上书名号，方便一眼看到工具名
+         const shareText = `「${title}」 ${su}`;
+         if (navigator.share) {
+         navigator.share({ title: title, text: shareText, url: su }).catch(() => {});
+         } else {
+         if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。'));
+         } else {
+            prompt('复制下面的链接分享给朋友：', shareText);
             }
           }
         }
