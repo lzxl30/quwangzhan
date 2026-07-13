@@ -8,6 +8,6 @@ var sceneryTools = [
     icon: '🏯',
     iconBgClass: 'bg-5',
     accentClass: 'accent-5',
-    external: true 
+    external: true          // ← 新增此标记，自动用新窗口打开
   }
 ];
