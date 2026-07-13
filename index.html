@@ -813,7 +813,7 @@
         // 唯一修改的地方：转发链接中增加工具名称参数
         function shareTool(url, title) {
           const base = location.origin + location.pathname;
-          const su = base + '?name=' + encodeURIComponent(title) + '&open=' + encodeURIComponent(url);
+          const su = base + '?name=' + encodeURI(title) + '&open=' + encodeURIComponent(url);
           if (navigator.share) {
             navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {});
           } else {
