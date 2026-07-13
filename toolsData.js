@@ -11,6 +11,9 @@ if (typeof gamesTools !== 'undefined') {
 if (typeof sceneryTools !== 'undefined') {
   toolsData = toolsData.concat(sceneryTools);
 }
+if (typeof musicTools !== 'undefined') {
+  toolsData = toolsData.concat(musicTools);
+}
 // 未来可继续追加其他分类
 // 未来添加其他分类，例如：
 // if (typeof imageTools !== 'undefined') {
