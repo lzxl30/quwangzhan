@@ -18,6 +18,6 @@ var musicTools = [
     icon: '🎹',
     iconBgClass: 'bg-6',      // 青蓝渐变，和🎹钢琴搭配，清爽专业
     accentClass: 'accent-6'
-    external: true  
+    external: true          // ← 新增此标记，自动用新窗口打开
   }
 ];
