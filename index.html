@@ -17,7 +17,7 @@
       --accent-3: #f6c85b;
       --accent-4: #5ba0f5;
       --accent-5: #f07b6c;
-      --accent-6: #22d3ee;        /* 新增音乐辅助色 */
+      --accent-6: #22d3ee;
       --border: #2a2e3b;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
@@ -309,7 +309,7 @@
       display: flex; flex-direction: column; gap: 8px;
       text-decoration: none; color: inherit; overflow: hidden;
       -webkit-tap-highlight-color: transparent;
-      will-change: transform;  /* 优化动画性能 */
+      will-change: transform;
     }
     .card.dragging { opacity: 0.5; }
     .card.drag-over { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 124, 247, 0.4); }
@@ -329,14 +329,13 @@
       width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.3rem; flex-shrink: 0; color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);  /* 图标微光，更精致 */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .bg-1 { background: linear-gradient(135deg, #f97ba8, #e84393); }
     .bg-2 { background: linear-gradient(135deg, #2dd4bf, #00cec9); }
     .bg-3 { background: linear-gradient(135deg, #f6c85b, #f39c12); }
     .bg-4 { background: linear-gradient(135deg, #5ba0f5, #6c5ce7); }
     .bg-5 { background: linear-gradient(135deg, #f07b6c, #d63031); }
-    /* 新增 bg-6 音乐辅助色 */
     .bg-6 { background: linear-gradient(135deg, #22d3ee, #6366f1); }
     .bg-0 { background: linear-gradient(135deg, #8b7cf7, #b4a7ff); }
 
@@ -642,7 +641,16 @@
         dynCats = categoryConfigs.map(c => ({ id: c.id, name: c.name, icon: c.icon }));
         sharedCat = null; sharedUrl = null;
 
-        function checkShared() { const p = new URLSearchParams(location.search); const o = p.get('open'); if (o) { sharedUrl = decodeURIComponent(o); sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' }; return true; } return false; }
+        function checkShared() {
+          const p = new URLSearchParams(location.search);
+          const o = p.get('open');
+          if (o) {
+            sharedUrl = decodeURIComponent(o);
+            sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' };
+            return true;
+          }
+          return false;
+        }
         function getCats() { const saved = getSavedOrder(); let ordered = []; if (saved.length) { const map = new Map(dynCats.map(c => [c.id, c])); saved.forEach(id => { if (map.has(id)) ordered.push(map.get(id)); }); dynCats.forEach(c => { if (!saved.includes(c.id)) ordered.push(c); }); } else { ordered = [...dynCats]; } const cats = [builtIn[0], builtIn[1], ...ordered]; if (sharedCat) cats.unshift(sharedCat); return cats; }
 
         curCat = 'all'; searchQ = '';
@@ -802,7 +810,20 @@
           const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; const isExternal = card.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title, isExternal); else openTool(location.origin + '/' + u, card.dataset.title, isExternal); } } return; }
         });
 
-        function shareTool(url, title) { const base = location.origin + location.pathname; const su = base + '?open=' + encodeURIComponent(url); if (navigator.share) { navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {}); } else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', su); } } }
+        // 唯一修改的地方：转发链接中增加工具名称参数
+        function shareTool(url, title) {
+          const base = location.origin + location.pathname;
+          const su = base + '?name=' + encodeURIComponent(title) + '&open=' + encodeURIComponent(url);
+          if (navigator.share) {
+            navigator.share({ title, text: `试试这个网站：${title}`, url: su }).catch(() => {});
+          } else {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(su).then(() => alert('链接已复制，可粘贴分享。'));
+            } else {
+              prompt('复制下面的链接分享给朋友：', su);
+            }
+          }
+        }
 
         if (checkShared()) curCat = 'shared';
         searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
