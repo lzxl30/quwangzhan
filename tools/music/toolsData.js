@@ -3,20 +3,20 @@ var musicTools = [
   id: 'music-1',
   title: 'Aidn 创意音乐盒',
   url: 'https://aidn.jp/contents/',
-  description: '创意互动作品集，包含音调矩阵、初音音乐游戏等，点击即可创作旋律。',
+  description: '日本开发者 aidn 的互动作品集，点击即可创作旋律，好玩又好听。',
   category: 'music',
-  icon: '🎵',
-  iconBgClass: 'bg-4',
-  accentClass: 'accent-4'
+  icon: '🎶',
+  iconBgClass: 'bg-5',      // 音乐专属背景色，建议紫色渐变
+  accentClass: 'accent-5'   // 音乐强调色
 },
 {
   id: 'music-2',
   title: 'Ableton 学音乐',
   url: 'https://learningmusic.ableton.com/',
-  description: 'Ableton 官方出品的互动音乐学习网站，从节拍到歌曲创作，零基础也能轻松上手。',
+  description: 'Ableton 官方互动教程，从节拍到歌曲，零基础玩转音乐制作。',
   category: 'music',
-  icon: '🎼',
-  iconBgClass: 'bg-4',
-  accentClass: 'accent-4'
+  icon: '🎹',
+  iconBgClass: 'bg-5',
+  accentClass: 'accent-5'
 }
 ];
