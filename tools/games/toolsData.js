@@ -38,6 +38,16 @@ var gamesTools = [
     icon: '💸',
     iconBgClass: 'bg-5',
     accentClass: 'accent-5'
+  },
+  {
+    id: 'games-5',
+    title: '便携小空调',
+    url: 'https://air.shadiao.pro/',
+    description: '在线模拟空调，调节温度与模式，界面逼真，适合夏天望梅止渴。',
+    category: 'games',
+    icon: '❄️',
+    iconBgClass: 'bg-4',
+    accentClass: 'accent-4'
   }
   
   // 在这里继续添加更多游戏工具
