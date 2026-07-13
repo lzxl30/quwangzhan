@@ -17,6 +17,12 @@ var categoryConfigs = [
     id: 'scenery',
     name: '风景',
     icon: ''
+  },
+  {
+    folder: 'music',
+    id: 'music',
+    name: '音乐',
+    icon: ''
   }
   // 未来添加新分类，只需在这里追加，例如：
   // {
