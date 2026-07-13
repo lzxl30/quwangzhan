@@ -68,5 +68,15 @@ var turingTools = [
     icon: '📱',
     iconBgClass: 'bg-0',
     accentClass: 'accent-0'
+  },
+  {
+    id: 'turing-8',
+    title: 'silk绘画',
+    url: 'https://silk.art/',
+    description: '在线丝绸绘画工具，用鼠标或手指画出飘逸灵动的丝绸线条，极具艺术感。',
+    category: 'turing',
+    icon: '🎨',
+    iconBgClass: 'bg-3',
+    accentClass: 'accent-3'
   }
 ];
