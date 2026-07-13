@@ -157,6 +157,7 @@
     }
     .header-hint a:hover { color: var(--accent-1); }
 
+    /* 分类标签栏 */
     .category-bar-wrap {
       position: relative;
       max-width: 1350px;
@@ -685,14 +686,18 @@
         mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
 
-        // 回顶按钮：滚动到顶部并刷新排序
+        // 回顶按钮：先瞬间回到顶部，再清除缓存并刷新排序
         topBtn.addEventListener('click', () => {
-          // 清除当前分类的随机缓存，以便重新随机
-          if (curCat !== 'favorites' && curCat !== 'shared') {
-            delete shuffled[curCat];
-          }
-          renderAll();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo(0, 0);
+          // 使用双层 requestAnimationFrame 确保滚动完成后再执行渲染，避免渲染中断滚动
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (curCat !== 'favorites' && curCat !== 'shared') {
+                delete shuffled[curCat];
+              }
+              renderAll();
+            });
+          });
         });
 
         function applyTheme(m) { if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '☀️'; } else { document.body.classList.remove('light-mode'); themeBtn.textContent = '🌙'; } localStorage.setItem('turingMagicTheme', m); }
