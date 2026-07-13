@@ -18,6 +18,16 @@ var gamesTools = [
     icon: '🧊',
     iconBgClass: 'bg-4',
     accentClass: 'accent-4'
+  },
+  {
+    id: 'games-3',
+    title: '在线养金鱼',
+    url: 'https://goldfishies.com/',
+    description: '在线互动养鱼模拟，点击屏幕投食，可爱的金鱼游来游去，治愈放松。',
+    category: 'games',
+    icon: '🐟',
+    iconBgClass: 'bg-3',
+    accentClass: 'accent-3'
   }
   // 在这里继续添加更多游戏工具
 ];
