@@ -17,6 +17,7 @@
       --accent-3: #f6c85b;
       --accent-4: #5ba0f5;
       --accent-5: #f07b6c;
+      --accent-6: #22d3ee;        /* 新增音乐辅助色 */
       --border: #2a2e3b;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       --shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
@@ -43,6 +44,7 @@
       --accent-3: #f39c12;
       --accent-4: #0984e3;
       --accent-5: #d63031;
+      --accent-6: #00a8ff;
       --border: #e0e3eb;
       --shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
       --shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.1);
@@ -202,13 +204,13 @@
       border: none;
       background: none;
       border-radius: 6px;
-      transition: color 0.2s;
+      transition: color 0.2s, background 0.2s;
       -webkit-tap-highlight-color: transparent;
       flex-shrink: 0;
       position: relative;
     }
     .category-tag:active { opacity: 0.7; }
-    .category-tag:hover { color: var(--text); }
+    .category-tag:hover { color: var(--text); background: rgba(139,124,247,0.08); }
     .category-tag.active {
       color: var(--primary-light);
       font-weight: 700;
@@ -307,6 +309,7 @@
       display: flex; flex-direction: column; gap: 8px;
       text-decoration: none; color: inherit; overflow: hidden;
       -webkit-tap-highlight-color: transparent;
+      will-change: transform;  /* 优化动画性能 */
     }
     .card.dragging { opacity: 0.5; }
     .card.drag-over { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 124, 247, 0.4); }
@@ -318,6 +321,7 @@
     .card.accent-3::before { background: var(--accent-3); }
     .card.accent-4::before { background: var(--accent-4); }
     .card.accent-5::before { background: var(--accent-5); }
+    .card.accent-6::before { background: var(--accent-6); }
     .card.accent-0::before { background: var(--primary); }
 
     .card-icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
@@ -325,12 +329,15 @@
       width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.3rem; flex-shrink: 0; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);  /* 图标微光，更精致 */
     }
     .bg-1 { background: linear-gradient(135deg, #f97ba8, #e84393); }
     .bg-2 { background: linear-gradient(135deg, #2dd4bf, #00cec9); }
     .bg-3 { background: linear-gradient(135deg, #f6c85b, #f39c12); }
     .bg-4 { background: linear-gradient(135deg, #5ba0f5, #6c5ce7); }
     .bg-5 { background: linear-gradient(135deg, #f07b6c, #d63031); }
+    /* 新增 bg-6 音乐辅助色 */
+    .bg-6 { background: linear-gradient(135deg, #22d3ee, #6366f1); }
     .bg-0 { background: linear-gradient(135deg, #8b7cf7, #b4a7ff); }
 
     .card-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.2px; line-height: 1.3; }
@@ -686,10 +693,8 @@
         mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
 
-        // 回顶按钮：先瞬间回到顶部，再清除缓存并刷新排序
         topBtn.addEventListener('click', () => {
           window.scrollTo(0, 0);
-          // 使用双层 requestAnimationFrame 确保滚动完成后再执行渲染，避免渲染中断滚动
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               if (curCat !== 'favorites' && curCat !== 'shared') {
@@ -808,7 +813,6 @@
         renderTags();
       }
 
-      // ---------- 超时收集逻辑 ----------
       const pendingTools = [];
       let collectTimer = null;
       let finalFlushDone = false;
