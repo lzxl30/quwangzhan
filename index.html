@@ -202,14 +202,26 @@
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; background: var(--card-bg); }
     .modal-title-text { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     .modal-toolbar { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .tool-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-secondary); font-size: 1rem; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
-    .tool-btn:active { background: rgba(255,255,255,0.15); }
+    /* 竖屏工具按钮：无背景，透明 */
+    .tool-btn {
+      background: none; border: none; color: var(--text-secondary); font-size: 1rem;
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tool-btn:active { background: rgba(255,255,255,0.1); }
     .modal-close-btn { background: var(--primary); border: none; color: #fff; font-size: 0.8rem; font-weight: 600; padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .modal-close-btn:hover { background: var(--primary-light); }
 
-    .zoom-btns { display: flex; align-items: center; gap: 2px; background: rgba(255,255,255,0.08); border-radius: 20px; padding: 2px 4px; }
-    .zoom-btn { width: 28px; height: 28px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: var(--text); font-size: 1rem; font-weight: 600; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    .zoom-btn:active { background: rgba(255,255,255,0.2); }
+    .zoom-btns { display: flex; align-items: center; gap: 2px; background: none; border-radius: 20px; padding: 0; }
+    .zoom-btn {
+      width: 28px; height: 28px; border: none; background: transparent; color: var(--text);
+      font-size: 1rem; font-weight: 600; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
+    }
+    .zoom-btn:active { background: rgba(255,255,255,0.15); }
     .zoom-value { font-size: 0.75rem; color: var(--text-secondary); min-width: 32px; text-align: center; }
 
     .modal-iframe-wrap { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: flex-start; justify-content: flex-start; }
@@ -230,46 +242,47 @@
     }
     .modal-content.landscape .iframe-scaler { transform-origin: top left; }
 
-    /* 横屏浮动工具栏：放在竖屏视角最下面（横过来右侧下方） */
+    /* 横屏浮动工具栏 */
     .landscape-float-toolbar {
       display: none;
       position: fixed;
       right: 10px;
-      bottom: 10px;                /* 竖屏底部 => 横过来右侧下方 */
+      bottom: 10px;
       z-index: 1010;
     }
     .modal-content.landscape .landscape-float-toolbar { display: block; }
 
-    /* V 形按钮（固定不动） */
+    /* V 形按钮 (更明显) */
     .landscape-toggle-btn {
       position: absolute;
       right: 0;
       bottom: 0;
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,0.2);
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.25);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1.5px solid rgba(255,255,255,0.5);
       border-radius: 10px;
       color: #fff;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
       line-height: 1;
       z-index: 2;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
-    /* 展开的缩放/恢复竖屏按钮组（旋转90度，竖向排列） */
+    /* 展开的按钮组 (旋转90度，竖向排列) */
     .landscape-expand-btns {
       position: absolute;
-      right: 44px;                /* V 按钮左侧 */
+      right: 46px;
       bottom: 0;
       display: flex;
-      flex-direction: row;       /* 先横向 */
+      flex-direction: row;
       align-items: center;
       gap: 4px;
-      transform: rotate(90deg);   /* 旋转后变成竖向，向左上方延伸 */
+      transform: rotate(90deg);
       transform-origin: right bottom;
       opacity: 0;
       pointer-events: none;
@@ -281,10 +294,10 @@
     }
 
     .float-tool-btn {
-      width: 28px; height: 28px;   /* 更小尺寸 */
-      background: rgba(255,255,255,0.2);
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.22);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.4);
       border-radius: 8px;
       color: #fff;
       display: flex; align-items: center; justify-content: center;
@@ -293,7 +306,7 @@
       transition: 0.2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .float-tool-btn:active { background: rgba(255,255,255,0.35); }
+    .float-tool-btn:active { background: rgba(255,255,255,0.4); }
     .float-zoom-value {
       color: #fff;
       font-size: 0.7rem;
@@ -533,10 +546,11 @@
           if (floatZoomValueEl) floatZoomValueEl.textContent = percent;
         }
 
-        zoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.1));
-        zoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.1));
-        floatZoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.1));
-        floatZoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.1));
+        // 步进改为 5%
+        zoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
+        zoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
+        floatZoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
+        floatZoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
 
         function resetZoom() { applyZoom(1); }
 
