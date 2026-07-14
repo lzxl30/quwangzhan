@@ -223,14 +223,7 @@
     .zoom-btn:active { background: rgba(255,255,255,0.15); }
     .zoom-value { font-size: 0.7rem; color: var(--text-secondary); min-width: 30px; text-align: center; }
 
-    /* 将 iframe 容器改为居中 */
-    .modal-iframe-wrap {
-      flex: 1; position: relative; background: #000;
-      overflow: hidden;
-      display: flex;
-      align-items: center;      /* 垂直居中 */
-      justify-content: center;  /* 水平居中 */
-    }
+    .modal-iframe-wrap { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: flex-start; justify-content: flex-start; }
     .iframe-scaler { transform-origin: top left; transition: transform 0.2s ease, width 0.2s, height 0.2s; flex-shrink: 0; }
     .iframe-scaler iframe { width: 100%; height: 100%; border: none; display: block; }
     .modal-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #666; font-size: 0.9rem; z-index: 2; }
@@ -571,7 +564,7 @@
           mIframe.src = url;
           mo.classList.add('active');
           document.body.style.overflow = 'hidden';
-          document.body.style.overscrollBehavior = 'none';  // 禁止浏览器手势
+          document.body.style.overscrollBehavior = 'none';  // 🔒 禁止浏览器手势
           mIframe.onload = () => { mLoad.style.display = 'none'; };
           resetZoom();
           const modalContent = document.querySelector('.modal-content');
@@ -591,7 +584,7 @@
           mIframe.src = '';
           mLoad.style.display = 'block';
           document.body.style.overflow = '';
-          document.body.style.overscrollBehavior = '';  // 恢复
+          document.body.style.overscrollBehavior = '';  // 🔓 恢复
           resetZoom();
         }
 
