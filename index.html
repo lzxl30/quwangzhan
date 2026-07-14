@@ -472,6 +472,7 @@
       opacity: 0.75;
     }
 
+    /* ---------- 模态框优化 ---------- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.75); z-index: 1000;
@@ -488,18 +489,35 @@
     }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px; border-bottom: 1px solid var(--border);
-      font-weight: 600; font-size: 1rem;
+      padding: 6px 12px;          /* 缩小内边距，让顶部更紧凑 */
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: 0.9rem;
+      gap: 8px;
     }
+    .modal-title {
+      flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+      font-size: 0.9rem;
+    }
+    .modal-actions {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .modal-rotate-btn {
+      background: none; border: none; color: var(--text-secondary);
+      font-size: 1.3rem; cursor: pointer; padding: 4px;
+      border-radius: 6px; line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-rotate-btn:hover { color: var(--text); background: rgba(255,255,255,0.1); }
     .modal-close {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       background: var(--primary); border: none;
-      color: #fff; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; padding: 10px 20px; border-radius: 25px;
+      color: #fff; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; padding: 6px 14px; border-radius: 25px;
       transition: all 0.2s; letter-spacing: 0.3px;
       box-shadow: 0 4px 12px rgba(139, 124, 247, 0.3);
+      white-space: nowrap;
     }
     .modal-close:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(139, 124, 247, 0.5); }
     body.light-mode .modal-close { background: #6c5ce7; color: #fff; }
@@ -524,8 +542,9 @@
       .back-to-top-btn { padding: 3px 10px; font-size: 0.75rem; }
       .header-hint { font-size: 0.65rem; }
       .open-btn { width: 12px; height: 12px; border-width: 2.5px; margin-right: 4px; }
-      .modal-header { padding: 12px 16px; }
-      .modal-close { padding: 8px 16px; font-size: 0.85rem; }
+      .modal-header { padding: 4px 10px; }   /* 手机端进一步减小 */
+      .modal-close { padding: 4px 10px; font-size: 0.8rem; }
+      .modal-rotate-btn { font-size: 1.1rem; }
       .fade-mask { width: 55px; }
     }
     @media (min-width: 601px) and (max-width: 1024px) {
@@ -573,9 +592,16 @@
     </div>
   </div>
 
+  <!-- 模态框 -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <div class="modal-header"><span id="modalTitle">网站加载中...</span><button class="modal-close" id="modalClose">← 返回主页</button></div>
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">网站加载中...</span>
+        <div class="modal-actions">
+          <button class="modal-rotate-btn" id="modalRotateBtn" title="切换横屏">↔️</button>
+          <button class="modal-close" id="modalClose">← 返回</button>
+        </div>
+      </div>
       <div class="modal-iframe-wrap">
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
         <iframe id="modalIframe" src=""></iframe>
@@ -618,7 +644,7 @@
       let favs, shuffled;
       let scrollEl, expandBtn, fadeMask;
       let gridEl, emptyEl, emptyText, emptySubText, infoEl, searchInp, themeBtn, topBtn;
-      let mo, mIframe, mTitle, mLoad, mClose;
+      let mo, mIframe, mTitle, mLoad, mClose, mRotateBtn;
       let renderTags, renderCards, renderAll, switchCat, setupDrag;
       let dataLoaded = false;
 
@@ -673,6 +699,7 @@
         themeBtn = document.getElementById('themeToggle');
         topBtn = document.getElementById('backToTopBtn');
         mo = document.getElementById('modalOverlay'); mIframe = document.getElementById('modalIframe'); mTitle = document.getElementById('modalTitle'); mLoad = document.getElementById('modalLoading'); mClose = document.getElementById('modalClose');
+        mRotateBtn = document.getElementById('modalRotateBtn');
 
         scrollEl.addEventListener('scroll', updateFadeMask);
         window.addEventListener('resize', updateFadeMask);
@@ -700,6 +727,34 @@
         mClose.addEventListener('click', closeModal);
         mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
+
+        // ---------- 横屏按钮逻辑 ----------
+        function updateRotateIcon() {
+          if (!mRotateBtn) return;
+          const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+          mRotateBtn.textContent = isLandscape ? '↕️' : '↔️';
+        }
+        window.addEventListener('orientationchange', () => {
+          setTimeout(updateRotateIcon, 100);  // 延迟等待屏幕旋转完成
+        });
+        updateRotateIcon();
+
+        mRotateBtn.addEventListener('click', () => {
+          const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              if (isLandscape) {
+                screen.orientation.lock('portrait');
+              } else {
+                screen.orientation.lock('landscape');
+              }
+            } catch (err) {
+              alert('当前环境不支持自动旋转，请手动旋转手机。');
+            }
+          } else {
+            alert('该浏览器不支持屏幕方向锁定，请手动旋转手机。');
+          }
+        });
 
         topBtn.addEventListener('click', () => {
           window.scrollTo(0, 0);
@@ -810,20 +865,17 @@
           const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; const isExternal = card.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title, isExternal); else openTool(location.origin + '/' + u, card.dataset.title, isExternal); } } return; }
         });
 
-        // 唯一修改的地方：转发链接中增加工具名称参数
         function shareTool(url, title) {
-         const base = location.origin + location.pathname;
-          // 链接里只保留 open 参数，不再携带 name，简短干净
-         const su = base + '?open=' + encodeURIComponent(url);
-         // 分享/复制的文本带上书名号，方便一眼看到工具名
-         const shareText = `「${title}」 ${su}`;
-         if (navigator.share) {
-         navigator.share({ title: title, text: shareText, url: su }).catch(() => {});
-         } else {
-         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。'));
-         } else {
-            prompt('复制下面的链接分享给朋友：', shareText);
+          const base = location.origin + location.pathname;
+          const su = base + '?open=' + encodeURIComponent(url);
+          const shareText = `「${title}」 ${su}`;
+          if (navigator.share) {
+            navigator.share({ title: title, text: shareText, url: su }).catch(() => {});
+          } else {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。'));
+            } else {
+              prompt('复制下面的链接分享给朋友：', shareText);
             }
           }
         }
