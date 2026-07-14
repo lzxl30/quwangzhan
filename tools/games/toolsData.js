@@ -53,7 +53,7 @@ var gamesTools = [
   id: 'games-6',               // 如果已有 games-1，用下一个序号
   title: '星球生成器',
   url: 'http://oskarstalberg.com/game/planet/planet.html',
-  description: '首次加载可能较慢，点击随机生成独一无二的低多边形星球，旋转缩放观察细节，轻松解压。',
+  description: '首次加载可能较慢，尤其手机端，点击随机生成独一无二的低多边形星球，旋转缩放观察细节，轻松解压。',
   category: 'games',
   icon: '🌍',                  // 星球图标，也可用 🌍
   iconBgClass: 'bg-2',        // 青绿渐变，有太空感，也和游戏的 bg-3 区分开
@@ -63,7 +63,7 @@ var gamesTools = [
     id: 'games-7',
     title: '城镇叠叠乐',
     url: 'https://oskarstalberg.com/Townscaper/',
-    description: '首次加载可能较慢,轻松点击建造多彩的立体城镇，没有目标，只有纯粹的创作乐趣。',
+    description: '首次加载可能较慢,尤其手机端，轻松点击建造多彩的立体城镇，没有目标，只有纯粹的创作乐趣。',
     category: 'games',
     icon: '🏘️',
     iconBgClass: 'bg-3',
