@@ -571,6 +571,8 @@
           if (modalContent.classList.contains('landscape')) {
             modalContent.classList.remove('landscape');
             floatExpandBtns.classList.remove('open');
+            const wrap = document.getElementById('iframeWrap');
+            if (wrap) { wrap.style.width = ''; wrap.style.height = ''; }
           }
         }
 
@@ -579,6 +581,8 @@
           if (modalContent.classList.contains('landscape')) {
             modalContent.classList.remove('landscape');
             floatExpandBtns.classList.remove('open');
+            const wrap = document.getElementById('iframeWrap');
+            if (wrap) { wrap.style.width = ''; wrap.style.height = ''; }
           }
           mo.classList.remove('active');
           mIframe.src = '';
@@ -596,6 +600,11 @@
         rotateBtnHeader.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
+          const wrap = document.getElementById('iframeWrap');
+          if (wrap) {
+            wrap.style.width = window.innerHeight + 'px';
+            wrap.style.height = window.innerWidth + 'px';
+          }
           modalContent.classList.add('landscape');
           floatExpandBtns.classList.remove('open');
         });
@@ -604,6 +613,8 @@
         floatRotateBackBtn.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
+          const wrap = document.getElementById('iframeWrap');
+          if (wrap) { wrap.style.width = ''; wrap.style.height = ''; }
           modalContent.classList.remove('landscape');
           floatExpandBtns.classList.remove('open');
         });
@@ -626,7 +637,6 @@
           startLeft = rect.left;
           startTop = rect.top;
           landscapeFloatToolbar.style.transition = 'none';
-          // 重置标记，防止影响本次触摸
           floatToggleBtn.dataset.touchHandled = 'false';
         });
 
@@ -650,7 +660,6 @@
           landscapeFloatToolbar.style.transition = '0.2s';
           if (!isDraggingFloat) {
             toggleFloatExpand();
-            // 标记为触摸处理，避免后续 click 再次触发
             floatToggleBtn.dataset.touchHandled = 'true';
           } else {
             floatToggleBtn.dataset.touchHandled = 'false';
@@ -658,9 +667,8 @@
           isDraggingFloat = false;
         });
 
-        // 新增 click 事件，用于电脑端鼠标点击
+        // 电脑端鼠标点击
         floatToggleBtn.addEventListener('click', function(e) {
-          // 如果刚由触摸事件处理过，跳过
           if (floatToggleBtn.dataset.touchHandled === 'true') {
             floatToggleBtn.dataset.touchHandled = 'false';
             return;
