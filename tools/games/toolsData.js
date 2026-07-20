@@ -57,7 +57,8 @@ var gamesTools = [
   category: 'games',
   icon: '🌍',                  // 星球图标，也可用 🌍
   iconBgClass: 'bg-2',        // 青绿渐变，有太空感，也和游戏的 bg-3 区分开
-  accentClass: 'accent-2',  
+  accentClass: 'accent-2', 
+  external: true // ← 用新窗口打开
   },
   {
     id: 'games-7',
@@ -67,8 +68,7 @@ var gamesTools = [
     category: 'games',
     icon: '🏘️',
     iconBgClass: 'bg-3',
-    accentClass: 'accent-3',
-    external: true // ← 用新窗口打开
+    accentClass: 'accent-3'
   },
   {
   id: 'games-8',                              // 根据已有游戏序号调整
