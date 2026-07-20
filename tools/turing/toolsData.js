@@ -83,10 +83,11 @@ var turingTools = [
   id: 'turing-3',               // 根据已有 id 调整，如 turing-3
   title: 'Pixiv 阅读器',
   url: 'https://pixiv.pictures/',
-  description: ' Pixiv 插画与小说在线浏览工具，无需登录即可探索精彩内容。',
+  description: '优雅的 Pixiv 插画与小说在线浏览工具，无需登录即可探索精彩内容。',
   category: 'turing',
   icon: '📖',
   iconBgClass: 'bg-4',          // 蓝紫色渐变，契合 Pixiv 品牌色
   accentClass: 'accent-4',
+  external: true                // 建议在新窗口打开，避免 iframe 被第三方限制
   }
 ];
