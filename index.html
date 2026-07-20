@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>趣网站 | 有趣网站导航</title>
   <style>
+    /* ========== 原有样式 (已存在，未改动) ========== */
     :root {
       --bg: #0f1117;
       --card-bg: #1a1d27;
@@ -31,7 +32,6 @@
       --input-bg: #1e2130;
       --card-border: transparent;
     }
-
     body.light-mode {
       --bg: #f4f5fa;
       --card-bg: #ffffff;
@@ -55,9 +55,7 @@
       --input-bg: #f0f2f8;
       --card-border: #e8ecf5;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: var(--bg);
@@ -65,46 +63,42 @@
       line-height: 1.5;
       min-height: 100vh;
       transition: background 0.3s, color 0.3s;
-      background-image:
-        radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
+      background-image: radial-gradient(ellipse at 30% 10%, rgba(139,124,247,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 90%, rgba(45,212,191,0.05) 0%, transparent 60%);
       -webkit-tap-highlight-color: transparent;
       padding-bottom: 100px;
     }
-
-    .header {
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(16px);
-      background: rgba(18, 20, 28, 0.88);
-      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s;
-    }
-    body.light-mode .header { background: rgba(255, 255, 255, 0.88); }
-    .header-top {
-      max-width: 1350px; margin: 0 auto; padding: 10px 20px 6px;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px;
-    }
+    .header { background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); background: rgba(18,20,28,0.88); box-shadow: 0 1px 8px rgba(0,0,0,0.3); transition: background 0.3s; }
+    body.light-mode .header { background: rgba(255,255,255,0.88); }
+    .header-top { max-width: 1350px; margin: 0 auto; padding: 10px 20px 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; }
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); flex-shrink: 0; }
-    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #8b7cf7, #f97ba8); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4); }
+    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #8b7cf7, #f97ba8); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(139,124,247,0.4); }
     .logo-text { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .logo-sub { font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; margin-top: 1px; display: none; }
-
-    .search-wrap { position: relative; flex: 1; max-width: 360px; min-width: 160px; margin: 0 8px; }
+    .search-wrap { position: relative; flex: 1; max-width: 360px; min-width: 160px; margin: 0 8px; display: flex; align-items: center; gap: 6px; }
+    .search-wrap .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 0.95rem; color: #888ca0; pointer-events: none; z-index: 1; }
     .search-wrap input { width: 100%; padding: 9px 16px 9px 38px; border: 2px solid var(--border); border-radius: 50px; font-size: 0.85rem; outline: none; transition: var(--transition); background: var(--input-bg); color: var(--text); -webkit-appearance: none; }
-    .search-wrap input:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(139, 124, 247, 0.12); background: var(--card-bg); }
-    .search-wrap .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 0.95rem; color: #888ca0; pointer-events: none; }
-
+    .search-wrap input:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(139,124,247,0.12); background: var(--card-bg); }
+    .search-mode-btn {
+      background: var(--tag-bg);
+      border: none;
+      color: var(--text);
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: 0.2s;
+      flex-shrink: 0;
+    }
+    .search-mode-btn:active { background: var(--primary); color: #fff; }
     .theme-toggle { background: var(--tag-bg); border: none; color: var(--text); width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
     .theme-toggle:hover { background: var(--primary); color: #fff; transform: scale(1.06); }
-
     .header-hint { max-width: 1350px; margin: 0 auto; padding: 0 20px 4px; text-align: center; font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; }
     .header-hint a { color: var(--primary-light); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
     .header-hint a:hover { color: var(--accent-1); }
-
     .category-bar-wrap { position: relative; max-width: 1350px; margin: 0 auto; padding: 0 0 4px 16px; display: flex; align-items: center; }
     .category-scroll { flex: 1; display: flex; flex-wrap: nowrap; gap: 6px; max-height: 38px; overflow-x: auto; overflow-y: hidden; transition: max-height 0.35s ease, flex-wrap 0s 0.35s; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
     .category-scroll::-webkit-scrollbar { display: none; }
@@ -122,25 +116,21 @@
     .category-tag:hover .drag-handle { opacity: 1; }
     .sort-hint { font-size: 0.68rem; color: var(--text-secondary); text-align: center; padding: 6px 0 2px; opacity: 0.7; display: none; }
     .category-scroll.expanded .sort-hint { display: block; }
-
     .fade-mask { pointer-events: none; position: absolute; right: 0; top: 0; bottom: 0; width: 70px; background: linear-gradient(to left, var(--bg) 0%, transparent 100%); z-index: 2; transition: opacity 0.3s; }
     body.light-mode .fade-mask { background: linear-gradient(to left, var(--bg) 0%, transparent 100%); }
     .category-scroll.expanded ~ .fade-mask, .fade-mask.hidden { opacity: 0; pointer-events: none; }
-
     .category-expand-btn { flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-secondary); cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; border-radius: 6px; z-index: 5; }
     .category-expand-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
     .category-expand-btn:active { opacity: 0.7; }
     .arrow-v { display: inline-block; width: 10px; height: 10px; border-right: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: rotate(45deg); transition: transform 0.25s; }
     .category-expand-btn.open .arrow-v { transform: rotate(-135deg); }
-
     .main-container { max-width: 1350px; margin: 0 auto; padding: 16px 20px 20px; }
     .info-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
     .drag-hint { font-size: 0.8rem; color: var(--primary-light); font-weight: 500; display: flex; align-items: center; gap: 4px; }
-
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
     .card.dragging { opacity: 0.5; }
-    .card.drag-over { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 124, 247, 0.4); }
+    .card.drag-over { border-color: var(--primary); box-shadow: 0 0 20px rgba(139,124,247,0.4); }
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
@@ -151,7 +141,6 @@
     .card.accent-5::before { background: var(--accent-5); }
     .card.accent-6::before { background: var(--accent-6); }
     .card.accent-0::before { background: var(--primary); }
-
     .card-icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
     .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
     .bg-1 { background: linear-gradient(135deg, #f97ba8, #e84393); }
@@ -161,27 +150,24 @@
     .bg-5 { background: linear-gradient(135deg, #f07b6c, #d63031); }
     .bg-6 { background: linear-gradient(135deg, #22d3ee, #6366f1); }
     .bg-0 { background: linear-gradient(135deg, #8b7cf7, #b4a7ff); }
-
     .card-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.2px; line-height: 1.3; }
     .card-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; flex-grow: 1; }
     .card-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
-    .card-category-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: rgba(139, 124, 247, 0.12); color: var(--primary-light); font-weight: 500; cursor: pointer; border: none; transition: background 0.2s, color 0.2s; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    .card-category-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: rgba(139,124,247,0.12); color: var(--primary-light); font-weight: 500; cursor: pointer; border: none; transition: background 0.2s, color 0.2s; text-decoration: none; -webkit-tap-highlight-color: transparent; }
     .card-category-badge:hover { background: var(--primary); color: #fff; }
     .card-actions { display: flex; gap: 8px; align-items: center; }
     .action-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 10px; transition: 0.2s; color: #7c8096; font-size: 1.1rem; -webkit-tap-highlight-color: transparent; }
     .action-btn span.icon { font-size: 1.2rem; }
     .action-btn span.label { font-size: 0.65rem; font-weight: 500; }
-    .action-btn:hover { background: rgba(139, 124, 247, 0.1); color: var(--primary-light); }
+    .action-btn:hover { background: rgba(139,124,247,0.1); color: var(--primary-light); }
     .fav-btn.favorited { color: #f97ba8; }
     .open-btn { display: inline-block; width: 14px; height: 14px; border-right: 3px solid var(--text-secondary); border-bottom: 3px solid var(--text-secondary); transform: rotate(-45deg); margin-left: auto; margin-right: 6px; cursor: pointer; opacity: 0.6; transition: all 0.2s; flex-shrink: 0; align-self: center; -webkit-tap-highlight-color: transparent; }
     .open-btn:hover { border-color: var(--primary-light); opacity: 1; transform: rotate(-45deg) scale(1.2); }
-
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); }
     .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; opacity: 0.7; }
     .empty-state p { font-size: 0.95rem; }
-
-    .fixed-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 6px 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); backdrop-filter: blur(12px); background: rgba(18, 20, 28, 0.9); }
-    body.light-mode .fixed-bottom-bar { background: rgba(255, 255, 255, 0.9); }
+    .fixed-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 6px 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); backdrop-filter: blur(12px); background: rgba(18,20,28,0.9); }
+    body.light-mode .fixed-bottom-bar { background: rgba(255,255,255,0.9); }
     .bottom-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; }
     .back-to-top-btn { display: inline-flex; align-items: center; gap: 4px; background: transparent; border: none; color: #f0f2ff; padding: 4px 12px; border-radius: 50px; font-weight: 600; font-size: 0.8rem; text-decoration: none; transition: all 0.25s; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
     .back-to-top-btn:hover { color: #fff; transform: scale(1.02); }
@@ -194,127 +180,70 @@
     body.light-mode .channel-btn:hover { background: #e6e8f2; border-color: #6c5ce7; }
     .fixed-bottom-bar .btn-icon { font-size: 0.95rem; }
     .footer-note { color: var(--text-secondary); font-size: 0.65rem; text-align: center; margin: 2px 0 0 0; opacity: 0.75; }
-
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 0; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
     .modal-overlay.active { opacity: 1; visibility: visible; }
     .modal-content { background: var(--card-bg); border-radius: 0; width: 100%; height: 100%; max-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
-
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; border-bottom: 1px solid var(--border); gap: 6px; flex-wrap: wrap; background: var(--card-bg); }
     .modal-title-text { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     .modal-toolbar { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .tool-btn {
-      background: none; border: none; color: var(--text-secondary); font-size: 0.95rem;
-      width: 28px; height: 28px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
+    .tool-btn { background: none; border: none; color: var(--text-secondary); font-size: 0.95rem; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
     .tool-btn:active { background: rgba(255,255,255,0.1); }
     .modal-close-btn { background: var(--primary); border: none; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .modal-close-btn:hover { background: var(--primary-light); }
-
     .zoom-btns { display: flex; align-items: center; gap: 1px; background: none; border-radius: 20px; padding: 0; }
-    .zoom-btn {
-      width: 26px; height: 26px; border: none; background: transparent; color: var(--text);
-      font-size: 0.95rem; font-weight: 600; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: 0.2s;
-    }
+    .zoom-btn { width: 26px; height: 26px; border: none; background: transparent; color: var(--text); font-size: 0.95rem; font-weight: 600; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .zoom-btn:active { background: rgba(255,255,255,0.15); }
     .zoom-value { font-size: 0.7rem; color: var(--text-secondary); min-width: 30px; text-align: center; }
-
     .modal-iframe-wrap { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: flex-start; justify-content: flex-start; }
     .iframe-scaler { transform-origin: top left; transition: transform 0.2s ease, width 0.2s, height 0.2s; flex-shrink: 0; }
     .iframe-scaler iframe { width: 100%; height: 100%; border: none; display: block; }
     .modal-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #666; font-size: 0.9rem; z-index: 2; }
-
-    /* 横屏模式 */
     .modal-content.landscape .modal-header { display: none; }
-    .modal-content.landscape .modal-iframe-wrap {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vh; height: 100vw;
-      transform: rotate(90deg) translateY(-100%);
-      transform-origin: top left;
-      overflow: hidden;
-      z-index: 5;
-    }
+    .modal-content.landscape .modal-iframe-wrap { position: fixed; top: 0; left: 0; width: 100vh; height: 100vw; transform: rotate(90deg) translateY(-100%); transform-origin: top left; overflow: hidden; z-index: 5; }
     .modal-content.landscape .iframe-scaler { transform-origin: top left; }
-
-    /* 横屏浮动工具栏 */
-    .landscape-float-toolbar {
-      display: none;
-      position: fixed;
-      right: 10px;
-      bottom: 10px;
-      z-index: 1010;
-    }
+    .landscape-float-toolbar { display: none; position: fixed; right: 10px; bottom: 10px; z-index: 1010; }
     .modal-content.landscape .landscape-float-toolbar { display: block; }
-
-    /* V 按钮：透明，粗边框，阴影 */
-    .landscape-toggle-btn {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      width: 38px; height: 38px;
-      background: transparent;
-      border: 2px solid rgba(255,255,255,0.7);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 1.5rem;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: none;
-      line-height: 1;
-      z-index: 2;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-      transform: rotate(90deg);
-    }
-
-    /* 展开的按钮组：向右排列 */
-    .landscape-expand-btns {
-      position: absolute;
-      right: 44px;
-      bottom: 0;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .landscape-expand-btns.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* 展开后的按钮样式与 V 按钮一致 */
-    .float-tool-btn {
-      width: 32px; height: 32px;
-      background: transparent;
-      border: 2px solid rgba(255,255,255,0.7);
-      border-radius: 10px;
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: 0.2s;
-      -webkit-tap-highlight-color: transparent;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-    }
+    .landscape-toggle-btn { position: absolute; right: 0; bottom: 0; width: 38px; height: 38px; background: transparent; border: 2px solid rgba(255,255,255,0.7); border-radius: 10px; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none; line-height: 1; z-index: 2; box-shadow: 0 2px 10px rgba(0,0,0,0.6); transform: rotate(90deg); }
+    .landscape-expand-btns { position: absolute; right: 44px; bottom: 0; display: flex; flex-direction: row; align-items: center; gap: 6px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .landscape-expand-btns.open { opacity: 1; pointer-events: auto; }
+    .float-tool-btn { width: 32px; height: 32px; background: transparent; border: 2px solid rgba(255,255,255,0.7); border-radius: 10px; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: 0.2s; -webkit-tap-highlight-color: transparent; box-shadow: 0 2px 10px rgba(0,0,0,0.6); }
     .float-tool-btn:active { background: rgba(255,255,255,0.1); }
-    .float-zoom-value {
+    .float-zoom-value { color: #fff; font-size: 0.75rem; white-space: nowrap; background: transparent; border: 2px solid rgba(255,255,255,0.7); border-radius: 10px; padding: 4px 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; }
+
+    /* ========== 图片卡片特有样式 ========== */
+    .card.image-card {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 200px;
       color: #fff;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      background: transparent;
-      border: 2px solid rgba(255,255,255,0.7);
-      border-radius: 10px;
-      padding: 4px 6px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .card.image-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%);
+      z-index: 0;
+    }
+    .card.image-card .card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100%;
+    }
+    .card.image-card .card-title {
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    .card.image-card .card-desc {
+      color: rgba(255,255,255,0.8);
+    }
+    .card.image-card .card-category-badge {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
     }
 
     @media (max-width: 600px) {
@@ -357,6 +286,7 @@
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" id="searchInput" placeholder="搜索网站..." aria-label="搜索网站">
+        <button class="search-mode-btn" id="searchModeBtn" title="切换搜索图片">🖼️图片</button>
       </div>
       <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">🌙</button>
     </div>
@@ -402,8 +332,6 @@
         </div>
         <div class="modal-loading" id="modalLoading">⏳ 加载中...</div>
       </div>
-
-      <!-- 横屏浮动工具栏 -->
       <div class="landscape-float-toolbar" id="landscapeFloatToolbar">
         <div class="landscape-toggle-btn" id="floatToggleBtn">∨</div>
         <div class="landscape-expand-btns" id="floatExpandBtns">
@@ -436,21 +364,21 @@
       });
     }
   </script>
-
   <script src="categories.js"></script>
   <script src="version.js"></script>
-
   <script>
     (function() {
       if (typeof categoryConfigs === 'undefined') { console.error('❌ categories.js 未加载'); return; }
       window.toolsData = [];
+      window.imageCards = [];   // 存储图片卡片数据
       function loadScript(url) { return new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = url; s.onload = resolve; s.onerror = () => reject(new Error(`加载失败: ${url}`)); document.head.appendChild(s); }); }
 
       let appInit = false;
       let builtIn, dynCats, sharedCat, sharedUrl, curCat, searchQ;
+      let searchMode = 'tools';   // 'tools' 或 'images'
       let favs, shuffled;
       let scrollEl, expandBtn, fadeMask;
-      let gridEl, emptyEl, emptyText, emptySubText, infoEl, searchInp, themeBtn, topBtn;
+      let gridEl, emptyEl, emptyText, emptySubText, infoEl, searchInp, themeBtn, topBtn, searchModeBtn;
       let mo, mIframe, mTitle, mLoad, mClose, rotateBtnHeader;
       let zoomInBtn, zoomOutBtn, zoomValueEl, iframeScaler;
       let landscapeFloatToolbar, floatToggleBtn, floatExpandBtns;
@@ -469,6 +397,31 @@
           fadeMask.classList.add('hidden');
         } else {
           fadeMask.classList.remove('hidden');
+        }
+      }
+
+      // 获取图片数据 (Lolicon API)
+      async function fetchImages() {
+        try {
+          const res = await fetch('https://api.lolicon.app/setu/v2?size=regular&num=20');
+          const json = await res.json();
+          if (json.data && json.data.length) {
+            window.imageCards = json.data.map(item => ({
+              id: 'img-' + item.pid,
+              title: item.title || '无标题',
+              author: item.author,
+              tags: item.tags,
+              thumbnail: item.urls.regular,
+              imageUrl: item.urls.original || item.urls.regular,
+              category: 'images',
+              icon: '🖼️',
+              iconBgClass: 'bg-0',
+              accentClass: 'accent-0',
+              type: 'image'
+            }));
+          }
+        } catch (e) {
+          console.warn('图片加载失败，将稍后重试');
         }
       }
 
@@ -509,26 +462,13 @@
         searchInp = document.getElementById('searchInput');
         themeBtn = document.getElementById('themeToggle');
         topBtn = document.getElementById('backToTopBtn');
+        searchModeBtn = document.getElementById('searchModeBtn');
 
-        mo = document.getElementById('modalOverlay');
-        mIframe = document.getElementById('modalIframe');
-        mTitle = document.getElementById('modalTitle');
-        mLoad = document.getElementById('modalLoading');
-        mClose = document.getElementById('modalClose');
+        mo = document.getElementById('modalOverlay'); mIframe = document.getElementById('modalIframe'); mTitle = document.getElementById('modalTitle'); mLoad = document.getElementById('modalLoading'); mClose = document.getElementById('modalClose');
         rotateBtnHeader = document.getElementById('rotateBtnHeader');
-
-        zoomInBtn = document.getElementById('zoomInBtn');
-        zoomOutBtn = document.getElementById('zoomOutBtn');
-        zoomValueEl = document.getElementById('zoomValue');
-        iframeScaler = document.getElementById('iframeScaler');
-
-        landscapeFloatToolbar = document.getElementById('landscapeFloatToolbar');
-        floatToggleBtn = document.getElementById('floatToggleBtn');
-        floatExpandBtns = document.getElementById('floatExpandBtns');
-        floatZoomInBtn = document.getElementById('floatZoomInBtn');
-        floatZoomOutBtn = document.getElementById('floatZoomOutBtn');
-        floatZoomValueEl = document.getElementById('floatZoomValue');
-        floatRotateBackBtn = document.getElementById('floatRotateBackBtn');
+        zoomInBtn = document.getElementById('zoomInBtn'); zoomOutBtn = document.getElementById('zoomOutBtn'); zoomValueEl = document.getElementById('zoomValue'); iframeScaler = document.getElementById('iframeScaler');
+        landscapeFloatToolbar = document.getElementById('landscapeFloatToolbar'); floatToggleBtn = document.getElementById('floatToggleBtn'); floatExpandBtns = document.getElementById('floatExpandBtns');
+        floatZoomInBtn = document.getElementById('floatZoomInBtn'); floatZoomOutBtn = document.getElementById('floatZoomOutBtn'); floatZoomValueEl = document.getElementById('floatZoomValue'); floatRotateBackBtn = document.getElementById('floatRotateBackBtn');
 
         scrollEl.addEventListener('scroll', updateFadeMask);
         window.addEventListener('resize', updateFadeMask);
@@ -549,12 +489,10 @@
           zoomValueEl.textContent = percent;
           if (floatZoomValueEl) floatZoomValueEl.textContent = percent;
         }
-
         zoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
         zoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
         floatZoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
         floatZoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
-
         function resetZoom() { applyZoom(1); }
 
         function openTool(url, title, isExternal) {
@@ -571,11 +509,8 @@
           if (modalContent.classList.contains('landscape')) {
             modalContent.classList.remove('landscape');
             floatExpandBtns.classList.remove('open');
-            const wrap = document.getElementById('iframeWrap');
-            if (wrap) { wrap.style.width = ''; wrap.style.height = ''; }
           }
         }
-
         function closeModal() {
           const modalContent = document.querySelector('.modal-content');
           if (modalContent.classList.contains('landscape')) {
@@ -591,12 +526,10 @@
           document.body.style.overscrollBehavior = '';
           resetZoom();
         }
-
         mClose.addEventListener('click', closeModal);
         mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
 
-        // 顶部旋转按钮：进入横屏
         rotateBtnHeader.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
@@ -608,8 +541,6 @@
           modalContent.classList.add('landscape');
           floatExpandBtns.classList.remove('open');
         });
-
-        // 浮动恢复竖屏按钮
         floatRotateBackBtn.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
@@ -619,34 +550,17 @@
           floatExpandBtns.classList.remove('open');
         });
 
-        // V 形按钮：展开/折叠
-        function toggleFloatExpand() {
-          floatExpandBtns.classList.toggle('open');
-        }
-
-        // 触摸事件：拖动和点击，无边界限制
-        let isDraggingFloat = false;
-        let startX, startY, startLeft, startTop;
-
+        function toggleFloatExpand() { floatExpandBtns.classList.toggle('open'); }
+        let isDraggingFloat = false, startX, startY, startLeft, startTop;
         floatToggleBtn.addEventListener('touchstart', function(e) {
-          isDraggingFloat = false;
-          const touch = e.touches[0];
-          startX = touch.clientX;
-          startY = touch.clientY;
-          const rect = landscapeFloatToolbar.getBoundingClientRect();
-          startLeft = rect.left;
-          startTop = rect.top;
+          isDraggingFloat = false; const touch = e.touches[0]; startX = touch.clientX; startY = touch.clientY;
+          const rect = landscapeFloatToolbar.getBoundingClientRect(); startLeft = rect.left; startTop = rect.top;
           landscapeFloatToolbar.style.transition = 'none';
           floatToggleBtn.dataset.touchHandled = 'false';
         });
-
         floatToggleBtn.addEventListener('touchmove', function(e) {
-          const touch = e.touches[0];
-          const dx = touch.clientX - startX;
-          const dy = touch.clientY - startY;
-          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-            isDraggingFloat = true;
-          }
+          const touch = e.touches[0]; const dx = touch.clientX - startX; const dy = touch.clientY - startY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isDraggingFloat = true;
           if (isDraggingFloat) {
             e.preventDefault();
             landscapeFloatToolbar.style.left = (startLeft + dx) + 'px';
@@ -655,42 +569,38 @@
             landscapeFloatToolbar.style.bottom = 'auto';
           }
         });
-
         floatToggleBtn.addEventListener('touchend', function(e) {
           landscapeFloatToolbar.style.transition = '0.2s';
-          if (!isDraggingFloat) {
-            toggleFloatExpand();
-            floatToggleBtn.dataset.touchHandled = 'true';
-          } else {
-            floatToggleBtn.dataset.touchHandled = 'false';
-          }
+          if (!isDraggingFloat) { toggleFloatExpand(); floatToggleBtn.dataset.touchHandled = 'true'; }
+          else floatToggleBtn.dataset.touchHandled = 'false';
           isDraggingFloat = false;
         });
-
-        // 电脑端鼠标点击
         floatToggleBtn.addEventListener('click', function(e) {
-          if (floatToggleBtn.dataset.touchHandled === 'true') {
-            floatToggleBtn.dataset.touchHandled = 'false';
-            return;
-          }
+          if (floatToggleBtn.dataset.touchHandled === 'true') { floatToggleBtn.dataset.touchHandled = 'false'; return; }
           toggleFloatExpand();
         });
 
         topBtn.addEventListener('click', () => {
           window.scrollTo(0, 0);
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (curCat !== 'favorites' && curCat !== 'shared') {
-                delete shuffled[curCat];
-              }
-              renderAll();
-            });
-          });
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (curCat !== 'favorites' && curCat !== 'shared') delete shuffled[curCat];
+            renderAll();
+          }));
         });
 
         function applyTheme(m) { if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '☀️'; } else { document.body.classList.remove('light-mode'); themeBtn.textContent = '🌙'; } localStorage.setItem('turingMagicTheme', m); }
         (function initTheme() { const s = localStorage.getItem('turingMagicTheme'); applyTheme(s === 'light' ? 'light' : 'dark'); })();
         themeBtn.addEventListener('click', () => { applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'); });
+
+        // 搜索模式切换
+        searchModeBtn.addEventListener('click', () => {
+          searchMode = (searchMode === 'tools') ? 'images' : 'tools';
+          searchModeBtn.innerHTML = (searchMode === 'images') ? '🔍网站' : '🖼️图片';
+          searchInp.placeholder = (searchMode === 'images') ? '搜索图片标签...' : '搜索网站...';
+          searchInp.value = '';
+          searchQ = '';
+          renderCards();
+        });
 
         function getFiltered() {
           let f = [...toolsData];
@@ -714,29 +624,23 @@
             return `<button class="category-tag${curCat === c.id ? ' active' : ''}" data-category="${c.id}" ${(!isBuiltIn && isExpanded) ? 'draggable="true"' : ''}>${handle}${c.name}<span class="count">${n}</span></button>`;
           }).join('');
           if (isExpanded) {
-            const hint = document.createElement('div');
-            hint.className = 'sort-hint';
-            hint.textContent = '↕️ 拖拽调整分类顺序，点击分类可刷新网站排序';
+            const hint = document.createElement('div'); hint.className = 'sort-hint'; hint.textContent = '↕️ 拖拽调整分类顺序，点击分类可刷新网站排序';
             scrollEl.appendChild(hint);
           }
           scrollEl.querySelectorAll('.category-tag').forEach(btn => {
             btn.addEventListener('click', () => switchCat(btn.dataset.category));
             if (btn.draggable) {
-              btn.addEventListener('dragstart', handleCatDragStart);
-              btn.addEventListener('dragover', handleCatDragOver);
-              btn.addEventListener('dragleave', handleCatDragLeave);
-              btn.addEventListener('drop', handleCatDrop);
-              btn.addEventListener('dragend', handleCatDragEnd);
+              btn.addEventListener('dragstart', handleCatDragStart); btn.addEventListener('dragover', handleCatDragOver);
+              btn.addEventListener('dragleave', handleCatDragLeave); btn.addEventListener('drop', handleCatDrop); btn.addEventListener('dragend', handleCatDragEnd);
             }
           });
           updateFadeMask();
         };
-
         let catDragSrc = null;
         function handleCatDragStart(e) { catDragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', this.dataset.category); }
-        function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) { this.classList.add('drag-over'); } }
+        function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all','favorites','shared'].includes(this.dataset.category)) this.classList.add('drag-over'); }
         function handleCatDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleCatDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); if (this === catDragSrc || ['all', 'favorites', 'shared'].includes(this.dataset.category)) return; const buttons = Array.from(scrollEl.querySelectorAll('.category-tag[draggable]')); const srcIdx = buttons.indexOf(catDragSrc); const destIdx = buttons.indexOf(this); if (srcIdx < destIdx) { scrollEl.insertBefore(catDragSrc, this.nextSibling); } else { scrollEl.insertBefore(catDragSrc, this); } const order = []; scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => { const cid = btn.dataset.category; if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid); }); saveOrder(order); renderTags(); }
+        function handleCatDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); if (this === catDragSrc || ['all','favorites','shared'].includes(this.dataset.category)) return; const buttons = Array.from(scrollEl.querySelectorAll('.category-tag[draggable]')); const srcIdx = buttons.indexOf(catDragSrc); const destIdx = buttons.indexOf(this); if (srcIdx < destIdx) scrollEl.insertBefore(catDragSrc, this.nextSibling); else scrollEl.insertBefore(catDragSrc, this); const order = []; scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => { const cid = btn.dataset.category; if (!['all','favorites','shared'].includes(cid)) order.push(cid); }); saveOrder(order); renderTags(); }
         function handleCatDragEnd(e) { this.classList.remove('dragging'); scrollEl.querySelectorAll('.category-tag').forEach(c => c.classList.remove('drag-over')); catDragSrc = null; }
 
         let dragCard = null;
@@ -752,56 +656,106 @@
         };
 
         renderCards = function() {
-          const f = getFiltered();
-          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
-          else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
-          if (f.length === 0) {
-            gridEl.innerHTML = '';
-            emptyEl.style.display = 'block';
-            if (!dataLoaded) {
-              emptyText.textContent = '正在加载网站…';
-              emptySubText.textContent = '请稍候，网站卡片即将呈现';
-            } else if (curCat === 'favorites') {
-              emptyText.textContent = '暂无收藏';
-              emptySubText.textContent = '点击心形图标收藏喜欢的网站吧';
-            } else if (curCat === 'shared') {
-              emptyText.textContent = '未找到该网站';
-              emptySubText.textContent = '请检查链接是否正确';
-            } else {
-              emptyText.textContent = '暂无内容';
-              emptySubText.textContent = '该分类下还没有网站';
+          // 获取工具卡片
+          let tools = [];
+          if (searchMode === 'tools') {
+            tools = getFiltered();
+            // 追加图片卡片（仅当没有搜索词且不是特殊分类时）
+            if (!searchQ.trim() && curCat !== 'shared') {
+              tools = tools.concat(window.imageCards);
             }
           } else {
+            // 搜索图片模式
+            let imgs = [...window.imageCards];
+            if (searchQ.trim()) {
+              const q = searchQ.trim().toLowerCase();
+              imgs = imgs.filter(img => img.tags.some(tag => tag.toLowerCase().includes(q)) || img.title.toLowerCase().includes(q));
+            }
+            tools = imgs;
+          }
+
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
+          else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
+
+          if (tools.length === 0) {
+            gridEl.innerHTML = '';
+            emptyEl.style.display = 'block';
+            if (!dataLoaded) { emptyText.textContent = '正在加载网站…'; emptySubText.textContent = '请稍候，网站卡片即将呈现'; }
+            else if (searchMode === 'images') { emptyText.textContent = '暂无匹配图片'; emptySubText.textContent = '换个标签试试吧'; }
+            else if (curCat === 'favorites') { emptyText.textContent = '暂无收藏'; emptySubText.textContent = '点击心形图标收藏喜欢的网站吧'; }
+            else if (curCat === 'shared') { emptyText.textContent = '未找到该网站'; emptySubText.textContent = '请检查链接是否正确'; }
+            else { emptyText.textContent = '暂无内容'; emptySubText.textContent = '该分类下还没有网站'; }
+          } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
+            gridEl.innerHTML = tools.map(t => {
+              if (t.type === 'image') {
+                // 图片卡片
+                return `<div class="card image-card ${t.accentClass}" style="background-image: url(${t.thumbnail});" data-tool-id="${t.id}" data-image-url="${t.imageUrl}" data-title="${t.title}">
+                  <div class="card-content">
+                    <div class="card-title">${t.title}</div>
+                    <div class="card-desc">画师：${t.author} | 标签：${t.tags.slice(0,3).join('、')}</div>
+                    <div class="card-footer-row">
+                      <span class="card-category-badge">图片</span>
+                      <div class="card-actions">
+                        <button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+              } else {
+                // 工具卡片（原有）
+                const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站';
+                return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}">
+                  <div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div>
+                  <div class="card-desc">${t.description}</div>
+                  <div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button>
+                  <div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`;
+              }
+            }).join('');
+            if (curCat === 'favorites') setupDrag();
+          }
         };
 
         renderAll = function() { renderTags(); renderCards(); };
 
         gridEl.addEventListener('click', (e) => {
+          const card = e.target.closest('.card');
+          if (!card) return;
+          // 图片卡片处理
+          if (card.classList.contains('image-card')) {
+            const imgUrl = card.dataset.imageUrl;
+            if (imgUrl) window.open(imgUrl, '_blank');
+            return;
+          }
+          // 原有工具卡片处理
           const badge = e.target.closest('.card-category-badge'); if (badge) { e.preventDefault(); e.stopPropagation(); if (badge.dataset.category) switchCat(badge.dataset.category); return; }
           const fb = e.target.closest('.fav-btn'); if (fb) { e.preventDefault(); e.stopPropagation(); togFav(fb.dataset.toolId); renderAll(); return; }
-          const sb = e.target.closest('.share-btn'); if (sb) { e.preventDefault(); e.stopPropagation(); const card = sb.closest('.card'); if (card) shareTool(card.dataset.url, card.dataset.title); return; }
-          const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; const isExternal = card.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title, isExternal); else openTool(location.origin + '/' + u, card.dataset.title, isExternal); } } return; }
+          const sb = e.target.closest('.share-btn'); if (sb) { e.preventDefault(); e.stopPropagation(); const toolCard = sb.closest('.card'); if (toolCard) {
+            if (toolCard.classList.contains('image-card')) {
+              const imgUrl = toolCard.dataset.imageUrl;
+              const title = toolCard.dataset.title;
+              const base = location.origin + location.pathname;
+              const su = base + '?open=' + encodeURIComponent(imgUrl);
+              const shareText = `「${title}」 ${su}`;
+              if (navigator.share) { navigator.share({ title, text: shareText, url: su }).catch(()=>{}); }
+              else { if (navigator.clipboard) { navigator.clipboard.writeText(shareText).then(() => alert('链接已复制')); } else { prompt('复制链接：', shareText); } }
+            } else {
+              shareTool(toolCard.dataset.url, toolCard.dataset.title);
+            }
+          } return; }
+          const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const toolCard = ob.closest('.card'); if (toolCard) { const u = toolCard.dataset.url; const isExternal = toolCard.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, toolCard.dataset.title, isExternal); else openTool(location.origin + '/' + u, toolCard.dataset.title, isExternal); } } return; }
         });
 
         function shareTool(url, title) {
           const base = location.origin + location.pathname;
           const su = base + '?open=' + encodeURIComponent(url);
           const shareText = `「${title}」 ${su}`;
-          if (navigator.share) {
-            navigator.share({ title: title, text: shareText, url: su }).catch(() => {});
-          } else {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。'));
-            } else {
-              prompt('复制下面的链接分享给朋友：', shareText);
-            }
-          }
+          if (navigator.share) { navigator.share({ title, text: shareText, url: su }).catch(()=>{}); }
+          else { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。')); } else { prompt('复制下面的链接分享给朋友：', shareText); } }
         }
 
         if (checkShared()) curCat = 'shared';
-        searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
+        searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
         emptyEl.style.display = 'block';
         emptyText.textContent = '正在加载网站…';
@@ -810,53 +764,35 @@
       }
 
       const pendingTools = [];
-      let collectTimer = null;
-      let finalFlushDone = false;
-
-      function addTools(arr) { if (arr && Array.isArray(arr)) { pendingTools.push(arr); } }
-
+      let collectTimer = null, finalFlushDone = false;
+      function addTools(arr) { if (arr && Array.isArray(arr)) pendingTools.push(arr); }
       function flushTools(isFinal) {
         if (finalFlushDone) return;
         if (isFinal) {
           if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
           pendingTools.forEach(arr => { toolsData = toolsData.concat(arr); });
-          pendingTools.length = 0;
-          finalFlushDone = true;
-          dataLoaded = true;
+          pendingTools.length = 0; finalFlushDone = true; dataLoaded = true;
           if (appInit) renderAll();
         } else {
           if (finalFlushDone) return;
           if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
-          const snapshot = [];
-          pendingTools.forEach(arr => { snapshot.push(...arr); });
+          const snapshot = []; pendingTools.forEach(arr => { snapshot.push(...arr); });
           const tempData = [...toolsData, ...snapshot];
-          const oldTools = toolsData;
-          toolsData = tempData;
-          const tempShuffled = {};
-          for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
-          if (appInit) renderAll();
-          Object.assign(shuffled, tempShuffled);
-          toolsData = oldTools;
+          const oldTools = toolsData; toolsData = tempData;
+          const tempShuffled = {}; for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
+          if (appInit) renderAll(); Object.assign(shuffled, tempShuffled); toolsData = oldTools;
         }
       }
-
-      function startCollectTimer() {
-        if (collectTimer) clearTimeout(collectTimer);
-        collectTimer = setTimeout(() => { flushTools(false); }, 200);
-      }
+      function startCollectTimer() { if (collectTimer) clearTimeout(collectTimer); collectTimer = setTimeout(() => { flushTools(false); }, 200); }
 
       (async function() {
         initFramework();
         startCollectTimer();
-        const promises = categoryConfigs.map(cfg => {
-          return loadScript(`tools/${cfg.folder}/toolsData.js`).then(() => {
-            const varName = cfg.folder + 'Tools';
-            const categoryTools = window[varName];
-            if (categoryTools) addTools(categoryTools);
-          }).catch((error) => {
-            console.error(`加载分类 ${cfg.folder} 失败:`, error);
-          });
-        });
+        // 预加载图片
+        fetchImages();
+        const promises = categoryConfigs.map(cfg => loadScript(`tools/${cfg.folder}/toolsData.js`).then(() => {
+          const varName = cfg.folder + 'Tools'; const categoryTools = window[varName]; if (categoryTools) addTools(categoryTools);
+        }).catch(error => console.error(`加载分类 ${cfg.folder} 失败:`, error)));
         await Promise.allSettled(promises);
         flushTools(true);
       })();
