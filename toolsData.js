@@ -14,6 +14,9 @@ if (typeof sceneryTools !== 'undefined') {
 if (typeof musicTools !== 'undefined') {
   toolsData = toolsData.concat(musicTools);
 }
+if (typeof toolsTools !== 'undefined') {
+  toolsData = toolsData.concat(toolsTools);
+}
 // 未来可继续追加其他分类
 // 未来添加其他分类，例如：
 // if (typeof imageTools !== 'undefined') {
