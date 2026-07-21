@@ -80,7 +80,7 @@ var turingTools = [
     accentClass: 'accent-3'
   },
   {
-  id: 'turing-3',               // 根据已有 id 调整，如 turing-3
+  id: 'turing-9',               // 根据已有 id 调整，如 turing-3
   title: 'Pixiv 阅读器(P站)',
   url: 'https://pixiv.pictures/',
   description: 'Pixiv 插画与小说在线浏览工具，无需登录即可探索精彩内容。',
