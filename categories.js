@@ -23,6 +23,12 @@ var categoryConfigs = [
     id: 'music',
     name: '音乐',
     icon: ''
+  },
+  {
+  folder: 'tools',
+  id: 'tools',
+  name: '工具',
+  icon: ''
   }
   // 未来添加新分类，只需在这里追加，例如：
   // {
