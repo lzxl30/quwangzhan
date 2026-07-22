@@ -792,14 +792,14 @@
           updateFadeMask();
         };
 
-        // 收藏卡片拖拽（已优化：强制 fallback + 禁用动画，实现实时交换）
+        // 收藏卡片拖拽（延长长按时间，避免与滚动冲突）
         function initFavSortable() {
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
             favSortable = new Sortable(gridEl, {
               animation: 150,
-              delay: 100,
-              touchStartThreshold: 8,
+              delay: 200,               // 延长至200ms，与滚动更好区分
+              touchStartThreshold: 10,  // 移动超过10px才认为拖拽
               scroll: true,
               forceFallback: true,
               fallbackClass: 'card-sortable-fallback',
@@ -807,7 +807,6 @@
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
                 saveFavs();
-                // 清除滑动标记，恢复正常点击
                 gridEl.classList.remove('swiping');
               }
             });
@@ -816,7 +815,7 @@
 
         renderCards = function() {
           const f = getFiltered();
-          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 长按可拖拽卡片调整收藏顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
           if (f.length === 0) {
             gridEl.innerHTML = '';
@@ -848,7 +847,6 @@
 
         // 修改后的 click 处理器，增加滑动判断
         gridEl.addEventListener('click', (e) => {
-          // 如果之前发生了滑动，忽略本次点击
           if (gridEl.classList.contains('swiping')) {
             gridEl.classList.remove('swiping');
             return;
