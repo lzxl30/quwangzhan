@@ -762,7 +762,7 @@
           updateFadeMask();
         };
 
-        // 收藏卡片拖拽（实时换位，无重影）
+        // 收藏卡片拖拽（移动端实时换位，已加上 forceFallback）
         function initFavSortable() {
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
@@ -771,6 +771,8 @@
               delay: 100,
               touchStartThreshold: 8,
               scroll: true,
+              forceFallback: true,          // 关键：移动端模拟拖拽，触发实时重排
+              fallbackClass: 'card-sortable-fallback', // 可自定义类（已有 CSS 兼容）
               onEnd: function(evt) {
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
