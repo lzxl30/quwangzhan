@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>趣网站 | 有趣网站导航</title>
-  <!-- SortableJS 核心 + Swap 插件 -->
+  <!-- SortableJS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/plugins/Swap.min.js"></script>
   <style>
     :root {
       --bg: #0f1117;
@@ -142,10 +141,18 @@
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
-    /* 拖拽时原卡片不隐藏（swap 需要它可见） */
-    .card.sortable-chosen { opacity: 1; }
-    /* 目标位置占位符（可选） */
-    .card.sortable-ghost { opacity: 0.3; }
+    /* 原位置占位：半透明 */
+    .card.sortable-ghost { opacity: 0.25; }
+    /* 被拖拽的原卡片：完全隐藏，避免双影 */
+    .card.sortable-chosen { opacity: 0; }
+    /* 拖拽镜像：与普通卡片完全一致，无任何额外效果 */
+    .card.sortable-drag {
+      box-shadow: var(--shadow); /* 与普通卡片相同的阴影 */
+      transform: none;
+      border-color: var(--card-border);
+      opacity: 1 !important;
+      transition: none; /* 取消过渡，让镜像紧跟手指 */
+    }
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
@@ -756,19 +763,18 @@
           updateFadeMask();
         };
 
-        // 收藏卡片拖拽（Swap 交换动画，无镜像）
+        // 收藏卡片拖拽（与分类标签相同的配置，仅增加移动端必需项）
         function initFavSortable() {
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
             favSortable = new Sortable(gridEl, {
-              animation: 250,               // 交换动画时间（可调整）
-              delay: 100,
+              animation: 150,             // 平滑移动动画
+              delay: 100,                // 防误触
               touchStartThreshold: 8,
               scroll: true,
-              swap: true,                   // 启用交换模式
-              swapClass: 'card-swap-highlight', // 可选：交换时的高亮类（可自定义样式）
+              forceFallback: true,       // 移动端实时重排
+              fallbackClass: 'card-sortable-fallback', // 使用自定义类，但实际由CSS控制样式
               onEnd: function(evt) {
-                // swap 插件会自动处理 oldIndex / newIndex
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
                 saveFavs();
@@ -779,7 +785,7 @@
 
         renderCards = function() {
           const f = getFiltered();
-          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 拖拽卡片到目标位置即可交换排序</div>'; }
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 可拖拽卡片调整收藏顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
           if (f.length === 0) {
             gridEl.innerHTML = '';
@@ -797,10 +803,12 @@
               emptyText.textContent = '暂无内容';
               emptySubText.textContent = '该分类下还没有网站';
             }
+            // 清空收藏拖拽实例
             if (favSortable) { favSortable.destroy(); favSortable = null; }
           } else {
             emptyEl.style.display = 'none';
             gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
+            // 初始化或重新初始化收藏拖拽
             initFavSortable();
           }
         };
