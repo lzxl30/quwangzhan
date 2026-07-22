@@ -8,6 +8,7 @@ var aiTools = [
   icon: '🍻',
   iconBgClass: 'bg-3',
   accentClass: 'accent-3',
+  external: true
  },
  {
   id: 'ai-2',
@@ -18,5 +19,6 @@ var aiTools = [
   icon: '🍹',
   iconBgClass: 'bg-2',
   accentClass: 'accent-2',
+  external: true
  }
 ];
