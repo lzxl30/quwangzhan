@@ -141,17 +141,23 @@
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
+    /* 拖拽时禁用动画和过渡，确保位置即时更新 */
+    .card.sortable-ghost,
+    .card.sortable-chosen,
+    .card.sortable-drag {
+      transition: none !important;
+      animation: none !important;
+    }
     /* 原位置占位：半透明 */
     .card.sortable-ghost { opacity: 0.25; }
     /* 被拖拽的原卡片：完全隐藏，避免双影 */
     .card.sortable-chosen { opacity: 0; }
     /* 拖拽镜像：与普通卡片完全一致，无任何额外效果 */
     .card.sortable-drag {
-      box-shadow: var(--shadow); /* 与普通卡片相同的阴影 */
+      box-shadow: var(--shadow);
       transform: none;
       border-color: var(--card-border);
       opacity: 1 !important;
-      transition: none; /* 取消过渡，让镜像紧跟手指 */
     }
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
@@ -352,11 +358,17 @@
     @media (min-width: 601px) and (max-width: 1024px) {
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    /* 卡片淡入动画仅在非拖拽时保留 */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .card { animation: fadeInUp 0.3s ease forwards; }
+    .card.sortable-ghost,
+    .card.sortable-chosen,
+    .card.sortable-drag {
+      animation: none !important;
+    }
   </style>
 </head>
 <body>
@@ -763,17 +775,17 @@
           updateFadeMask();
         };
 
-        // 收藏卡片拖拽（与分类标签相同的配置，仅增加移动端必需项）
+        // 收藏卡片拖拽（已优化：强制 fallback + 禁用动画，实现实时交换）
         function initFavSortable() {
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
             favSortable = new Sortable(gridEl, {
-              animation: 150,             // 平滑移动动画
-              delay: 100,                // 防误触
+              animation: 150,             // 其他卡片移动的动画时间（仅在非拖拽元素上生效）
+              delay: 100,
               touchStartThreshold: 8,
               scroll: true,
-              forceFallback: true,       // 移动端实时重排
-              fallbackClass: 'card-sortable-fallback', // 使用自定义类，但实际由CSS控制样式
+              forceFallback: true,       // 确保移动端也能实时重排
+              fallbackClass: 'card-sortable-fallback', // 自定义类（实际样式由 .card.sortable-drag 控制）
               onEnd: function(evt) {
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
