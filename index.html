@@ -142,7 +142,7 @@
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
     .card.sortable-ghost { opacity: 0.5; }
-    .card.sortable-chosen { opacity: 0; }
+    /* 不再自定义 .card.sortable-chosen，使用 SortableJS 默认行为 */
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
@@ -762,8 +762,7 @@
               delay: 100,              // 长按100ms后才开始拖拽
               touchStartThreshold: 8,  // 手指移动超过8px才判定为拖拽
               scroll: true,            // 允许拖拽到边缘时自动滚动
-              forceFallback: true,     // 强制使用拖拽代理，避免原卡显示
-              fallbackClass: 'card-sortable-fallback',
+              // 不再使用 forceFallback，让 SortableJS 自适应设备
               onEnd: function(evt) {
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
@@ -793,12 +792,10 @@
               emptyText.textContent = '暂无内容';
               emptySubText.textContent = '该分类下还没有网站';
             }
-            // 清空收藏拖拽实例
             if (favSortable) { favSortable.destroy(); favSortable = null; }
           } else {
             emptyEl.style.display = 'none';
             gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
-            // 初始化或重新初始化收藏拖拽
             initFavSortable();
           }
         };
