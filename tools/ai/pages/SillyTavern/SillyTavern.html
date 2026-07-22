@@ -362,11 +362,23 @@
             color: #8899bb;
             text-align: center;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            pointer-events: none;
+            pointer-events: auto;
             line-height: 1.5;
+        }
+        .card-desc a,
+        .modal-desc a {
+            color: var(--accent-glow);
+            text-decoration: none;
+            transition: var(--transition);
+            pointer-events: auto;
+        }
+        .card-desc a:hover,
+        .modal-desc a:hover {
+            text-decoration: underline;
+            color: #fff;
         }
         .card-tags {
             display: flex;
@@ -531,6 +543,14 @@
             color: #8899bb;
             margin-bottom: 14px;
             line-height: 1.6;
+        }
+        .modal-desc a {
+            color: var(--accent-glow);
+            text-decoration: none;
+        }
+        .modal-desc a:hover {
+            text-decoration: underline;
+            color: #fff;
         }
         .modal-tags {
             display: flex;
@@ -923,7 +943,7 @@
                                  style="animation-delay:${idx * 0.04}s;">
                                 <div class="card-icon">${escapeHTML(card.icon)}</div>
                                 <div class="card-name">${escapeHTML(card.name)}</div>
-                                <div class="card-desc">${escapeHTML(card.description)}</div>
+                                <div class="card-desc">${card.description}</div>
                                 <div class="card-tags">${card.tags.map(t => `<span class="tag">${escapeHTML(t)}</span>`).join('')}</div>
                                 <div class="card-actions">
                                     <button class="mini-btn fav-btn${fav ? ' favorited' : ''}" data-action="fav" data-card-name="${escapeHTML(card.name)}">${fav ? '❤' : '🤍'}</button>
@@ -1017,7 +1037,7 @@
                 currentModalCard = card;
                 $modalIcon.textContent = card.icon;
                 $modalName.textContent = card.name;
-                $modalDesc.textContent = card.description;
+                $modalDesc.innerHTML = card.description;
                 $modalTags.innerHTML = card.tags.map(t => `<span class="tag">${escapeHTML(t)}</span>`).join('');
                 $modalVisitLink.href = card.url || '#';
                 if (!card.url || card.url === '#') {
