@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>趣网站 | 有趣网站导航</title>
+  <!-- SortableJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
     :root {
       --bg: #0f1117;
@@ -116,9 +118,9 @@
     .category-tag.active::after { content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: var(--primary-light); border-radius: 2px; }
     .category-tag .count { font-size: 0.7rem; color: var(--text-secondary); font-weight: 400; margin-left: 1px; }
     .category-tag.active .count { color: var(--primary-light); }
-    .category-tag.dragging { opacity: 0.4; }
-    .category-tag.drag-over { background: rgba(139,124,247,0.15); border-radius: 6px; }
-    .drag-handle { cursor: grab; color: var(--text-secondary); font-size: 0.8rem; margin-right: 2px; opacity: 0.5; }
+    .category-tag.sortable-ghost { opacity: 0.4; }
+    .category-tag.sortable-chosen { background: rgba(139,124,247,0.15); }
+    .drag-handle { cursor: grab; color: var(--text-secondary); font-size: 0.8rem; margin-right: 2px; opacity: 0.5; user-select: none; }
     .category-tag:hover .drag-handle { opacity: 1; }
     .sort-hint { font-size: 0.68rem; color: var(--text-secondary); text-align: center; padding: 6px 0 2px; opacity: 0.7; display: none; }
     .category-scroll.expanded .sort-hint { display: block; }
@@ -139,8 +141,8 @@
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
-    .card.dragging { opacity: 0.5; }
-    .card.drag-over { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 124, 247, 0.4); }
+    .card.sortable-ghost { opacity: 0.5; }
+    .card.sortable-chosen { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 124, 247, 0.4); }
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
@@ -458,9 +460,11 @@
       let zoomInBtn, zoomOutBtn, zoomValueEl, iframeScaler;
       let landscapeFloatToolbar, floatToggleBtn, floatExpandBtns;
       let floatZoomInBtn, floatZoomOutBtn, floatZoomValueEl, floatRotateBackBtn;
-      let renderTags, renderCards, renderAll, switchCat, setupDrag;
+      let renderTags, renderCards, renderAll, switchCat;
       let dataLoaded = false;
       let currentZoom = 1;
+      let catSortable = null;
+      let favSortable = null;
 
       const ORDER_KEY = 'categoryOrder_v1';
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
@@ -707,6 +711,7 @@
 
         switchCat = function(cid) { if (cid !== 'favorites' && cid !== 'shared') delete shuffled[cid]; curCat = cid; searchInp.value = ''; searchQ = ''; renderAll(); };
 
+        // 分类标签渲染（含 Sortable 初始化）
         renderTags = function() {
           const cats = getCats();
           const isExpanded = scrollEl.classList.contains('expanded');
@@ -714,45 +719,54 @@
             let n; if (c.id === 'favorites') n = favs.length; else if (c.id === 'shared') n = sharedUrl ? toolsData.filter(t => t.url === sharedUrl).length : 0; else if (c.id === 'all') n = toolsData.length; else n = toolsData.filter(t => t.category === c.id).length;
             const isBuiltIn = c.id === 'all' || c.id === 'favorites' || c.id === 'shared';
             const handle = isBuiltIn ? '' : '<span class="drag-handle">⋮⋮</span>';
-            return `<button class="category-tag${curCat === c.id ? ' active' : ''}" data-category="${c.id}" ${(!isBuiltIn && isExpanded) ? 'draggable="true"' : ''}>${handle}${c.name}<span class="count">${n}</span></button>`;
+            return `<button class="category-tag${curCat === c.id ? ' active' : ''}" data-category="${c.id}">${handle}${c.name}<span class="count">${n}</span></button>`;
           }).join('');
           if (isExpanded) {
             const hint = document.createElement('div');
             hint.className = 'sort-hint';
-            hint.textContent = '↕️ 拖拽调整分类顺序，点击分类可刷新网站排序';
+            hint.textContent = '↕️ 拖拽⋮⋮调整分类顺序，点击分类可刷新网站排序';
             scrollEl.appendChild(hint);
           }
+          // 绑定点击切换分类
           scrollEl.querySelectorAll('.category-tag').forEach(btn => {
             btn.addEventListener('click', () => switchCat(btn.dataset.category));
-            if (btn.draggable) {
-              btn.addEventListener('dragstart', handleCatDragStart);
-              btn.addEventListener('dragover', handleCatDragOver);
-              btn.addEventListener('dragleave', handleCatDragLeave);
-              btn.addEventListener('drop', handleCatDrop);
-              btn.addEventListener('dragend', handleCatDragEnd);
-            }
           });
+          // 销毁旧的 Sortable 实例
+          if (catSortable) { catSortable.destroy(); catSortable = null; }
+          // 仅在展开状态下启用拖拽排序
+          if (isExpanded) {
+            catSortable = new Sortable(scrollEl, {
+              group: 'categories',
+              animation: 150,
+              handle: '.drag-handle',
+              filter: '.category-tag[data-category="all"], .category-tag[data-category="favorites"], .category-tag[data-category="shared"]',
+              onEnd: function() {
+                const order = [];
+                scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => {
+                  const cid = btn.dataset.category;
+                  if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid);
+                });
+                saveOrder(order);
+              }
+            });
+          }
           updateFadeMask();
         };
 
-        let catDragSrc = null;
-        function handleCatDragStart(e) { catDragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', this.dataset.category); }
-        function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this !== catDragSrc && !['all', 'favorites', 'shared'].includes(this.dataset.category)) { this.classList.add('drag-over'); } }
-        function handleCatDragLeave(e) { this.classList.remove('drag-over'); }
-        function handleCatDrop(e) { e.preventDefault(); this.classList.remove('drag-over'); if (this === catDragSrc || ['all', 'favorites', 'shared'].includes(this.dataset.category)) return; const buttons = Array.from(scrollEl.querySelectorAll('.category-tag[draggable]')); const srcIdx = buttons.indexOf(catDragSrc); const destIdx = buttons.indexOf(this); if (srcIdx < destIdx) { scrollEl.insertBefore(catDragSrc, this.nextSibling); } else { scrollEl.insertBefore(catDragSrc, this); } const order = []; scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => { const cid = btn.dataset.category; if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid); }); saveOrder(order); renderTags(); }
-        function handleCatDragEnd(e) { this.classList.remove('dragging'); scrollEl.querySelectorAll('.category-tag').forEach(c => c.classList.remove('drag-over')); catDragSrc = null; }
-
-        let dragCard = null;
-        setupDrag = function() {
-          gridEl.querySelectorAll('.card').forEach(card => {
-            card.setAttribute('draggable', 'true');
-            card.addEventListener('dragstart', (e) => { dragCard = card; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', card.dataset.toolId); });
-            card.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (card !== dragCard) card.classList.add('drag-over'); });
-            card.addEventListener('dragleave', () => { card.classList.remove('drag-over'); });
-            card.addEventListener('drop', (e) => { e.preventDefault(); card.classList.remove('drag-over'); if (card === dragCard) return; const cards = Array.from(gridEl.querySelectorAll('.card')); const si = cards.indexOf(dragCard); const di = cards.indexOf(card); if (si < di) gridEl.insertBefore(dragCard, card.nextSibling); else gridEl.insertBefore(dragCard, card); const sid = dragCard.dataset.toolId; const did = card.dataset.toolId; const sf = favs.find(f => f.id === sid); const df = favs.find(f => f.id === did); if (sf && df) { const sIdx = favs.indexOf(sf); const dIdx = favs.indexOf(df); favs.splice(sIdx, 1); favs.splice(dIdx, 0, sf); saveFavs(); } });
-            card.addEventListener('dragend', () => { card.classList.remove('dragging'); gridEl.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over')); dragCard = null; });
-          });
-        };
+        // 收藏卡片拖拽初始化
+        function initFavSortable() {
+          if (favSortable) { favSortable.destroy(); favSortable = null; }
+          if (curCat === 'favorites' && gridEl.children.length > 0) {
+            favSortable = new Sortable(gridEl, {
+              animation: 150,
+              onEnd: function(evt) {
+                const movedId = favs.splice(evt.oldIndex, 1)[0];
+                favs.splice(evt.newIndex, 0, movedId);
+                saveFavs();
+              }
+            });
+          }
+        }
 
         renderCards = function() {
           const f = getFiltered();
@@ -774,9 +788,14 @@
               emptyText.textContent = '暂无内容';
               emptySubText.textContent = '该分类下还没有网站';
             }
+            // 清空收藏拖拽实例
+            if (favSortable) { favSortable.destroy(); favSortable = null; }
           } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join(''); if (curCat === 'favorites') setupDrag(); }
+            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
+            // 初始化或重新初始化收藏拖拽
+            initFavSortable();
+          }
         };
 
         renderAll = function() { renderTags(); renderCards(); };
