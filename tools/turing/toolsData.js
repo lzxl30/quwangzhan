@@ -1,7 +1,7 @@
 var turingTools = [
   {
     id: 'turing-1',
-    title: '光棱坦克 (Prism)',
+    title: '光棱坦克',
     url: 'https://prism.uyanide.com',
     description: '通过调节亮度阈值，让叠加在暗处的图片逐渐显现，创造神秘的双重曝光与显影效果。',
     category: 'turing',
@@ -11,7 +11,7 @@ var turingTools = [
   },
   {
     id: 'turing-2',
-    title: '幻影坦克 (Mirage)',
+    title: '幻影坦克',
     url: 'https://mirage.uyanide.com/',
     description: '制作经典“幻影坦克”图片——黑底白底各显示一张不同的图，神奇的双重隐藏效果。',
     category: 'turing',
