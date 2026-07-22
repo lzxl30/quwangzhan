@@ -141,8 +141,17 @@
 
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 20px 16px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--card-border); position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; overflow: hidden; -webkit-tap-highlight-color: transparent; will-change: transform; }
-    .card.sortable-ghost { opacity: 0.3; }  /* 原位置占位符：半透明 */
-    .card.sortable-chosen { /* 手指下的卡片：完全不透明，默认即可，不需要特殊样式 */ }
+    /* 原位置占位：半透明 */
+    .card.sortable-ghost { opacity: 0.25; }
+    /* 被拖拽的原卡片：完全隐藏，避免双影 */
+    .card.sortable-chosen { opacity: 0; }
+    /* 拖拽跟随的镜像：添加突出样式 */
+    .card.sortable-drag {
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      transform: scale(1.04);
+      border-color: var(--primary-light);
+      opacity: 1 !important;
+    }
     .card:active { transform: scale(0.98); }
     .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary-light); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
@@ -753,16 +762,15 @@
           updateFadeMask();
         };
 
-        // 收藏卡片拖拽初始化（仅保留防误触，移除 forceFallback，恢复正常交换动画）
+        // 收藏卡片拖拽（实时换位，无重影）
         function initFavSortable() {
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
             favSortable = new Sortable(gridEl, {
-              animation: 150,            // 其他卡片移动的动画时间
-              delay: 100,               // 长按100ms后开始拖拽，防止滚动误触
-              touchStartThreshold: 8,   // 移动超过8px才判定为拖拽
-              scroll: true,             // 允许拖拽到边缘时自动滚动
-              // 不再使用 forceFallback，让桌面端用原生拖拽，移动端用 Sortable 内置模拟
+              animation: 150,
+              delay: 100,
+              touchStartThreshold: 8,
+              scroll: true,
               onEnd: function(evt) {
                 const movedId = favs.splice(evt.oldIndex, 1)[0];
                 favs.splice(evt.newIndex, 0, movedId);
