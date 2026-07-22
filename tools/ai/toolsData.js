@@ -2,7 +2,7 @@ var sceneryTools = [
   {
   id: 'ai-1',
   title: '公益酒馆合集（SillyTavern）',
-  url: 'tools/ai/pages/SillyTavern/SillyTavern.html',
+  url: 'tools/ai/pages/SillyTavern.html',
   description: '免费公益的 SillyTavern 酒馆合集，无需部署即可体验 AI 角色扮演与对话。',
   category: 'ai',
   icon: '🍻',
