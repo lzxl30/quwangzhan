@@ -19,5 +19,6 @@ var sceneryTools = [
   icon: '🎥',
   iconBgClass: 'bg-3',
   accentClass: 'accent-3',
+  external: true
   }
 ];
