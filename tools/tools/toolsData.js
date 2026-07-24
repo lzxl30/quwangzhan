@@ -9,5 +9,15 @@ var toolsTools = [
     iconBgClass: 'bg-4',      // 蓝紫渐变，理性工具感
     accentClass: 'accent-4',
     external: true            // 搜索引擎适合在新标签页打开
+  },
+  {
+  id: 'tools-2',
+  title: 'Cvoice 声音印象测试',
+  url: 'https://chiooone.com/cvoice/',
+  description: '录一段自然说话，获得专属于你的专业音色报告。在线语音分析工具，快速了解你的声音特点。',
+  category: 'tools',
+  icon: '🎙️',
+  iconBgClass: 'bg-0',
+  accentClass: 'accent-0',
   }
 ];
