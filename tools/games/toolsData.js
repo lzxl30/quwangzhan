@@ -94,11 +94,21 @@ var gamesTools = [
   id: 'games-10',                             // 根据实际序号调整
   title: 'Florr.io',
   url: 'https://florr.io/',
-  description: '收集花瓣、合成装备，在线对战的花园 io 游戏，简单耐玩。',
+  description: '建议浏览打开，收集花瓣、合成装备，在线对战的花园 io 游戏，简单耐玩。',
   category: 'games',
   icon: '🌸',
   iconBgClass: 'bg-2',          // 青绿渐变，清新自然花朵风
   accentClass: 'accent-2',             // 建议新窗口打开，避免 iframe 限制
+  }, 
+  {
+  id: 'games-11',                        // 根据实际序号调整
+  title: '怀旧游戏',
+  url: 'http://accct.top/332',
+  description: '重温经典老游戏，多种童年街机与掌机游戏在线畅玩。',
+  category: 'games',
+  icon: '🕹️',
+  iconBgClass: 'bg-5',                  // 橙红渐变，复古街机风
+  accentClass: 'accent-5',                        // 建议新窗口打开，兼容性更好
   }
   // 在这里继续添加更多游戏工具
 ];
