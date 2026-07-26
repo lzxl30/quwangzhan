@@ -21,7 +21,8 @@
       --accent-5: #f07b6c;
       --accent-6: #22d3ee;
       --border: rgba(42, 46, 59, 0.6);
-      --glass-blur: 0px;            /* 默认无模糊 */
+      --glass-blur: 12px;               /* 默认其他区域模糊开启 */
+      --card-glass-blur: 0px;           /* 默认卡片模糊关闭 */
       --shadow: 0 8px 24px rgba(0,0,0,0.4);
       --shadow-hover: 0 16px 40px rgba(0,0,0,0.6);
       --radius: 18px;
@@ -84,7 +85,7 @@
 
     .header {
       background: var(--header-bg);
-      backdrop-filter: blur(var(--glass-blur));
+      backdrop-filter: blur(var(--glass-blur));   /* 其他区域模糊 */
       border-bottom: 1px solid var(--border);
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
@@ -97,7 +98,6 @@
     .logo-text { font-size:1.2rem; font-weight:700; letter-spacing:-0.3px; background:linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     .logo-sub { font-size:0.6rem; color:var(--text-secondary); font-weight:400; margin-top:1px; display:none; }
 
-    /* 搜索框背景透明 */
     .search-wrap { position:relative; flex:1; max-width:360px; min-width:160px; margin:0 8px; }
     .search-wrap input {
       width:100%; padding:9px 16px 9px 38px; border:2px solid var(--border); border-radius:50px;
@@ -107,7 +107,6 @@
     .search-wrap input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(139,124,247,0.12); background: transparent; }
     .search-wrap .search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:0.95rem; color:#888ca0; pointer-events:none; }
 
-    /* 昼夜按钮背景透明 */
     .theme-toggle {
       background: transparent; border:none; color:var(--text); width:36px; height:36px;
       border-radius:50%; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
@@ -154,7 +153,7 @@
     .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; }
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(var(--glass-blur));
+      backdrop-filter: blur(var(--card-glass-blur));  /* 卡片单独模糊控制 */
       border-radius: var(--radius);
       padding:20px 20px 16px;
       box-shadow: var(--shadow);
@@ -419,12 +418,15 @@
       <button id="applyBgBtn">应用背景</button>
     </div>
 
-    <label>🔍 毛玻璃透明度</label>
+    <label>🔍 透明度</label>
     <input type="range" id="glassAlphaSlider" min="0.3" max="0.9" step="0.05" value="0.6">
     <span style="font-size:0.7rem; color:var(--text-secondary);">当前透明度：<span id="glassAlphaVal">0.6</span></span>
 
     <label style="display:flex; align-items:center; gap:4px; margin-top:8px;">
-      <input type="checkbox" id="glassToggle"> 启用毛玻璃模糊
+      <input type="checkbox" id="glassToggle"> 启用全局模糊
+    </label>
+    <label style="display:flex; align-items:center; gap:4px;">
+      <input type="checkbox" id="cardGlassToggle"> 启用卡片模糊
     </label>
 
     <label>🌗 背景明暗</label>
@@ -461,7 +463,7 @@
       let landscapeFloatToolbar, floatToggleBtn, floatExpandBtns;
       let floatZoomInBtn, floatZoomOutBtn, floatZoomValueEl, floatRotateBackBtn;
       let appearanceBtn, appearancePanel, closePanelBtn, applyBgBtn, clearBgBtn;
-      let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal, glassToggle;
+      let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal, glassToggle, cardGlassToggle;
       let renderTags, renderCards, renderAll, switchCat;
       let dataLoaded = false;
       let currentZoom = 1;
@@ -475,10 +477,12 @@
       function loadAppearance() {
         const glass = localStorage.getItem('glassAlpha') || '0.6';
         const darken = localStorage.getItem('bgDarken') || '0';
-        const blurEnabled = localStorage.getItem('glassEnabled') === 'true';
+        const blurEnabled = localStorage.getItem('glassEnabled') !== 'false'; // 默认为 true
+        const cardBlurEnabled = localStorage.getItem('cardGlassEnabled') === 'true'; // 默认 false
         document.documentElement.style.setProperty('--glass-alpha', glass);
         document.documentElement.style.setProperty('--bg-darken', darken);
         document.documentElement.style.setProperty('--glass-blur', blurEnabled ? '12px' : '0px');
+        document.documentElement.style.setProperty('--card-glass-blur', cardBlurEnabled ? '12px' : '0px');
         if (glassAlphaSlider) {
           glassAlphaSlider.value = glass;
           glassAlphaVal.textContent = glass;
@@ -489,6 +493,9 @@
         }
         if (glassToggle) {
           glassToggle.checked = blurEnabled;
+        }
+        if (cardGlassToggle) {
+          cardGlassToggle.checked = cardBlurEnabled;
         }
       }
 
@@ -582,14 +589,17 @@
         glassAlphaVal = document.getElementById('glassAlphaVal');
         bgDarkenVal = document.getElementById('bgDarkenVal');
         glassToggle = document.getElementById('glassToggle');
+        cardGlassToggle = document.getElementById('cardGlassToggle');
 
         appearanceBtn.addEventListener('click', () => {
           appearancePanel.classList.toggle('show');
+          // 同步当前值
           glassAlphaSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--glass-alpha').trim();
           bgDarkenSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-darken').trim();
           glassAlphaVal.textContent = glassAlphaSlider.value;
           bgDarkenVal.textContent = bgDarkenSlider.value;
-          glassToggle.checked = localStorage.getItem('glassEnabled') === 'true';
+          glassToggle.checked = localStorage.getItem('glassEnabled') !== 'false';
+          cardGlassToggle.checked = localStorage.getItem('cardGlassEnabled') === 'true';
         });
         closePanelBtn.addEventListener('click', () => appearancePanel.classList.remove('show'));
 
@@ -609,6 +619,12 @@
           const enabled = glassToggle.checked;
           document.documentElement.style.setProperty('--glass-blur', enabled ? '12px' : '0px');
           localStorage.setItem('glassEnabled', enabled);
+        });
+
+        cardGlassToggle.addEventListener('change', () => {
+          const enabled = cardGlassToggle.checked;
+          document.documentElement.style.setProperty('--card-glass-blur', enabled ? '12px' : '0px');
+          localStorage.setItem('cardGlassEnabled', enabled);
         });
 
         applyBgBtn.addEventListener('click', () => {
