@@ -8,9 +8,9 @@
   <style>
     :root {
       --bg: #0a0c12;
-      --glass-bg: rgba(22, 25, 35, 0.55);
+      --glass-bg: rgba(18, 20, 28, 0.45);
       --glass-border: rgba(255,255,255,0.08);
-      --blur: 24px;
+      --blur: 30px;
       --text: #e8edf2;
       --text-secondary: #9aa0b4;
       --primary: #8b7cf7;
@@ -29,16 +29,16 @@
       --tag-bg: rgba(255,255,255,0.06);
       --tag-active-bg: var(--primary);
       --tag-text: #b4bcd0;
-      --footer-bg: rgba(18, 20, 28, 0.55);
+      --footer-bg: rgba(18, 20, 28, 0.45);
       --input-bg: rgba(255,255,255,0.06);
       --card-border: rgba(255,255,255,0.06);
     }
 
     body.light-mode {
       --bg: #f0f2f7;
-      --glass-bg: rgba(255,255,255,0.55);
+      --glass-bg: rgba(255,255,255,0.45);
       --glass-border: rgba(0,0,0,0.06);
-      --blur: 24px;
+      --blur: 30px;
       --text: #1e1e2f;
       --text-secondary: #5b5e72;
       --primary: #6c5ce7;
@@ -53,7 +53,7 @@
       --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.1);
       --tag-bg: rgba(0,0,0,0.04);
       --tag-text: #4a4d5e;
-      --footer-bg: rgba(255,255,255,0.55);
+      --footer-bg: rgba(255,255,255,0.45);
       --input-bg: rgba(0,0,0,0.04);
       --card-border: rgba(0,0,0,0.06);
     }
@@ -68,21 +68,22 @@
       min-height: 100vh;
       transition: background 0.3s, color 0.3s;
       background-image:
-        radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.05) 0%, transparent 60%);
+        radial-gradient(ellipse at 30% 10%, rgba(139, 124, 247, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 90%, rgba(45, 212, 191, 0.06) 0%, transparent 60%);
       -webkit-tap-highlight-color: transparent;
       padding-bottom: 100px;
     }
 
-    /* ========== 玻璃核心 ========== */
+    /* ========= 全局毛玻璃 ========= */
     .header,
     .fixed-bottom-bar,
     .modal-content,
     .card,
-    .empty-state {
+    .empty-state,
+    .modal-header {
       background: var(--glass-bg);
-      backdrop-filter: blur(var(--blur));
-      -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
       border-color: var(--glass-border);
     }
 
@@ -91,7 +92,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 1px 16px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 16px rgba(0, 0, 0, 0.15);
       transition: background 0.3s;
     }
 
@@ -101,8 +102,8 @@
     }
 
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); flex-shrink: 0; }
-    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #8b7cf7, #f97ba8); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4); }
-    .logo-text { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .logo-icon { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #8b7cf7, #f97ba8); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(139, 124, 247, 0.4); }
+    .logo-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; background: linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .logo-sub { font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; margin-top: 1px; display: none; }
 
     .search-wrap { position: relative; flex: 1; max-width: 360px; min-width: 160px; margin: 0 8px; }
@@ -127,8 +128,8 @@
 
     .theme-toggle {
       background: var(--tag-bg); border: none; color: var(--text);
-      width: 36px; height: 36px; border-radius: 50%;
-      font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: var(--transition);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;
       backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -187,7 +188,8 @@
       position: relative; display: flex; flex-direction: column; gap: 8px;
       text-decoration: none; color: inherit; overflow: hidden;
       -webkit-tap-highlight-color: transparent; will-change: transform;
-      backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
     }
     .card.sortable-ghost,
     .card.sortable-chosen,
@@ -201,7 +203,7 @@
       border-color: var(--glass-border); opacity: 1 !important;
     }
     .card:active { transform: scale(0.98); }
-    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: rgba(255,255,255,0.12); }
+    .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: rgba(255,255,255,0.14); }
     .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; opacity: 0.9; }
     .card.accent-1::before { background: var(--accent-1); }
     .card.accent-2::before { background: var(--accent-2); }
@@ -212,7 +214,13 @@
     .card.accent-0::before { background: var(--primary); }
 
     .card-icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      background: linear-gradient(135deg, var(--primary), var(--accent-4));
+    }
     .bg-1 { background: linear-gradient(135deg, #f97ba8, #e84393); }
     .bg-2 { background: linear-gradient(135deg, #2dd4bf, #00cec9); }
     .bg-3 { background: linear-gradient(135deg, #f6c85b, #f39c12); }
@@ -235,15 +243,15 @@
     .card-category-badge:hover { background: var(--primary); color: #fff; }
     .card-actions { display: flex; gap: 8px; align-items: center; }
     .action-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      display: flex; align-items: center; gap: 4px;
       background: transparent; border: none; cursor: pointer;
-      padding: 4px 8px; border-radius: 10px; transition: 0.2s;
-      color: #7c8096; font-size: 1.1rem;
+      padding: 4px 6px; border-radius: 8px; transition: 0.2s;
+      color: #7c8096; font-size: 0.9rem;
       -webkit-tap-highlight-color: transparent;
     }
-    .action-btn span.icon { font-size: 1.2rem; }
+    .action-btn span.icon { font-size: 1rem; }
     .action-btn span.label { font-size: 0.65rem; font-weight: 500; }
-    .action-btn:hover { background: rgba(139, 124, 247, 0.1); color: var(--primary-light); }
+    .action-btn:hover { background: rgba(139, 124, 247, 0.12); color: var(--primary-light); }
     .fav-btn.favorited { color: #f97ba8; }
     .open-btn {
       display: inline-block; width: 14px; height: 14px;
@@ -259,7 +267,8 @@
     .empty-state {
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
       text-align: center; padding: 60px 20px; color: var(--text-secondary);
       border-radius: var(--radius); box-shadow: var(--shadow);
     }
@@ -272,9 +281,10 @@
       padding: 6px 16px 8px;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
       z-index: 99;
-      box-shadow: 0 -2px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.15);
       background: var(--footer-bg);
-      backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
     }
 
     .bottom-top-row { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; }
@@ -317,7 +327,8 @@
     .modal-content {
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
       border-radius: 0; width: 100%; height: 100%; max-height: 100vh;
       display: flex; flex-direction: column;
       box-shadow: 0 20px 50px rgba(0,0,0,0.6);
@@ -487,13 +498,13 @@
        <div class="logo-icon">
        <img src="images/qwztb.png" alt="趣网站" style="width:100%; height:100%; object-fit: contain;">
        </div>
-        <div><div class="logo-text">趣网站</div><div class="logo-sub">✨ 好玩的网站集合</div></div>
+        <div><div class="logo-text">趣网站</div><div class="logo-sub">✦ 好玩的网站集合</div></div>
       </a>
       <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">⌕</span>
         <input type="text" id="searchInput" placeholder="搜索网站..." aria-label="搜索网站">
       </div>
-      <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">🌙</button>
+      <button class="theme-toggle" id="themeToggle" title="切换亮色/暗色模式">◐</button>
     </div>
     <div class="header-hint">
       📢 加入<a href="https://pd.qq.com/s/g22heg9e2?b=9" target="_blank" rel="noopener">趣网吧</a>分享有趣网站，你分享的网站有机会出现在这里哦
@@ -554,7 +565,7 @@
   <div class="fixed-bottom-bar">
     <div class="bottom-top-row">
       <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部并刷新排序">
-        <span class="btn-icon">⬆️</span> 回顶
+        <span class="btn-icon">⇧</span> 回顶
       </button>
       <div class="channel-row">
         <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="channel-btn"><span class="btn-icon">🎮</span> 次元ACG</a>
@@ -727,7 +738,7 @@
 
         topBtn.addEventListener('click', () => { window.scrollTo(0, 0); requestAnimationFrame(() => { requestAnimationFrame(() => { if (curCat !== 'favorites' && curCat !== 'shared') { delete shuffled[curCat]; } renderAll(); }); }); });
 
-        function applyTheme(m) { if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '☀️'; } else { document.body.classList.remove('light-mode'); themeBtn.textContent = '🌙'; } localStorage.setItem('turingMagicTheme', m); }
+        function applyTheme(m) { if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '◑'; } else { document.body.classList.remove('light-mode'); themeBtn.textContent = '◐'; } localStorage.setItem('turingMagicTheme', m); }
         (function initTheme() { const s = localStorage.getItem('turingMagicTheme'); applyTheme(s === 'light' ? 'light' : 'dark'); })();
         themeBtn.addEventListener('click', () => { applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'); });
 
@@ -761,13 +772,13 @@
           if (f.length === 0) {
             gridEl.innerHTML = ''; emptyEl.style.display = 'block';
             if (!dataLoaded) { emptyText.textContent = '正在加载网站…'; emptySubText.textContent = '请稍候，网站卡片即将呈现'; }
-            else if (curCat === 'favorites') { emptyText.textContent = '暂无收藏'; emptySubText.textContent = '点击心形图标收藏喜欢的网站吧'; }
+            else if (curCat === 'favorites') { emptyText.textContent = '暂无收藏'; emptySubText.textContent = '点击 ♡ 收藏喜欢的网站吧'; }
             else if (curCat === 'shared') { emptyText.textContent = '未找到该网站'; emptySubText.textContent = '请检查链接是否正确'; }
             else { emptyText.textContent = '暂无内容'; emptySubText.textContent = '该分类下还没有网站'; }
             if (favSortable) { favSortable.destroy(); favSortable = null; }
           } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
+            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">↗</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '♥' : '♡'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
             initFavSortable();
           }
         };
