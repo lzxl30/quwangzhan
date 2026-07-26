@@ -1,4 +1,4 @@
-var sceneryTools = [
+var movieTools = [
   {
   id: 'movie-1',
   title: '以图搜番',
