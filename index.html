@@ -139,18 +139,21 @@
     .category-scroll.expanded .sort-hint { display:block; }
 
     .fade-mask {
-      pointer-events:none;
-      position:absolute; right:0; top:0; bottom:0; width:70px;
-      background:linear-gradient(to left, var(--bg) 0%, transparent 100%);
-      z-index:2; transition:opacity 0.3s, background 0.3s;
-      border-radius: 0 0 10px 10px;
-      opacity: var(--glass-alpha);  /* 随透明度滑块变化 */
+      display: none; /* 移除遮罩 */
     }
-    body.light-mode .fade-mask { background:linear-gradient(to left, var(--bg) 0%, transparent 100%); }
-    .category-scroll.expanded ~ .fade-mask, .fade-mask.hidden { opacity:0; pointer-events:none; }
+    .category-scroll.expanded ~ .fade-mask, .fade-mask.hidden { display: none; }
 
-    .category-expand-btn { flex-shrink:0; width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:none; border:none; color:var(--text-secondary); cursor:pointer; transition:0.2s; -webkit-tap-highlight-color:transparent; border-radius:6px; z-index:5; }
-    .category-expand-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+    .category-expand-btn {
+      flex-shrink:0; width:34px; height:34px;
+      display:flex; align-items:center; justify-content:center;
+      background:none; border:none; color:var(--text-secondary);
+      cursor:pointer; transition:0.2s;
+      -webkit-tap-highlight-color:transparent; border-radius:6px; z-index:5;
+    }
+    .category-expand-btn:hover {
+      background: transparent; /* 移除下拉按钮背景 */
+      color: var(--text);
+    }
     .category-expand-btn:active { opacity:0.7; }
     .arrow-v { display:inline-block; width:10px; height:10px; border-right:2.5px solid currentColor; border-bottom:2.5px solid currentColor; transform:rotate(45deg); transition:transform 0.25s; }
     .category-expand-btn.open .arrow-v { transform:rotate(-135deg); }
