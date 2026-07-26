@@ -90,7 +90,8 @@
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
       transition: background 0.3s, backdrop-filter 0.3s;
-      border-radius: 0 0 14px 14px; /* 底部圆角 */
+      border-radius: 0 0 12px 12px; /* 缩小圆角 */
+      overflow: hidden; /* 防止内部元素遮挡圆角 */
     }
     .header-top { max-width:1350px; margin:0 auto; padding:10px 20px 6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; }
     .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); flex-shrink:0; }
@@ -218,7 +219,7 @@
       z-index:99;
       box-shadow:0 -2px 10px rgba(0,0,0,0.2);
       transition:background 0.3s, backdrop-filter 0.3s;
-      border-radius: 14px 14px 0 0; /* 顶部圆角 */
+      border-radius: 12px 12px 0 0; /* 缩小顶部圆角 */
     }
     .bottom-top-row { display:flex; justify-content:space-between; align-items:center; width:100%; }
     .left-group { display:flex; align-items:center; }
