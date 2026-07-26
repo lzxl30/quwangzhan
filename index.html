@@ -21,7 +21,7 @@
       --accent-5: #f07b6c;
       --accent-6: #22d3ee;
       --border: rgba(42, 46, 59, 0.6);
-      --blur-effect: none;          /* 默认无毛玻璃模糊 */
+      --glass-blur: 0px;            /* 默认无模糊 */
       --shadow: 0 8px 24px rgba(0,0,0,0.4);
       --shadow-hover: 0 16px 40px rgba(0,0,0,0.6);
       --radius: 18px;
@@ -71,16 +71,20 @@
     }
 
     #bgOverlay {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      pointer-events: none; z-index:0;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
       background: rgba(0,0,0, var(--bg-darken, 0));
       transition: background 0.3s;
     }
-    body.light-mode #bgOverlay { background: rgba(255,255,255, var(--bg-darken, 0)); }
+    body.light-mode #bgOverlay {
+      background: rgba(255,255,255, var(--bg-darken, 0));
+    }
 
     .header {
       background: var(--header-bg);
-      backdrop-filter: var(--blur-effect);
+      backdrop-filter: blur(var(--glass-blur));
       border-bottom: 1px solid var(--border);
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
@@ -93,27 +97,23 @@
     .logo-text { font-size:1.2rem; font-weight:700; letter-spacing:-0.3px; background:linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     .logo-sub { font-size:0.6rem; color:var(--text-secondary); font-weight:400; margin-top:1px; display:none; }
 
-    /* 搜索框和主题按钮：无背景 */
+    /* 搜索框背景透明 */
     .search-wrap { position:relative; flex:1; max-width:360px; min-width:160px; margin:0 8px; }
     .search-wrap input {
       width:100%; padding:9px 16px 9px 38px; border:2px solid var(--border); border-radius:50px;
       font-size:0.85rem; outline:none; transition:var(--transition);
-      background: transparent;           /* 去掉背景 */
-      color:var(--text);
-      -webkit-appearance:none;
+      background: transparent; color:var(--text); -webkit-appearance:none;
     }
-    .search-wrap input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(139,124,247,0.12); }
+    .search-wrap input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(139,124,247,0.12); background: transparent; }
     .search-wrap .search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:0.95rem; color:#888ca0; pointer-events:none; }
 
+    /* 昼夜按钮背景透明 */
     .theme-toggle {
-      background: transparent;           /* 去掉背景 */
-      border:1px solid var(--border);
-      color:var(--text); width:36px; height:36px; border-radius:50%;
-      font-size:1.1rem; display:flex; align-items:center; justify-content:center;
-      cursor:pointer; transition:var(--transition);
-      flex-shrink:0;
+      background: transparent; border:none; color:var(--text); width:36px; height:36px;
+      border-radius:50%; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:var(--transition); flex-shrink:0;
     }
-    .theme-toggle:hover { background: rgba(139,124,247,0.1); }
+    .theme-toggle:hover { background:var(--primary); color:#fff; transform:scale(1.06); }
 
     .header-hint { max-width:1350px; margin:0 auto; padding:0 20px 4px; text-align:center; font-size:0.7rem; color:var(--text-secondary); font-weight:500; }
     .header-hint a { color:var(--primary-light); font-weight:700; text-decoration:underline; text-underline-offset:2px; }
@@ -154,7 +154,7 @@
     .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; }
     .card {
       background: var(--card-bg);
-      backdrop-filter: var(--blur-effect);
+      backdrop-filter: blur(var(--glass-blur));
       border-radius: var(--radius);
       padding:20px 20px 16px;
       box-shadow: var(--shadow);
@@ -205,14 +205,13 @@
     .open-btn { display:inline-block; width:14px; height:14px; border-right:3px solid var(--text-secondary); border-bottom:3px solid var(--text-secondary); transform:rotate(-45deg); margin-left:auto; margin-right:6px; cursor:pointer; opacity:0.6; transition:all 0.2s; flex-shrink:0; align-self:center; -webkit-tap-highlight-color:transparent; }
     .open-btn:hover { border-color:var(--primary-light); opacity:1; transform:rotate(-45deg) scale(1.2); }
 
-    .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); background:var(--card-bg); backdrop-filter: var(--blur-effect); border-radius:var(--radius); box-shadow:var(--shadow); }
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); background:var(--card-bg); backdrop-filter:blur(var(--glass-blur)); border-radius:var(--radius); box-shadow:var(--shadow); }
     .empty-state .empty-icon { font-size:3.5rem; margin-bottom:12px; opacity:0.7; }
     .empty-state p { font-size:0.95rem; }
 
     .fixed-bottom-bar {
       position:fixed; bottom:0; left:0; right:0;
-      background:var(--footer-bg);
-      backdrop-filter: var(--blur-effect);
+      background:var(--footer-bg); backdrop-filter:blur(var(--glass-blur));
       border-top:1px solid var(--border);
       padding:4px 16px 6px;
       display:flex; flex-direction:column; align-items:center; gap:4px;
@@ -241,7 +240,7 @@
     /* 自定义外观面板 */
     .appearance-panel {
       position:fixed; bottom:60px; right:16px;
-      background:var(--card-bg); backdrop-filter: var(--blur-effect);
+      background:var(--card-bg); backdrop-filter:blur(20px);
       border:1px solid var(--border); border-radius:12px;
       padding:16px; z-index:110; display:none;
       box-shadow:0 8px 30px rgba(0,0,0,0.4);
@@ -266,7 +265,7 @@
 
     .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:0; opacity:0; visibility:hidden; transition:opacity 0.3s, visibility 0.3s; }
     .modal-overlay.active { opacity:1; visibility:visible; }
-    .modal-content { background:rgba(26,29,39, var(--glass-alpha, 0.6)); backdrop-filter: var(--blur-effect); border-radius:0; width:100%; height:100%; max-height:100vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:relative; }
+    .modal-content { background:rgba(26,29,39, var(--glass-alpha, 0.6)); backdrop-filter:blur(16px); border-radius:0; width:100%; height:100%; max-height:100vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:relative; }
     body.light-mode .modal-content { background:rgba(255,255,255, var(--glass-alpha, 0.6)); }
 
     .modal-header { display:flex; align-items:center; justify-content:space-between; padding:4px 8px; border-bottom:1px solid var(--border); gap:6px; flex-wrap:wrap; background:transparent; }
@@ -326,7 +325,6 @@
 </head>
 <body>
   <div id="bgOverlay"></div>
-
   <header class="header">
     <div class="header-top">
       <a href="#" class="logo" title="趣网站">
@@ -411,7 +409,6 @@
     <p class="footer-note" id="versionNote"></p>
   </div>
 
-  <!-- 自定义外观面板 -->
   <div class="appearance-panel" id="appearancePanel">
     <label style="margin-top:0;">🌐 图片链接</label>
     <input type="text" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
@@ -422,11 +419,13 @@
       <button id="applyBgBtn">应用背景</button>
     </div>
 
-    <label><input type="checkbox" id="blurToggle"> 启用毛玻璃效果</label>
-
-    <label>🔍 背景透明度</label>
+    <label>🔍 毛玻璃透明度</label>
     <input type="range" id="glassAlphaSlider" min="0.3" max="0.9" step="0.05" value="0.6">
     <span style="font-size:0.7rem; color:var(--text-secondary);">当前透明度：<span id="glassAlphaVal">0.6</span></span>
+
+    <label style="display:flex; align-items:center; gap:4px; margin-top:8px;">
+      <input type="checkbox" id="glassToggle"> 启用毛玻璃模糊
+    </label>
 
     <label>🌗 背景明暗</label>
     <input type="range" id="bgDarkenSlider" min="0" max="0.7" step="0.05" value="0">
@@ -444,10 +443,8 @@
       });
     }
   </script>
-
   <script src="categories.js"></script>
   <script src="version.js"></script>
-
   <script>
     (function() {
       if (typeof categoryConfigs === 'undefined') { console.error('❌ categories.js 未加载'); return; }
@@ -464,8 +461,7 @@
       let landscapeFloatToolbar, floatToggleBtn, floatExpandBtns;
       let floatZoomInBtn, floatZoomOutBtn, floatZoomValueEl, floatRotateBackBtn;
       let appearanceBtn, appearancePanel, closePanelBtn, applyBgBtn, clearBgBtn;
-      let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal;
-      let blurToggle;
+      let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal, glassToggle;
       let renderTags, renderCards, renderAll, switchCat;
       let dataLoaded = false;
       let currentZoom = 1;
@@ -479,15 +475,21 @@
       function loadAppearance() {
         const glass = localStorage.getItem('glassAlpha') || '0.6';
         const darken = localStorage.getItem('bgDarken') || '0';
-        const blur = localStorage.getItem('blurEnabled') === 'true' ? 'blur(12px)' : 'none';
+        const blurEnabled = localStorage.getItem('glassEnabled') === 'true';
         document.documentElement.style.setProperty('--glass-alpha', glass);
         document.documentElement.style.setProperty('--bg-darken', darken);
-        document.documentElement.style.setProperty('--blur-effect', blur);
-        if (glassAlphaSlider) glassAlphaSlider.value = glass;
-        if (bgDarkenSlider) bgDarkenSlider.value = darken;
-        if (blurToggle) blurToggle.checked = (blur !== 'none');
-        glassAlphaVal.textContent = glass;
-        bgDarkenVal.textContent = darken;
+        document.documentElement.style.setProperty('--glass-blur', blurEnabled ? '12px' : '0px');
+        if (glassAlphaSlider) {
+          glassAlphaSlider.value = glass;
+          glassAlphaVal.textContent = glass;
+        }
+        if (bgDarkenSlider) {
+          bgDarkenSlider.value = darken;
+          bgDarkenVal.textContent = darken;
+        }
+        if (glassToggle) {
+          glassToggle.checked = blurEnabled;
+        }
       }
 
       function applyBgFromStorage() {
@@ -579,15 +581,15 @@
         bgDarkenSlider = document.getElementById('bgDarkenSlider');
         glassAlphaVal = document.getElementById('glassAlphaVal');
         bgDarkenVal = document.getElementById('bgDarkenVal');
-        blurToggle = document.getElementById('blurToggle');
+        glassToggle = document.getElementById('glassToggle');
 
         appearanceBtn.addEventListener('click', () => {
           appearancePanel.classList.toggle('show');
           glassAlphaSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--glass-alpha').trim();
           bgDarkenSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-darken').trim();
-          blurToggle.checked = (getComputedStyle(document.documentElement).getPropertyValue('--blur-effect').trim() !== 'none');
           glassAlphaVal.textContent = glassAlphaSlider.value;
           bgDarkenVal.textContent = bgDarkenSlider.value;
+          glassToggle.checked = localStorage.getItem('glassEnabled') === 'true';
         });
         closePanelBtn.addEventListener('click', () => appearancePanel.classList.remove('show'));
 
@@ -596,16 +598,17 @@
           glassAlphaVal.textContent = glassAlphaSlider.value;
           localStorage.setItem('glassAlpha', glassAlphaSlider.value);
         });
+
         bgDarkenSlider.addEventListener('input', () => {
           document.documentElement.style.setProperty('--bg-darken', bgDarkenSlider.value);
           bgDarkenVal.textContent = bgDarkenSlider.value;
           localStorage.setItem('bgDarken', bgDarkenSlider.value);
         });
 
-        blurToggle.addEventListener('change', () => {
-          const val = blurToggle.checked ? 'blur(12px)' : 'none';
-          document.documentElement.style.setProperty('--blur-effect', val);
-          localStorage.setItem('blurEnabled', blurToggle.checked);
+        glassToggle.addEventListener('change', () => {
+          const enabled = glassToggle.checked;
+          document.documentElement.style.setProperty('--glass-blur', enabled ? '12px' : '0px');
+          localStorage.setItem('glassEnabled', enabled);
         });
 
         applyBgBtn.addEventListener('click', () => {
