@@ -35,6 +35,12 @@ var categoryConfigs = [
   id: 'ai',
   name: 'AI',
   icon: ''
+  },
+  {
+  folder: 'movie',
+  id: 'movie',
+  name: '影视',
+  icon: ''
   }
   // 未来添加新分类，只需在这里追加，例如：
   // {
