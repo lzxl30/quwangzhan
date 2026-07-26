@@ -7,6 +7,6 @@ var sceneryTools = [
   category: 'movie',
   icon: '🔍',
   iconBgClass: 'bg-4',          // 蓝紫渐变，科技感与观影氛围
-  accentClass: 'accent-4',
+  accentClass: 'accent-4'
   }
 ];
