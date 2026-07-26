@@ -21,8 +21,8 @@
       --accent-5: #f07b6c;
       --accent-6: #22d3ee;
       --border: rgba(42, 46, 59, 0.6);
-      --glass-blur: 12px;               /* 默认其他区域模糊开启 */
-      --card-glass-blur: 0px;           /* 默认卡片模糊关闭 */
+      --glass-blur: 12px;
+      --card-glass-blur: 0px;
       --shadow: 0 8px 24px rgba(0,0,0,0.4);
       --shadow-hover: 0 16px 40px rgba(0,0,0,0.6);
       --radius: 18px;
@@ -90,6 +90,7 @@
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
       transition: background 0.3s, backdrop-filter 0.3s;
+      border-radius: 0 0 14px 14px; /* 底部圆角 */
     }
     .header-top { max-width:1350px; margin:0 auto; padding:10px 20px 6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; }
     .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); flex-shrink:0; }
@@ -217,6 +218,7 @@
       z-index:99;
       box-shadow:0 -2px 10px rgba(0,0,0,0.2);
       transition:background 0.3s, backdrop-filter 0.3s;
+      border-radius: 14px 14px 0 0; /* 顶部圆角 */
     }
     .bottom-top-row { display:flex; justify-content:space-between; align-items:center; width:100%; }
     .left-group { display:flex; align-items:center; }
@@ -521,7 +523,6 @@
       loadAppearance();
       applyBgFromStorage();
 
-      // 图片压缩函数
       function compressImage(file, maxSizeMB = 1) {
         return new Promise((resolve, reject) => {
           if (file.size <= maxSizeMB * 1024 * 1024) {
