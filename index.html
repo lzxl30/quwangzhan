@@ -8,11 +8,8 @@
   <style>
     :root {
       --bg: #0f1117;
-      --card-bg: rgba(26, 29, 39, 1);          /* 默认不透明 */
-      --header-bg: rgba(18, 20, 28, 1);
-      --footer-bg: rgba(18, 20, 28, 1);
-      --glass-blur: 0px;                         /* 默认无模糊 */
-      --glass-alpha: 1;                          /* 默认完全不透明 */
+      --card-bg: rgba(26, 29, 39, var(--glass-alpha, 0.6));
+      --header-bg: rgba(18, 20, 28, var(--glass-alpha, 0.6));
       --text: #e8edf2;
       --text-secondary: #9aa0b4;
       --primary: #8b7cf7;
@@ -24,6 +21,7 @@
       --accent-5: #f07b6c;
       --accent-6: #22d3ee;
       --border: rgba(42, 46, 59, 0.6);
+      --blur-effect: none;          /* 默认无毛玻璃模糊 */
       --shadow: 0 8px 24px rgba(0,0,0,0.4);
       --shadow-hover: 0 16px 40px rgba(0,0,0,0.6);
       --radius: 18px;
@@ -31,24 +29,14 @@
       --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
       --tag-bg: #232738;
       --tag-text: #b4bcd0;
-      --input-bg: transparent;                   /* 搜索框背景透明 */
-    }
-
-    /* 启用毛玻璃效果 */
-    .glass-enabled {
-      --glass-blur: 12px;
-      --card-bg: rgba(26, 29, 39, var(--glass-alpha));
-      --header-bg: rgba(18, 20, 28, var(--glass-alpha));
-      --footer-bg: rgba(18, 20, 28, var(--glass-alpha));
+      --footer-bg: rgba(18,20,28,0.6);
+      --input-bg: #1e2130;
     }
 
     body.light-mode {
       --bg: #f4f5fa;
-      --card-bg: rgba(255, 255, 255, 1);          /* 亮色模式不透明 */
-      --header-bg: rgba(255, 255, 255, 1);
-      --footer-bg: rgba(255, 255, 255, 1);
-      --glass-blur: 0px;
-      --glass-alpha: 1;
+      --card-bg: rgba(255, 255, 255, var(--glass-alpha, 0.6));
+      --header-bg: rgba(255, 255, 255, var(--glass-alpha, 0.6));
       --text: #1e1e2f;
       --text-secondary: #5b5e72;
       --primary: #6c5ce7;
@@ -64,15 +52,8 @@
       --shadow-hover: 0 14px 34px rgba(0,0,0,0.1);
       --tag-bg: #ebeef5;
       --tag-text: #4a4d5e;
-      --input-bg: transparent;
-    }
-
-    /* 亮色模式开启毛玻璃 */
-    body.light-mode.glass-enabled {
-      --glass-blur: 12px;
-      --card-bg: rgba(255, 255, 255, var(--glass-alpha));
-      --header-bg: rgba(255, 255, 255, var(--glass-alpha));
-      --footer-bg: rgba(255, 255, 255, var(--glass-alpha));
+      --footer-bg: rgba(255,255,255,0.6);
+      --input-bg: #f0f2f8;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
@@ -89,22 +70,17 @@
       position: relative;
     }
 
-    /* 背景明暗覆盖层 */
     #bgOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      pointer-events: none; z-index:0;
       background: rgba(0,0,0, var(--bg-darken, 0));
       transition: background 0.3s;
     }
-    body.light-mode #bgOverlay {
-      background: rgba(255,255,255, var(--bg-darken, 0));
-    }
+    body.light-mode #bgOverlay { background: rgba(255,255,255, var(--bg-darken, 0)); }
 
     .header {
       background: var(--header-bg);
-      backdrop-filter: blur(var(--glass-blur));
+      backdrop-filter: var(--blur-effect);
       border-bottom: 1px solid var(--border);
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
@@ -117,26 +93,27 @@
     .logo-text { font-size:1.2rem; font-weight:700; letter-spacing:-0.3px; background:linear-gradient(to right, #d4ccff, #f9a8d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     .logo-sub { font-size:0.6rem; color:var(--text-secondary); font-weight:400; margin-top:1px; display:none; }
 
+    /* 搜索框和主题按钮：无背景 */
     .search-wrap { position:relative; flex:1; max-width:360px; min-width:160px; margin:0 8px; }
     .search-wrap input {
-      width:100%; padding:9px 16px 9px 38px;
-      border:2px solid var(--border); border-radius:50px;
-      font-size:0.85rem; outline:none;
-      transition:var(--transition);
-      background: transparent;                 /* 无背景 */
-      color:var(--text); -webkit-appearance:none;
+      width:100%; padding:9px 16px 9px 38px; border:2px solid var(--border); border-radius:50px;
+      font-size:0.85rem; outline:none; transition:var(--transition);
+      background: transparent;           /* 去掉背景 */
+      color:var(--text);
+      -webkit-appearance:none;
     }
     .search-wrap input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(139,124,247,0.12); }
     .search-wrap .search-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:0.95rem; color:#888ca0; pointer-events:none; }
 
     .theme-toggle {
-      border:none; color:var(--text); width:36px; height:36px; border-radius:50%;
+      background: transparent;           /* 去掉背景 */
+      border:1px solid var(--border);
+      color:var(--text); width:36px; height:36px; border-radius:50%;
       font-size:1.1rem; display:flex; align-items:center; justify-content:center;
       cursor:pointer; transition:var(--transition);
-      background: transparent;                 /* 无背景 */
       flex-shrink:0;
     }
-    .theme-toggle:hover { color:var(--primary); transform:scale(1.06); }
+    .theme-toggle:hover { background: rgba(139,124,247,0.1); }
 
     .header-hint { max-width:1350px; margin:0 auto; padding:0 20px 4px; text-align:center; font-size:0.7rem; color:var(--text-secondary); font-weight:500; }
     .header-hint a { color:var(--primary-light); font-weight:700; text-decoration:underline; text-underline-offset:2px; }
@@ -177,7 +154,7 @@
     .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; }
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(var(--glass-blur));
+      backdrop-filter: var(--blur-effect);
       border-radius: var(--radius);
       padding:20px 20px 16px;
       box-shadow: var(--shadow);
@@ -228,14 +205,14 @@
     .open-btn { display:inline-block; width:14px; height:14px; border-right:3px solid var(--text-secondary); border-bottom:3px solid var(--text-secondary); transform:rotate(-45deg); margin-left:auto; margin-right:6px; cursor:pointer; opacity:0.6; transition:all 0.2s; flex-shrink:0; align-self:center; -webkit-tap-highlight-color:transparent; }
     .open-btn:hover { border-color:var(--primary-light); opacity:1; transform:rotate(-45deg) scale(1.2); }
 
-    .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); background:var(--card-bg); backdrop-filter:blur(var(--glass-blur)); border-radius:var(--radius); box-shadow:var(--shadow); }
+    .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); background:var(--card-bg); backdrop-filter: var(--blur-effect); border-radius:var(--radius); box-shadow:var(--shadow); }
     .empty-state .empty-icon { font-size:3.5rem; margin-bottom:12px; opacity:0.7; }
     .empty-state p { font-size:0.95rem; }
 
     .fixed-bottom-bar {
       position:fixed; bottom:0; left:0; right:0;
       background:var(--footer-bg);
-      backdrop-filter:blur(var(--glass-blur));
+      backdrop-filter: var(--blur-effect);
       border-top:1px solid var(--border);
       padding:4px 16px 6px;
       display:flex; flex-direction:column; align-items:center; gap:4px;
@@ -264,7 +241,7 @@
     /* 自定义外观面板 */
     .appearance-panel {
       position:fixed; bottom:60px; right:16px;
-      background:var(--card-bg); backdrop-filter:blur(20px);
+      background:var(--card-bg); backdrop-filter: var(--blur-effect);
       border:1px solid var(--border); border-radius:12px;
       padding:16px; z-index:110; display:none;
       box-shadow:0 8px 30px rgba(0,0,0,0.4);
@@ -278,7 +255,6 @@
       background:var(--input-bg); color:var(--text); font-size:0.8rem; margin-top:4px;
     }
     .appearance-panel input[type="range"] { width:100%; margin:4px 0; }
-    .appearance-panel input[type="checkbox"] { margin-right:6px; }
     .appearance-panel button {
       margin-top:8px; padding:6px 14px; border-radius:6px; border:none;
       background:var(--primary); color:#fff; cursor:pointer; font-size:0.8rem;
@@ -290,7 +266,8 @@
 
     .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:0; opacity:0; visibility:hidden; transition:opacity 0.3s, visibility 0.3s; }
     .modal-overlay.active { opacity:1; visibility:visible; }
-    .modal-content { background:var(--card-bg); backdrop-filter:blur(16px); border-radius:0; width:100%; height:100%; max-height:100vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:relative; }
+    .modal-content { background:rgba(26,29,39, var(--glass-alpha, 0.6)); backdrop-filter: var(--blur-effect); border-radius:0; width:100%; height:100%; max-height:100vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:relative; }
+    body.light-mode .modal-content { background:rgba(255,255,255, var(--glass-alpha, 0.6)); }
 
     .modal-header { display:flex; align-items:center; justify-content:space-between; padding:4px 8px; border-bottom:1px solid var(--border); gap:6px; flex-wrap:wrap; background:transparent; }
     .modal-title-text { font-size:0.8rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; }
@@ -348,7 +325,6 @@
   </style>
 </head>
 <body>
-  <!-- 背景明暗覆盖层 -->
   <div id="bgOverlay"></div>
 
   <header class="header">
@@ -446,11 +422,10 @@
       <button id="applyBgBtn">应用背景</button>
     </div>
 
-    <label>
-      <input type="checkbox" id="glassToggle"> 启用毛玻璃效果
-    </label>
-    <label>🔍 毛玻璃透明度</label>
-    <input type="range" id="glassAlphaSlider" min="0.3" max="1" step="0.05" value="0.6" disabled>
+    <label><input type="checkbox" id="blurToggle"> 启用毛玻璃效果</label>
+
+    <label>🔍 背景透明度</label>
+    <input type="range" id="glassAlphaSlider" min="0.3" max="0.9" step="0.05" value="0.6">
     <span style="font-size:0.7rem; color:var(--text-secondary);">当前透明度：<span id="glassAlphaVal">0.6</span></span>
 
     <label>🌗 背景明暗</label>
@@ -490,7 +465,7 @@
       let floatZoomInBtn, floatZoomOutBtn, floatZoomValueEl, floatRotateBackBtn;
       let appearanceBtn, appearancePanel, closePanelBtn, applyBgBtn, clearBgBtn;
       let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal;
-      let glassToggle;
+      let blurToggle;
       let renderTags, renderCards, renderAll, switchCat;
       let dataLoaded = false;
       let currentZoom = 1;
@@ -501,31 +476,18 @@
       function getSavedOrder() { try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
       function saveOrder(order) { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }
 
-      // 加载外观设置
       function loadAppearance() {
-        const glassEnabled = localStorage.getItem('glassEnabled') === 'true';
-        const glassAlpha = localStorage.getItem('glassAlpha') || '0.6';
-        const bgDarken = localStorage.getItem('bgDarken') || '0';
-
-        if (glassEnabled) {
-          document.documentElement.classList.add('glass-enabled');
-        } else {
-          document.documentElement.classList.remove('glass-enabled');
-        }
-
-        document.documentElement.style.setProperty('--glass-alpha', glassEnabled ? glassAlpha : '1');
-        document.documentElement.style.setProperty('--bg-darken', bgDarken);
-
-        if (glassToggle) glassToggle.checked = glassEnabled;
-        if (glassAlphaSlider) {
-          glassAlphaSlider.value = glassAlpha;
-          glassAlphaSlider.disabled = !glassEnabled;
-          glassAlphaVal.textContent = glassAlpha;
-        }
-        if (bgDarkenSlider) {
-          bgDarkenSlider.value = bgDarken;
-          bgDarkenVal.textContent = bgDarken;
-        }
+        const glass = localStorage.getItem('glassAlpha') || '0.6';
+        const darken = localStorage.getItem('bgDarken') || '0';
+        const blur = localStorage.getItem('blurEnabled') === 'true' ? 'blur(12px)' : 'none';
+        document.documentElement.style.setProperty('--glass-alpha', glass);
+        document.documentElement.style.setProperty('--bg-darken', darken);
+        document.documentElement.style.setProperty('--blur-effect', blur);
+        if (glassAlphaSlider) glassAlphaSlider.value = glass;
+        if (bgDarkenSlider) bgDarkenSlider.value = darken;
+        if (blurToggle) blurToggle.checked = (blur !== 'none');
+        glassAlphaVal.textContent = glass;
+        bgDarkenVal.textContent = darken;
       }
 
       function applyBgFromStorage() {
@@ -617,46 +579,35 @@
         bgDarkenSlider = document.getElementById('bgDarkenSlider');
         glassAlphaVal = document.getElementById('glassAlphaVal');
         bgDarkenVal = document.getElementById('bgDarkenVal');
-        glassToggle = document.getElementById('glassToggle');
+        blurToggle = document.getElementById('blurToggle');
 
-        // 面板开关
         appearanceBtn.addEventListener('click', () => {
           appearancePanel.classList.toggle('show');
-          // 同步当前值
-          loadAppearance();
+          glassAlphaSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--glass-alpha').trim();
+          bgDarkenSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-darken').trim();
+          blurToggle.checked = (getComputedStyle(document.documentElement).getPropertyValue('--blur-effect').trim() !== 'none');
+          glassAlphaVal.textContent = glassAlphaSlider.value;
+          bgDarkenVal.textContent = bgDarkenSlider.value;
         });
         closePanelBtn.addEventListener('click', () => appearancePanel.classList.remove('show'));
 
-        // 毛玻璃开关
-        glassToggle.addEventListener('change', () => {
-          const enabled = glassToggle.checked;
-          if (enabled) {
-            document.documentElement.classList.add('glass-enabled');
-          } else {
-            document.documentElement.classList.remove('glass-enabled');
-          }
-          glassAlphaSlider.disabled = !enabled;
-          localStorage.setItem('glassEnabled', enabled);
-          // 重置透明度变量
-          const alpha = enabled ? glassAlphaSlider.value : '1';
-          document.documentElement.style.setProperty('--glass-alpha', alpha);
-        });
-
-        // 透明度滑块
         glassAlphaSlider.addEventListener('input', () => {
           document.documentElement.style.setProperty('--glass-alpha', glassAlphaSlider.value);
           glassAlphaVal.textContent = glassAlphaSlider.value;
           localStorage.setItem('glassAlpha', glassAlphaSlider.value);
         });
-
-        // 背景明暗滑块
         bgDarkenSlider.addEventListener('input', () => {
           document.documentElement.style.setProperty('--bg-darken', bgDarkenSlider.value);
           bgDarkenVal.textContent = bgDarkenSlider.value;
           localStorage.setItem('bgDarken', bgDarkenSlider.value);
         });
 
-        // 背景应用与清除
+        blurToggle.addEventListener('change', () => {
+          const val = blurToggle.checked ? 'blur(12px)' : 'none';
+          document.documentElement.style.setProperty('--blur-effect', val);
+          localStorage.setItem('blurEnabled', blurToggle.checked);
+        });
+
         applyBgBtn.addEventListener('click', () => {
           const fileInput = document.getElementById('bgImageFile');
           const urlInput = document.getElementById('bgImageUrl');
@@ -704,7 +655,7 @@
           renderTags();
         });
 
-        function applyZoom(zoom) { /* ... 不变 ... */
+        function applyZoom(zoom) {
           currentZoom = Math.min(2, Math.max(0.25, zoom));
           iframeScaler.style.transform = `scale(${currentZoom})`;
           iframeScaler.style.width = (100 / currentZoom) + '%';
@@ -713,13 +664,15 @@
           zoomValueEl.textContent = percent;
           if (floatZoomValueEl) floatZoomValueEl.textContent = percent;
         }
+
         zoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
         zoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
         floatZoomInBtn.addEventListener('click', () => applyZoom(currentZoom + 0.05));
         floatZoomOutBtn.addEventListener('click', () => applyZoom(currentZoom - 0.05));
+
         function resetZoom() { applyZoom(1); }
 
-        function openTool(url, title, isExternal) { /* ... 不变 ... */
+        function openTool(url, title, isExternal) {
           if (isExternal) { window.open(url, '_blank'); return; }
           mTitle.textContent = title;
           mLoad.style.display = 'block';
@@ -737,7 +690,8 @@
             if (wrap) { wrap.style.width = ''; wrap.style.height = ''; }
           }
         }
-        function closeModal() { /* ... 不变 ... */
+
+        function closeModal() {
           const modalContent = document.querySelector('.modal-content');
           if (modalContent.classList.contains('landscape')) {
             modalContent.classList.remove('landscape');
@@ -757,7 +711,7 @@
         mo.addEventListener('click', (e) => { if (e.target === mo) closeModal(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
 
-        rotateBtnHeader.addEventListener('click', () => { /* ... 不变 ... */
+        rotateBtnHeader.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
           const wrap = document.getElementById('iframeWrap');
@@ -768,7 +722,8 @@
           modalContent.classList.add('landscape');
           floatExpandBtns.classList.remove('open');
         });
-        floatRotateBackBtn.addEventListener('click', () => { /* ... 不变 ... */
+
+        floatRotateBackBtn.addEventListener('click', () => {
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
           const wrap = document.getElementById('iframeWrap');
@@ -778,26 +733,179 @@
         });
 
         function toggleFloatExpand() { floatExpandBtns.classList.toggle('open'); }
-        // 拖拽等逻辑保持不变（因篇幅省略，完全保留之前版本）
-        // ... 省略的拖拽代码与之前完全一致，此处不再赘述 ...
 
-        topBtn.addEventListener('click', () => { /* ... */ });
-        function applyTheme(m) { /* ... */ }
-        (function initTheme() { /* ... */ })();
-        themeBtn.addEventListener('click', () => { /* ... */ });
+        let isDraggingFloat = false;
+        let startX, startY, startLeft, startTop;
+        floatToggleBtn.addEventListener('touchstart', function(e) {
+          isDraggingFloat = false;
+          const touch = e.touches[0];
+          startX = touch.clientX; startY = touch.clientY;
+          const rect = landscapeFloatToolbar.getBoundingClientRect();
+          startLeft = rect.left; startTop = rect.top;
+          landscapeFloatToolbar.style.transition = 'none';
+          floatToggleBtn.dataset.touchHandled = 'false';
+        });
+        floatToggleBtn.addEventListener('touchmove', function(e) {
+          const touch = e.touches[0];
+          const dx = touch.clientX - startX;
+          const dy = touch.clientY - startY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) isDraggingFloat = true;
+          if (isDraggingFloat) {
+            e.preventDefault();
+            landscapeFloatToolbar.style.left = (startLeft + dx) + 'px';
+            landscapeFloatToolbar.style.top = (startTop + dy) + 'px';
+            landscapeFloatToolbar.style.right = 'auto';
+            landscapeFloatToolbar.style.bottom = 'auto';
+          }
+        });
+        floatToggleBtn.addEventListener('touchend', function(e) {
+          landscapeFloatToolbar.style.transition = '0.2s';
+          if (!isDraggingFloat) {
+            toggleFloatExpand();
+            floatToggleBtn.dataset.touchHandled = 'true';
+          } else {
+            floatToggleBtn.dataset.touchHandled = 'false';
+          }
+          isDraggingFloat = false;
+        });
+        floatToggleBtn.addEventListener('click', function(e) {
+          if (floatToggleBtn.dataset.touchHandled === 'true') {
+            floatToggleBtn.dataset.touchHandled = 'false';
+            return;
+          }
+          toggleFloatExpand();
+        });
 
-        function getFiltered() { /* ... */ }
-        switchCat = function(cid) { /* ... */ };
-        renderTags = function() { /* ... */ };
-        function initFavSortable() { /* ... */ }
-        renderCards = function() { /* ... */ };
-        renderAll = function() { /* ... */ };
-        gridEl.addEventListener('click', (e) => { /* ... */ });
-        function shareTool(url, title) { /* ... */ }
+        topBtn.addEventListener('click', () => {
+          window.scrollTo(0, 0);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (curCat !== 'favorites' && curCat !== 'shared') delete shuffled[curCat];
+              renderAll();
+            });
+          });
+        });
 
-        // 启动渲染
+        function applyTheme(m) {
+          if (m === 'light') { document.body.classList.add('light-mode'); themeBtn.textContent = '☀️'; }
+          else { document.body.classList.remove('light-mode'); themeBtn.textContent = '🌙'; }
+          localStorage.setItem('turingMagicTheme', m);
+          themeBtn.blur();
+        }
+        (function initTheme() { const s = localStorage.getItem('turingMagicTheme'); applyTheme(s === 'light' ? 'light' : 'dark'); })();
+        themeBtn.addEventListener('click', () => { applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light'); });
+
+        function getFiltered() {
+          let f = [...toolsData];
+          if (curCat === 'shared' && sharedUrl) f = f.filter(t => t.url === sharedUrl);
+          else if (curCat === 'favorites') { const ids = favs.map(x => x.id); f = f.filter(t => ids.includes(t.id)); f.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); }
+          else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
+          if (searchQ.trim()) { const q = searchQ.trim().toLowerCase(); f = f.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)); }
+          if (curCat !== 'favorites' && curCat !== 'shared') { const order = shuf(curCat, f); const map = new Map(order.map((id, i) => [id, i])); f.sort((a, b) => (map.get(a.id) ?? 9999) - (map.get(b.id) ?? 9999)); }
+          return f;
+        }
+
+        switchCat = function(cid) { if (cid !== 'favorites' && cid !== 'shared') delete shuffled[cid]; curCat = cid; searchInp.value = ''; searchQ = ''; renderAll(); };
+
+        renderTags = function() {
+          const cats = getCats();
+          const isExpanded = scrollEl.classList.contains('expanded');
+          scrollEl.innerHTML = cats.map(c => {
+            let n; if (c.id === 'favorites') n = favs.length; else if (c.id === 'shared') n = sharedUrl ? toolsData.filter(t => t.url === sharedUrl).length : 0; else if (c.id === 'all') n = toolsData.length; else n = toolsData.filter(t => t.category === c.id).length;
+            const isBuiltIn = c.id === 'all' || c.id === 'favorites' || c.id === 'shared';
+            const handle = isBuiltIn ? '' : '<span class="drag-handle">⋮⋮</span>';
+            return `<button class="category-tag${curCat === c.id ? ' active' : ''}" data-category="${c.id}">${handle}${c.name}<span class="count">${n}</span></button>`;
+          }).join('');
+          if (isExpanded) {
+            const hint = document.createElement('div');
+            hint.className = 'sort-hint';
+            hint.textContent = '↕️ 拖拽标签调整分类顺序，点击分类可刷新网站排序';
+            scrollEl.appendChild(hint);
+          }
+          scrollEl.querySelectorAll('.category-tag').forEach(btn => {
+            btn.addEventListener('click', () => switchCat(btn.dataset.category));
+          });
+          if (catSortable) { catSortable.destroy(); catSortable = null; }
+          if (isExpanded) {
+            catSortable = new Sortable(scrollEl, {
+              animation: 150,
+              draggable: '.category-tag',
+              filter: '.category-tag[data-category="all"], .category-tag[data-category="favorites"], .category-tag[data-category="shared"]',
+              onEnd: function() {
+                const order = [];
+                scrollEl.querySelectorAll('.category-tag[data-category]').forEach(btn => {
+                  const cid = btn.dataset.category;
+                  if (!['all', 'favorites', 'shared'].includes(cid)) order.push(cid);
+                });
+                saveOrder(order);
+              }
+            });
+          }
+          updateFadeMask();
+        };
+
+        function initFavSortable() {
+          if (favSortable) { favSortable.destroy(); favSortable = null; }
+          if (curCat === 'favorites' && gridEl.children.length > 0) {
+            favSortable = new Sortable(gridEl, {
+              animation: 150,
+              delay: 200,
+              touchStartThreshold: 10,
+              scroll: true,
+              forceFallback: true,
+              fallbackClass: 'card-sortable-fallback',
+              onEnd: function(evt) {
+                const movedId = favs.splice(evt.oldIndex, 1)[0];
+                favs.splice(evt.newIndex, 0, movedId);
+                saveFavs();
+                gridEl.classList.remove('swiping');
+              }
+            });
+          }
+        }
+
+        renderCards = function() {
+          const f = getFiltered();
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 长按可拖拽卡片调整收藏顺序</div>'; }
+          else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
+          if (f.length === 0) {
+            gridEl.innerHTML = '';
+            emptyEl.style.display = 'block';
+            if (!dataLoaded) { emptyText.textContent = '正在加载网站…'; emptySubText.textContent = '请稍候，网站卡片即将呈现'; }
+            else if (curCat === 'favorites') { emptyText.textContent = '暂无收藏'; emptySubText.textContent = '点击心形图标收藏喜欢的网站吧'; }
+            else if (curCat === 'shared') { emptyText.textContent = '未找到该网站'; emptySubText.textContent = '请检查链接是否正确'; }
+            else { emptyText.textContent = '暂无内容'; emptySubText.textContent = '该分类下还没有网站'; }
+            if (favSortable) { favSortable.destroy(); favSortable = null; }
+          } else {
+            emptyEl.style.display = 'none';
+            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
+            initFavSortable();
+          }
+        };
+
+        renderAll = function() { renderTags(); renderCards(); };
+
+        gridEl.addEventListener('click', (e) => {
+          if (gridEl.classList.contains('swiping')) { gridEl.classList.remove('swiping'); return; }
+          const badge = e.target.closest('.card-category-badge'); if (badge) { e.preventDefault(); e.stopPropagation(); if (badge.dataset.category) switchCat(badge.dataset.category); return; }
+          const fb = e.target.closest('.fav-btn'); if (fb) { e.preventDefault(); e.stopPropagation(); togFav(fb.dataset.toolId); renderAll(); return; }
+          const sb = e.target.closest('.share-btn'); if (sb) { e.preventDefault(); e.stopPropagation(); const card = sb.closest('.card'); if (card) shareTool(card.dataset.url, card.dataset.title); return; }
+          const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; const isExternal = card.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title, isExternal); else openTool(location.origin + '/' + u, card.dataset.title, isExternal); } } return; }
+        });
+
+        function shareTool(url, title) {
+          const base = location.origin + location.pathname;
+          const su = base + '?open=' + encodeURIComponent(url);
+          const shareText = `「${title}」 ${su}`;
+          if (navigator.share) { navigator.share({ title: title, text: shareText, url: su }).catch(() => {}); }
+          else {
+            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(shareText).then(() => alert('链接已复制，可粘贴分享。')); }
+            else { prompt('复制下面的链接分享给朋友：', shareText); }
+          }
+        }
+
         if (checkShared()) curCat = 'shared';
-        searchInp.addEventListener('input', () => { /* ... */ });
+        searchInp.addEventListener('input', () => { searchQ = searchInp.value; renderCards(); document.querySelectorAll('.category-tag').forEach(b => { b.classList.toggle('active', b.dataset.category === curCat && !searchQ.trim()); }); });
         if (typeof siteFooterText !== 'undefined') document.getElementById('versionNote').textContent = siteFooterText;
         emptyEl.style.display = 'block';
         emptyText.textContent = '正在加载网站…';
@@ -805,8 +913,55 @@
         renderTags();
       }
 
-      // 数据加载等保持不变
-      // ... 省略的后续代码与之前完全一致 ...
+      const pendingTools = [];
+      let collectTimer = null;
+      let finalFlushDone = false;
+
+      function addTools(arr) { if (arr && Array.isArray(arr)) pendingTools.push(arr); }
+
+      function flushTools(isFinal) {
+        if (finalFlushDone) return;
+        if (isFinal) {
+          if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
+          pendingTools.forEach(arr => { toolsData = toolsData.concat(arr); });
+          pendingTools.length = 0;
+          finalFlushDone = true;
+          dataLoaded = true;
+          if (appInit) renderAll();
+        } else {
+          if (finalFlushDone) return;
+          if (collectTimer) { clearTimeout(collectTimer); collectTimer = null; }
+          const snapshot = [];
+          pendingTools.forEach(arr => { snapshot.push(...arr); });
+          const tempData = [...toolsData, ...snapshot];
+          const oldTools = toolsData;
+          toolsData = tempData;
+          const tempShuffled = {};
+          for (const key in shuffled) { tempShuffled[key] = shuffled[key]; delete shuffled[key]; }
+          if (appInit) renderAll();
+          Object.assign(shuffled, tempShuffled);
+          toolsData = oldTools;
+        }
+      }
+
+      function startCollectTimer() {
+        if (collectTimer) clearTimeout(collectTimer);
+        collectTimer = setTimeout(() => { flushTools(false); }, 200);
+      }
+
+      (async function() {
+        initFramework();
+        startCollectTimer();
+        const promises = categoryConfigs.map(cfg => {
+          return loadScript(`tools/${cfg.folder}/toolsData.js`).then(() => {
+            const varName = cfg.folder + 'Tools';
+            const categoryTools = window[varName];
+            if (categoryTools) addTools(categoryTools);
+          }).catch((error) => { console.error(`加载分类 ${cfg.folder} 失败:`, error); });
+        });
+        await Promise.allSettled(promises);
+        flushTools(true);
+      })();
     })();
   </script>
 </body>
