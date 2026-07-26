@@ -90,8 +90,8 @@
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
       transition: background 0.3s, backdrop-filter 0.3s;
-      border-radius: 0 0 12px 12px; /* 缩小圆角 */
-      overflow: hidden; /* 防止内部元素遮挡圆角 */
+      border-radius: 0 0 10px 10px; /* 进一步缩小圆角 */
+      overflow: hidden;
     }
     .header-top { max-width:1350px; margin:0 auto; padding:10px 20px 6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; }
     .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); flex-shrink:0; }
@@ -138,7 +138,13 @@
     .sort-hint { font-size:0.68rem; color:var(--text-secondary); text-align:center; padding:6px 0 2px; opacity:0.7; display:none; }
     .category-scroll.expanded .sort-hint { display:block; }
 
-    .fade-mask { pointer-events:none; position:absolute; right:0; top:0; bottom:0; width:70px; background:linear-gradient(to left, var(--bg) 0%, transparent 100%); z-index:2; transition:opacity 0.3s; }
+    .fade-mask {
+      pointer-events:none;
+      position:absolute; right:0; top:0; bottom:0; width:70px;
+      background:linear-gradient(to left, var(--bg) 0%, transparent 100%);
+      z-index:2; transition:opacity 0.3s;
+      border-radius: 0 0 10px 10px; /* 匹配 header 底部圆角 */
+    }
     body.light-mode .fade-mask { background:linear-gradient(to left, var(--bg) 0%, transparent 100%); }
     .category-scroll.expanded ~ .fade-mask, .fade-mask.hidden { opacity:0; pointer-events:none; }
 
@@ -219,7 +225,7 @@
       z-index:99;
       box-shadow:0 -2px 10px rgba(0,0,0,0.2);
       transition:background 0.3s, backdrop-filter 0.3s;
-      border-radius: 12px 12px 0 0; /* 缩小顶部圆角 */
+      border-radius: 10px 10px 0 0; /* 缩小顶部圆角 */
     }
     .bottom-top-row { display:flex; justify-content:space-between; align-items:center; width:100%; }
     .left-group { display:flex; align-items:center; }
