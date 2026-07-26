@@ -20,6 +20,9 @@ if (typeof toolsTools !== 'undefined') {
 if (typeof aiTools !== 'undefined') {
   toolsData = toolsData.concat(aiTools);
 }
+if (typeof movieTools !== 'undefined') {
+  toolsData = toolsData.concat(movieTools);
+}
 // 未来可继续追加其他分类
 // 未来添加其他分类，例如：
 // if (typeof imageTools !== 'undefined') {
