@@ -89,5 +89,15 @@ var turingTools = [
   iconBgClass: 'bg-4',          // 蓝紫色渐变，契合 Pixiv 品牌色
   accentClass: 'accent-4',
   external: true                // 建议在新窗口打开，避免 iframe 被第三方限制
+  },
+  {
+  id: 'turing-10',                              // 根据实际序号调整
+  title: '多功能图片处理（remove）',
+  url: 'https://remove.photos/zh-cn/',
+  description: '在线多功能图片处理工具，支持背景移除、图片编辑、格式转换等操作。',
+  category: 'turing',
+  icon: '🖼️',
+  iconBgClass: 'bg-2',           // 青绿渐变，清爽
+  accentClass: 'accent-2',
   }
 ];
