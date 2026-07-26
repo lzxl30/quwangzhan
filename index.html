@@ -85,7 +85,7 @@
 
     .header {
       background: var(--header-bg);
-      backdrop-filter: blur(var(--glass-blur));   /* 其他区域模糊 */
+      backdrop-filter: blur(var(--glass-blur));
       border-bottom: 1px solid var(--border);
       position: sticky; top:0; z-index:100;
       box-shadow: 0 1px 8px rgba(0,0,0,0.2);
@@ -153,7 +153,7 @@
     .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; }
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(var(--card-glass-blur));  /* 卡片单独模糊控制 */
+      backdrop-filter: blur(var(--card-glass-blur));
       border-radius: var(--radius);
       padding:20px 20px 16px;
       box-shadow: var(--shadow);
@@ -261,6 +261,13 @@
     .appearance-panel button:hover { background: var(--primary-light); }
     .appearance-panel button.close-panel { background:transparent; color:var(--text-secondary); margin-right:8px; }
     .panel-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+
+    .compress-status {
+      font-size:0.7rem;
+      color: var(--text-secondary);
+      margin-top:4px;
+      display:none;
+    }
 
     .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:0; opacity:0; visibility:hidden; transition:opacity 0.3s, visibility 0.3s; }
     .modal-overlay.active { opacity:1; visibility:visible; }
@@ -413,6 +420,7 @@
     <input type="text" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
     <label>📁 本地上传</label>
     <input type="file" id="bgImageFile" accept="image/*">
+    <span class="compress-status" id="compressStatus">压缩中…</span>
     <div style="display:flex; justify-content:space-between; margin-top:8px;">
       <button id="clearBgBtn">清除背景</button>
       <button id="applyBgBtn">应用背景</button>
@@ -464,6 +472,7 @@
       let floatZoomInBtn, floatZoomOutBtn, floatZoomValueEl, floatRotateBackBtn;
       let appearanceBtn, appearancePanel, closePanelBtn, applyBgBtn, clearBgBtn;
       let glassAlphaSlider, bgDarkenSlider, glassAlphaVal, bgDarkenVal, glassToggle, cardGlassToggle;
+      let compressStatusEl;
       let renderTags, renderCards, renderAll, switchCat;
       let dataLoaded = false;
       let currentZoom = 1;
@@ -477,8 +486,8 @@
       function loadAppearance() {
         const glass = localStorage.getItem('glassAlpha') || '0.6';
         const darken = localStorage.getItem('bgDarken') || '0';
-        const blurEnabled = localStorage.getItem('glassEnabled') !== 'false'; // 默认为 true
-        const cardBlurEnabled = localStorage.getItem('cardGlassEnabled') === 'true'; // 默认 false
+        const blurEnabled = localStorage.getItem('glassEnabled') !== 'false';
+        const cardBlurEnabled = localStorage.getItem('cardGlassEnabled') === 'true';
         document.documentElement.style.setProperty('--glass-alpha', glass);
         document.documentElement.style.setProperty('--bg-darken', darken);
         document.documentElement.style.setProperty('--glass-blur', blurEnabled ? '12px' : '0px');
@@ -511,6 +520,53 @@
       }
       loadAppearance();
       applyBgFromStorage();
+
+      // 图片压缩函数
+      function compressImage(file, maxSizeMB = 1) {
+        return new Promise((resolve, reject) => {
+          if (file.size <= maxSizeMB * 1024 * 1024) {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+            return;
+          }
+          const img = new Image();
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            img.src = e.target.result;
+          };
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxDimension = 1920;
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = (height / width) * maxDimension;
+                width = maxDimension;
+              } else {
+                width = (width / height) * maxDimension;
+                height = maxDimension;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error('压缩失败'));
+                return;
+              }
+              const compressedReader = new FileReader();
+              compressedReader.onload = () => resolve(compressedReader.result);
+              compressedReader.readAsDataURL(blob);
+            }, 'image/jpeg', 0.7);
+          };
+          img.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
       function updateFadeMask() {
         if (!scrollEl || !fadeMask) return;
@@ -590,16 +646,18 @@
         bgDarkenVal = document.getElementById('bgDarkenVal');
         glassToggle = document.getElementById('glassToggle');
         cardGlassToggle = document.getElementById('cardGlassToggle');
+        compressStatusEl = document.getElementById('compressStatus');
 
         appearanceBtn.addEventListener('click', () => {
           appearancePanel.classList.toggle('show');
-          // 同步当前值
           glassAlphaSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--glass-alpha').trim();
           bgDarkenSlider.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-darken').trim();
           glassAlphaVal.textContent = glassAlphaSlider.value;
           bgDarkenVal.textContent = bgDarkenSlider.value;
           glassToggle.checked = localStorage.getItem('glassEnabled') !== 'false';
           cardGlassToggle.checked = localStorage.getItem('cardGlassEnabled') === 'true';
+          compressStatusEl.style.display = 'none';
+          compressStatusEl.textContent = '';
         });
         closePanelBtn.addEventListener('click', () => appearancePanel.classList.remove('show'));
 
@@ -627,21 +685,28 @@
           localStorage.setItem('cardGlassEnabled', enabled);
         });
 
-        applyBgBtn.addEventListener('click', () => {
+        applyBgBtn.addEventListener('click', async () => {
           const fileInput = document.getElementById('bgImageFile');
           const urlInput = document.getElementById('bgImageUrl');
           if (fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              localStorage.setItem('siteBgData', e.target.result);
+            const file = fileInput.files[0];
+            compressStatusEl.style.display = 'block';
+            compressStatusEl.textContent = '压缩中…';
+            try {
+              const dataUrl = await compressImage(file, 1);
+              compressStatusEl.textContent = '压缩完成';
+              localStorage.setItem('siteBgData', dataUrl);
               applyBgFromStorage();
-            };
-            reader.readAsDataURL(fileInput.files[0]);
+              appearancePanel.classList.remove('show');
+            } catch (err) {
+              compressStatusEl.textContent = '压缩失败，请重试';
+              console.error(err);
+            }
           } else if (urlInput.value.trim()) {
             localStorage.setItem('siteBgData', urlInput.value.trim());
             applyBgFromStorage();
+            appearancePanel.classList.remove('show');
           }
-          appearancePanel.classList.remove('show');
         });
         clearBgBtn.addEventListener('click', () => {
           localStorage.removeItem('siteBgData');
