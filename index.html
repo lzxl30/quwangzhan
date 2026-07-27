@@ -429,7 +429,7 @@
         <span class="divider"></span>
         <a href="https://v.douyin.com/PIsOmFIDcW4/   5@0.com" target="_blank" rel="noopener"><span class="btn-icon">♪</span> 我的抖音</a>
         <span class="divider"></span>
-        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">📢</span> 趣网吧</a>
+        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">🌐</span> 趣网吧</a>
         <span class="divider"></span>
         <button class="appearance-btn" id="appearanceBtn" title="自定义外观">🎨</button>
       </div>
@@ -953,14 +953,22 @@
               onEnd: function(evt) {
                 const cards = Array.from(gridEl.querySelectorAll('.card'));
                 const newFavs = [];
+                const newPinned = [];
+                // 遍历排序后的卡片，生成新的 favs 和 pinned 顺序
                 cards.forEach(card => {
                   const toolId = card.dataset.toolId;
                   if (favs.some(f => f.id === toolId)) {
                     newFavs.push({ id: toolId, time: Date.now() });
                   }
+                  // 检查该卡片是否在 pinned 列表中，保留置顶状态
+                  if (pinned.includes(toolId)) {
+                    newPinned.push(toolId);
+                  }
                 });
                 favs = newFavs;
+                pinned = newPinned;
                 saveFavs();
+                savePinned();
                 gridEl.classList.remove('swiping');
               }
             });
