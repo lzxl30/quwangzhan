@@ -883,9 +883,8 @@
           else if (curCat === 'favorites') {
             const ids = favs.map(x => x.id);
             f = f.filter(t => ids.includes(t.id));
-            // 置顶卡片按 pinned 顺序
+            // 置顶卡片按 pinned 顺序，未置顶卡片按 favs 顺序
             const pinnedCards = pinned.filter(id => ids.includes(id)).map(id => f.find(t => t.id === id)).filter(Boolean);
-            // 未置顶卡片严格按 favs 顺序
             const normalCards = favs.filter(fav => !pinned.includes(fav.id)).map(fav => f.find(t => t.id === fav.id)).filter(Boolean);
             f = [...pinnedCards, ...normalCards];
           }
@@ -943,14 +942,25 @@
               fallbackClass: 'card-sortable-fallback',
               onEnd: function(evt) {
                 const cards = Array.from(gridEl.querySelectorAll('.card'));
-                // 获取排序后的工具 ID 顺序
                 const orderedIds = cards.map(card => card.dataset.toolId);
-                // 找出第一个未置顶卡片的位置
-                const firstNonPinnedIdx = orderedIds.findIndex(id => !pinned.includes(id));
-                // 重新构建 pinned：所有在 firstNonPinnedIdx 之前的卡片置顶
-                const newPinned = firstNonPinnedIdx === -1 ? [...orderedIds] : orderedIds.slice(0, firstNonPinnedIdx);
-                pinned = newPinned;
-                // 重新构建 favs：保持当前排序顺序
+                const draggedId = evt.item.dataset.toolId;
+                // 移除被拖动卡片的旧状态
+                const oldPinnedSet = new Set(pinned);
+                oldPinnedSet.delete(draggedId);
+                // 计算除被拖动卡片外的置顶边界
+                let lastPinnedIdx = -1;
+                orderedIds.forEach((id, idx) => {
+                  if (id !== draggedId && oldPinnedSet.has(id)) {
+                    lastPinnedIdx = idx;
+                  }
+                });
+                const newIdx = orderedIds.indexOf(draggedId);
+                const shouldPin = newIdx <= lastPinnedIdx;
+                // 生成新 pinned（按顺序）
+                pinned = orderedIds.filter((id, idx) => {
+                  if (id === draggedId) return shouldPin;
+                  return oldPinnedSet.has(id);
+                });
                 favs = orderedIds.map(id => ({ id, time: Date.now() }));
                 saveFavs();
                 savePinned();
