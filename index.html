@@ -225,7 +225,13 @@
     .action-btn span.label { font-size:0.65rem; font-weight:500; }
     .action-btn:hover { background:rgba(139,124,247,0.1); color:var(--primary-light); }
     .fav-btn.favorited { color:#f97ba8; }
-    .pin-btn.pinned { color: var(--accent-3); }
+    /* 置顶按钮样式 */
+    .pin-btn {
+      color: rgba(124, 128, 150, 0.5); /* 未置顶：半透明灰色 */
+    }
+    .pin-btn.pinned {
+      color: #fbbf24; /* 置顶：明亮的金黄色 */
+    }
     .open-btn { display:inline-block; width:14px; height:14px; border-right:3px solid var(--text-secondary); border-bottom:3px solid var(--text-secondary); transform:rotate(-45deg); margin-left:auto; margin-right:6px; cursor:pointer; opacity:0.6; transition:all 0.2s; flex-shrink:0; align-self:center; -webkit-tap-highlight-color:transparent; }
     .open-btn:hover { border-color:var(--primary-light); opacity:1; transform:rotate(-45deg) scale(1.2); }
 
