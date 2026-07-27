@@ -429,7 +429,7 @@
         <span class="divider"></span>
         <a href="https://v.douyin.com/PIsOmFIDcW4/   5@0.com" target="_blank" rel="noopener"><span class="btn-icon">♪</span> 我的抖音</a>
         <span class="divider"></span>
-        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">🌐</span> 趣网吧</a>
+        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">📢</span> 趣网吧</a>
         <span class="divider"></span>
         <button class="appearance-btn" id="appearanceBtn" title="自定义外观">🎨</button>
       </div>
@@ -893,7 +893,7 @@
           else if (curCat === 'favorites') {
             const ids = favs.map(x => x.id);
             f = f.filter(t => ids.includes(t.id));
-            // 置顶卡片在前，按 pinned 顺序；普通卡片在后，按 favs 顺序
+            // 先置顶卡片（按 pinned 顺序），再普通卡片（按 favs 顺序）
             const pinnedCards = pinned.filter(id => ids.includes(id)).map(id => f.find(t => t.id === id)).filter(Boolean);
             const normalCards = f.filter(t => !pinned.includes(t.id));
             f = [...pinnedCards, ...normalCards];
@@ -952,24 +952,14 @@
               fallbackClass: 'card-sortable-fallback',
               onEnd: function(evt) {
                 const cards = Array.from(gridEl.querySelectorAll('.card'));
-                const newPinned = [];
                 const newFavs = [];
                 cards.forEach(card => {
                   const toolId = card.dataset.toolId;
-                  if (isPinned(toolId)) {
-                    newPinned.push(toolId);
-                  } else if (favs.some(f => f.id === toolId)) {
-                    newFavs.push(toolId);
+                  if (favs.some(f => f.id === toolId)) {
+                    newFavs.push({ id: toolId, time: Date.now() });
                   }
                 });
-                pinned = newPinned;
-                savePinned();
-                // 保留原有收藏时间戳
-                const newFavsWithTime = newFavs.map(id => {
-                  const existing = favs.find(f => f.id === id);
-                  return existing ? existing : { id, time: Date.now() };
-                });
-                favs = newFavsWithTime;
+                favs = newFavs;
                 saveFavs();
                 gridEl.classList.remove('swiping');
               }
