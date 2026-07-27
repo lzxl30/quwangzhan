@@ -909,7 +909,7 @@
           if (isExpanded) {
             const hint = document.createElement('div');
             hint.className = 'sort-hint';
-            hint.textContent = '↕️ 拖拽标签调整分类顺序，点击分类可刷新网站排序';
+            hint.textContent = '↕️ 长按拖拽标签调整分类顺序，点击分类可刷新网站排序';
             scrollEl.appendChild(hint);
           }
           scrollEl.querySelectorAll('.category-tag').forEach(btn => {
@@ -919,6 +919,8 @@
           if (isExpanded) {
             catSortable = new Sortable(scrollEl, {
               animation: 150,
+              delay: 200,
+              touchStartThreshold: 10,
               draggable: '.category-tag',
               filter: '.category-tag[data-category="all"], .category-tag[data-category="favorites"], .category-tag[data-category="shared"]',
               onEnd: function() {
