@@ -245,36 +245,28 @@
       border-radius: 10px 10px 0 0;
     }
     .bottom-top-row {
-      display: flex;
-      align-items: center;
-      width: 100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      width:100%;
+      flex-wrap: nowrap;          /* 确保不换行 */
+      overflow-x: auto;           /* 移动端可滑动 */
+      -webkit-overflow-scrolling: touch;
     }
-    .bottom-left, .bottom-right {
-      flex: 0 0 auto;
-    }
-    .bottom-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-    }
-    .bottom-center > *:not(.divider) {
+    .left-group { display:flex; align-items:center; flex-shrink: 0; }
+    .right-group { display:flex; align-items:center; gap:0; flex-shrink: 0; }
+    /* 统一按钮样式 */
+    .bottom-top-row .action-item {
       background:none; border:none; color:var(--text-secondary);
       font-size:0.72rem; font-weight:600; padding:4px 10px;
       text-decoration:none; transition:color 0.2s; cursor:pointer;
       white-space:nowrap; display:inline-flex; align-items:center; gap:3px;
       -webkit-tap-highlight-color:transparent;
     }
-    .bottom-center > *:not(.divider):hover { color:var(--primary-light); }
-    .back-to-top-btn {
-      background: transparent; border: none; color: var(--text-secondary);
-      font-size: 1rem; padding: 4px 8px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: color 0.2s;
-    }
-    .back-to-top-btn:hover { color: var(--primary-light); }
-    .divider { width:1px; height:18px; background:var(--text-secondary); opacity:0.4; margin:0 2px; }
+    .bottom-top-row .action-item:hover { color:var(--primary-light); }
+    .back-to-top-btn { display:inline-flex; align-items:center; gap:4px; }
+    .back-to-top-btn .btn-icon { font-size:0.95rem; }
+    .divider { width:1px; height:18px; background:var(--text-secondary); opacity:0.4; margin:0 2px; flex-shrink: 0; }
     .appearance-btn { font-size:1rem; }
     .footer-note { color:var(--text-secondary); font-size:0.65rem; text-align:center; margin:2px 0 0 0; opacity:0.75; }
 
@@ -354,7 +346,7 @@
       .category-bar-wrap { padding:0 0 6px 12px; }
       .main-container { padding:12px 12px 20px; }
       .fixed-bottom-bar { padding:3px 10px 5px; }
-      .bottom-center > *:not(.divider), .back-to-top-btn, .appearance-btn { padding:3px 6px; font-size:0.68rem; }
+      .bottom-top-row .action-item { padding:3px 6px; font-size:0.68rem; }
       .modal-header { padding:3px 6px; }
       .modal-close-btn { padding:3px 8px; font-size:0.7rem; }
       .fade-mask { width:55px; }
@@ -437,22 +429,19 @@
 
   <div class="fixed-bottom-bar">
     <div class="bottom-top-row">
-      <div class="bottom-left">
-        <button class="back-to-top-btn" id="backToTopBtn" title="回到顶部并刷新排序">
-          ⬆️
-        </button>
+      <div class="left-group">
+        <button class="action-item back-to-top-btn" id="backToTopBtn" title="回到顶部并刷新排序"><span class="btn-icon">⬆️</span> 回顶</button>
       </div>
-      <div class="bottom-center" id="bottomActionRow">
-        <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener"><span class="btn-icon">🎮</span> 次元ACG</a>
+      <div class="right-group" id="bottomActionRow">
+        <a href="https://pd.qq.com/s/cnedkunn2?b=9" target="_blank" rel="noopener" class="action-item"><span class="btn-icon">🎮</span> 次元ACG</a>
         <span class="divider"></span>
-        <a href="https://pd.qq.com/s/cbffiz2ds?b=9" target="_blank" rel="noopener"><span class="btn-icon">📡</span> 米游途</a>
+        <a href="https://pd.qq.com/s/cbffiz2ds?b=9" target="_blank" rel="noopener" class="action-item"><span class="btn-icon">📡</span> 米游途</a>
         <span class="divider"></span>
-        <a href="https://v.douyin.com/PIsOmFIDcW4/   5@0.com" target="_blank" rel="noopener"><span class="btn-icon">♪</span> 我的抖音</a>
+        <a href="https://v.douyin.com/PIsOmFIDcW4/   5@0.com" target="_blank" rel="noopener" class="action-item"><span class="btn-icon">♪</span> 我的抖音</a>
         <span class="divider"></span>
-        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">🌐</span> 趣网吧</a>
-      </div>
-      <div class="bottom-right">
-        <button class="appearance-btn" id="appearanceBtn" title="自定义外观">🎨</button>
+        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener" class="action-item"><span class="btn-icon">🌐</span> 趣网吧</a>
+        <span class="divider"></span>
+        <button class="action-item appearance-btn" id="appearanceBtn" title="自定义外观">🎨</button>
       </div>
     </div>
     <p class="footer-note" id="versionNote"></p>
@@ -754,6 +743,7 @@
           appearancePanel.classList.remove('show');
         });
 
+        // 导出配置
         exportConfigBtn.addEventListener('click', () => {
           const config = {};
           for (let i = 0; i < localStorage.length; i++) {
@@ -770,6 +760,7 @@
           appearancePanel.classList.remove('show');
         });
 
+        // 导入配置
         importConfigBtn.addEventListener('click', () => {
           importConfigFile.click();
         });
