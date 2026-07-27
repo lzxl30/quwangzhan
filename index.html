@@ -249,23 +249,31 @@
       justify-content:space-between;
       align-items:center;
       width:100%;
-      flex-wrap: nowrap;          /* 确保不换行 */
-      overflow-x: auto;           /* 移动端可滑动 */
-      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;        /* 不换行 */
     }
     .left-group { display:flex; align-items:center; flex-shrink: 0; }
-    .right-group { display:flex; align-items:center; gap:0; flex-shrink: 0; }
-    /* 统一按钮样式 */
-    .bottom-top-row .action-item {
-      background:none; border:none; color:var(--text-secondary);
-      font-size:0.72rem; font-weight:600; padding:4px 10px;
-      text-decoration:none; transition:color 0.2s; cursor:pointer;
-      white-space:nowrap; display:inline-flex; align-items:center; gap:3px;
-      -webkit-tap-highlight-color:transparent;
+    .right-group {
+      display:flex;
+      align-items:center;
+      gap:0;
+      flex-shrink: 1;           /* 空间不足时收缩 */
+      min-width: 0;
     }
-    .bottom-top-row .action-item:hover { color:var(--primary-light); }
+    .action-item {
+      background:none; border:none; color:var(--text-secondary);
+      font-size:0.72rem; font-weight:600;
+      padding:4px 6px;           /* 减小内边距 */
+      text-decoration:none; transition:color 0.2s; cursor:pointer;
+      white-space:nowrap;
+      display:inline-flex; align-items:center; gap:3px;
+      -webkit-tap-highlight-color:transparent;
+      flex-shrink: 1;            /* 允许按钮缩小 */
+      min-width: 0;
+    }
+    .action-item .btn-icon { font-size: 0.9rem; }  /* 统一图标大小 */
+    .action-item:hover { color:var(--primary-light); }
     .back-to-top-btn { display:inline-flex; align-items:center; gap:4px; }
-    .back-to-top-btn .btn-icon { font-size:0.95rem; }
+    .back-to-top-btn .btn-icon { font-size:0.9rem; }  /* 回顶图标也统一 */
     .divider { width:1px; height:18px; background:var(--text-secondary); opacity:0.4; margin:0 2px; flex-shrink: 0; }
     .appearance-btn { font-size:1rem; }
     .footer-note { color:var(--text-secondary); font-size:0.65rem; text-align:center; margin:2px 0 0 0; opacity:0.75; }
@@ -346,7 +354,7 @@
       .category-bar-wrap { padding:0 0 6px 12px; }
       .main-container { padding:12px 12px 20px; }
       .fixed-bottom-bar { padding:3px 10px 5px; }
-      .bottom-top-row .action-item { padding:3px 6px; font-size:0.68rem; }
+      .action-item { padding:3px 4px; font-size:0.68rem; }
       .modal-header { padding:3px 6px; }
       .modal-close-btn { padding:3px 8px; font-size:0.7rem; }
       .fade-mask { width:55px; }
