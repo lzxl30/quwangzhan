@@ -95,8 +95,6 @@
     }
     .header-top { max-width:1350px; margin:0 auto; padding:10px 20px 6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; }
     .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); flex-shrink:0; }
-
-    /* 带透明度的 Logo 图标 */
     .logo-icon {
       width: 38px; height: 38px;
       border-radius: 12px;
@@ -107,8 +105,6 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .logo-icon img { width:100%; height:100%; object-fit:contain; }
-
-    /* 带透明度的 Logo 文字 */
     .logo-text {
       font-size: 1.3rem;
       font-weight: 700;
@@ -117,7 +113,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      opacity: 0.85;   /* 让文字整体半透明，更融入背景 */
+      opacity: 0.85;
     }
     .logo-sub { font-size:0.6rem; color:var(--text-secondary); font-weight:400; margin-top:1px; display:none; }
 
@@ -159,9 +155,7 @@
     .sort-hint { font-size:0.68rem; color:var(--text-secondary); text-align:center; padding:6px 0 2px; opacity:0.7; display:none; }
     .category-scroll.expanded .sort-hint { display:block; }
 
-    .fade-mask {
-      display: none; /* 移除遮罩 */
-    }
+    .fade-mask { display: none; }
     .category-scroll.expanded ~ .fade-mask, .fade-mask.hidden { display: none; }
 
     .category-expand-btn {
@@ -171,10 +165,7 @@
       cursor:pointer; transition:0.2s;
       -webkit-tap-highlight-color:transparent; border-radius:6px; z-index:5;
     }
-    .category-expand-btn:hover {
-      background: transparent; /* 移除下拉按钮背景 */
-      color: var(--text);
-    }
+    .category-expand-btn:hover { background: transparent; color: var(--text); }
     .category-expand-btn:active { opacity:0.7; }
     .arrow-v { display:inline-block; width:10px; height:10px; border-right:2.5px solid currentColor; border-bottom:2.5px solid currentColor; transform:rotate(45deg); transition:transform 0.25s; }
     .category-expand-btn.open .arrow-v { transform:rotate(-135deg); }
@@ -234,6 +225,7 @@
     .action-btn span.label { font-size:0.65rem; font-weight:500; }
     .action-btn:hover { background:rgba(139,124,247,0.1); color:var(--primary-light); }
     .fav-btn.favorited { color:#f97ba8; }
+    .pin-btn.pinned { color: var(--accent-3); }
     .open-btn { display:inline-block; width:14px; height:14px; border-right:3px solid var(--text-secondary); border-bottom:3px solid var(--text-secondary); transform:rotate(-45deg); margin-left:auto; margin-right:6px; cursor:pointer; opacity:0.6; transition:all 0.2s; flex-shrink:0; align-self:center; -webkit-tap-highlight-color:transparent; }
     .open-btn:hover { border-color:var(--primary-light); opacity:1; transform:rotate(-45deg) scale(1.2); }
 
@@ -437,6 +429,8 @@
         <span class="divider"></span>
         <a href="https://v.douyin.com/PIsOmFIDcW4/   5@0.com" target="_blank" rel="noopener"><span class="btn-icon">♪</span> 我的抖音</a>
         <span class="divider"></span>
+        <a href="https://pd.qq.com/s/eqrz2yxno?b=9" target="_blank" rel="noopener"><span class="btn-icon">📢</span> 趣网吧</a>
+        <span class="divider"></span>
         <button class="appearance-btn" id="appearanceBtn" title="自定义外观">🎨</button>
       </div>
     </div>
@@ -491,7 +485,7 @@
 
       let appInit = false;
       let builtIn, dynCats, sharedCat, sharedUrl, curCat, searchQ;
-      let favs, shuffled;
+      let favs, pinned, shuffled;
       let scrollEl, expandBtn, fadeMask;
       let gridEl, emptyEl, emptyText, emptySubText, infoEl, searchInp, themeBtn, topBtn;
       let mo, mIframe, mTitle, mLoad, mClose, rotateBtnHeader;
@@ -559,32 +553,20 @@
           }
           const img = new Image();
           const reader = new FileReader();
-          reader.onload = (e) => {
-            img.src = e.target.result;
-          };
+          reader.onload = (e) => { img.src = e.target.result; };
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
+            let width = img.width, height = img.height;
             const maxDimension = 1920;
             if (width > maxDimension || height > maxDimension) {
-              if (width > height) {
-                height = (height / width) * maxDimension;
-                width = maxDimension;
-              } else {
-                width = (width / height) * maxDimension;
-                height = maxDimension;
-              }
+              if (width > height) { height = (height / width) * maxDimension; width = maxDimension; }
+              else { width = (width / height) * maxDimension; height = maxDimension; }
             }
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = width; canvas.height = height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
             canvas.toBlob((blob) => {
-              if (!blob) {
-                reject(new Error('压缩失败'));
-                return;
-              }
+              if (!blob) { reject(new Error('压缩失败')); return; }
               const compressedReader = new FileReader();
               compressedReader.onload = () => resolve(compressedReader.result);
               compressedReader.readAsDataURL(blob);
@@ -613,22 +595,27 @@
         function checkShared() {
           const p = new URLSearchParams(location.search);
           const o = p.get('open');
-          if (o) {
-            sharedUrl = decodeURIComponent(o);
-            sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' };
-            return true;
-          }
+          if (o) { sharedUrl = decodeURIComponent(o); sharedCat = { id: 'shared', name: '来自分享', icon: '🔗' }; return true; }
           return false;
         }
         function getCats() { const saved = getSavedOrder(); let ordered = []; if (saved.length) { const map = new Map(dynCats.map(c => [c.id, c])); saved.forEach(id => { if (map.has(id)) ordered.push(map.get(id)); }); dynCats.forEach(c => { if (!saved.includes(c.id)) ordered.push(c); }); } else { ordered = [...dynCats]; } const cats = [builtIn[0], builtIn[1], ...ordered]; if (sharedCat) cats.unshift(sharedCat); return cats; }
 
         curCat = 'all'; searchQ = '';
         favs = JSON.parse(localStorage.getItem('turingMagicFavorites_v2') || '[]');
+        pinned = JSON.parse(localStorage.getItem('pinnedFavorites') || '[]');
         shuffled = {};
         function shuf(cid, tools) { if (!shuffled[cid]) { const ids = tools.map(t => t.id); for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; } shuffled[cid] = ids; } return shuffled[cid]; }
         function saveFavs() { localStorage.setItem('turingMagicFavorites_v2', JSON.stringify(favs)); }
+        function savePinned() { localStorage.setItem('pinnedFavorites', JSON.stringify(pinned)); }
         function togFav(tid) { const idx = favs.findIndex(f => f.id === tid); if (idx !== -1) favs.splice(idx, 1); else favs.unshift({ id: tid, time: Date.now() }); saveFavs(); }
         function isFav(tid) { return favs.some(f => f.id === tid); }
+        function isPinned(tid) { return pinned.includes(tid); }
+        function togglePin(tid) {
+          const idx = pinned.indexOf(tid);
+          if (idx !== -1) pinned.splice(idx, 1);
+          else pinned.unshift(tid);
+          savePinned();
+        }
 
         scrollEl = document.getElementById('categoryScroll');
         expandBtn = document.getElementById('categoryExpandBtn');
@@ -826,10 +813,7 @@
           const modalContent = document.querySelector('.modal-content');
           if (!modalContent) return;
           const wrap = document.getElementById('iframeWrap');
-          if (wrap) {
-            wrap.style.width = window.innerHeight + 'px';
-            wrap.style.height = window.innerWidth + 'px';
-          }
+          if (wrap) { wrap.style.width = window.innerHeight + 'px'; wrap.style.height = window.innerWidth + 'px'; }
           modalContent.classList.add('landscape');
           floatExpandBtns.classList.remove('open');
         });
@@ -880,10 +864,7 @@
           isDraggingFloat = false;
         });
         floatToggleBtn.addEventListener('click', function(e) {
-          if (floatToggleBtn.dataset.touchHandled === 'true') {
-            floatToggleBtn.dataset.touchHandled = 'false';
-            return;
-          }
+          if (floatToggleBtn.dataset.touchHandled === 'true') { floatToggleBtn.dataset.touchHandled = 'false'; return; }
           toggleFloatExpand();
         });
 
@@ -909,7 +890,14 @@
         function getFiltered() {
           let f = [...toolsData];
           if (curCat === 'shared' && sharedUrl) f = f.filter(t => t.url === sharedUrl);
-          else if (curCat === 'favorites') { const ids = favs.map(x => x.id); f = f.filter(t => ids.includes(t.id)); f.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)); }
+          else if (curCat === 'favorites') {
+            const ids = favs.map(x => x.id);
+            f = f.filter(t => ids.includes(t.id));
+            // 先置顶卡片（按 pinned 顺序），再普通卡片（按 favs 顺序）
+            const pinnedCards = pinned.filter(id => ids.includes(id)).map(id => f.find(t => t.id === id)).filter(Boolean);
+            const normalCards = f.filter(t => !pinned.includes(t.id));
+            f = [...pinnedCards, ...normalCards];
+          }
           else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
           if (searchQ.trim()) { const q = searchQ.trim().toLowerCase(); f = f.filter(t => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)); }
           if (curCat !== 'favorites' && curCat !== 'shared') { const order = shuf(curCat, f); const map = new Map(order.map((id, i) => [id, i])); f.sort((a, b) => (map.get(a.id) ?? 9999) - (map.get(b.id) ?? 9999)); }
@@ -939,9 +927,7 @@
           if (catSortable) { catSortable.destroy(); catSortable = null; }
           if (isExpanded) {
             catSortable = new Sortable(scrollEl, {
-              animation: 150,
-              delay: 200,
-              touchStartThreshold: 10,
+              animation: 150, delay: 200, touchStartThreshold: 10,
               draggable: '.category-tag',
               filter: '.category-tag[data-category="all"], .category-tag[data-category="favorites"], .category-tag[data-category="shared"]',
               onEnd: function() {
@@ -961,15 +947,19 @@
           if (favSortable) { favSortable.destroy(); favSortable = null; }
           if (curCat === 'favorites' && gridEl.children.length > 0) {
             favSortable = new Sortable(gridEl, {
-              animation: 150,
-              delay: 200,
-              touchStartThreshold: 10,
-              scroll: true,
-              forceFallback: true,
+              animation: 150, delay: 200, touchStartThreshold: 10,
+              scroll: true, forceFallback: true,
               fallbackClass: 'card-sortable-fallback',
               onEnd: function(evt) {
-                const movedId = favs.splice(evt.oldIndex, 1)[0];
-                favs.splice(evt.newIndex, 0, movedId);
+                const cards = Array.from(gridEl.querySelectorAll('.card'));
+                const newFavs = [];
+                cards.forEach(card => {
+                  const toolId = card.dataset.toolId;
+                  if (favs.some(f => f.id === toolId)) {
+                    newFavs.push({ id: toolId, time: Date.now() });
+                  }
+                });
+                favs = newFavs;
                 saveFavs();
                 gridEl.classList.remove('swiping');
               }
@@ -979,7 +969,7 @@
 
         renderCards = function() {
           const f = getFiltered();
-          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">↕️ 长按可拖拽卡片调整收藏顺序</div>'; }
+          if (curCat === 'favorites') { infoEl.style.display = 'flex'; infoEl.innerHTML = '<div class="drag-hint">📌 点击图钉置顶，长按拖拽调整顺序</div>'; }
           else { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
           if (f.length === 0) {
             gridEl.innerHTML = '';
@@ -991,7 +981,23 @@
             if (favSortable) { favSortable.destroy(); favSortable = null; }
           } else {
             emptyEl.style.display = 'none';
-            gridEl.innerHTML = f.map(t => { const fav = isFav(t.id); const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站'; return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}"><div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div><div class="card-desc">${t.description}</div><div class="card-footer-row"><button class="card-category-badge" data-category="${t.category}">${cn}</button><div class="card-actions"><button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button><button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button></div></div></div>`; }).join('');
+            gridEl.innerHTML = f.map(t => {
+              const fav = isFav(t.id);
+              const pinnedIcon = isPinned(t.id);
+              const cn = getCats().find(c => c.id === t.category)?.name || t.category || '网站';
+              return `<div class="card ${t.accentClass}" data-tool-id="${t.id}" data-url="${t.url}" data-title="${t.title}" data-external="${!!t.external}">
+                <div class="card-icon-row"><div class="card-icon ${t.iconBgClass}">${t.icon}</div><div class="card-title">${t.title}</div><span class="open-btn" data-tool-id="${t.id}" title="打开网站"></span></div>
+                <div class="card-desc">${t.description}</div>
+                <div class="card-footer-row">
+                  <button class="card-category-badge" data-category="${t.category}">${cn}</button>
+                  <div class="card-actions">
+                    ${curCat === 'favorites' ? `<button class="action-btn pin-btn ${pinnedIcon ? 'pinned' : ''}" data-tool-id="${t.id}"><span class="icon">📌</span><span class="label">置顶</span></button>` : ''}
+                    <button class="action-btn share-btn" data-tool-id="${t.id}" title="转发"><span class="icon">📤</span><span class="label">转发</span></button>
+                    <button class="action-btn fav-btn ${fav ? 'favorited' : ''}" data-tool-id="${t.id}"><span class="icon">${fav ? '❤️' : '🤍'}</span><span class="label">收藏</span></button>
+                  </div>
+                </div>
+              </div>`;
+            }).join('');
             initFavSortable();
           }
         };
@@ -1002,6 +1008,7 @@
           if (gridEl.classList.contains('swiping')) { gridEl.classList.remove('swiping'); return; }
           const badge = e.target.closest('.card-category-badge'); if (badge) { e.preventDefault(); e.stopPropagation(); if (badge.dataset.category) switchCat(badge.dataset.category); return; }
           const fb = e.target.closest('.fav-btn'); if (fb) { e.preventDefault(); e.stopPropagation(); togFav(fb.dataset.toolId); renderAll(); return; }
+          const pb = e.target.closest('.pin-btn'); if (pb) { e.preventDefault(); e.stopPropagation(); togglePin(pb.dataset.toolId); renderAll(); return; }
           const sb = e.target.closest('.share-btn'); if (sb) { e.preventDefault(); e.stopPropagation(); const card = sb.closest('.card'); if (card) shareTool(card.dataset.url, card.dataset.title); return; }
           const ob = e.target.closest('.open-btn'); if (ob) { e.preventDefault(); e.stopPropagation(); const card = ob.closest('.card'); if (card) { const u = card.dataset.url; const isExternal = card.dataset.external === 'true'; if (u) { if (u.startsWith('http')) openTool(u, card.dataset.title, isExternal); else openTool(location.origin + '/' + u, card.dataset.title, isExternal); } } return; }
         });
