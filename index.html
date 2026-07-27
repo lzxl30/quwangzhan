@@ -883,9 +883,9 @@
           else if (curCat === 'favorites') {
             const ids = favs.map(x => x.id);
             f = f.filter(t => ids.includes(t.id));
-            // 置顶卡片按 pinned 顺序排列
+            // 置顶卡片按 pinned 顺序
             const pinnedCards = pinned.filter(id => ids.includes(id)).map(id => f.find(t => t.id === id)).filter(Boolean);
-            // 未置顶卡片严格按 favs 顺序排列
+            // 未置顶卡片严格按 favs 顺序
             const normalCards = favs.filter(fav => !pinned.includes(fav.id)).map(fav => f.find(t => t.id === fav.id)).filter(Boolean);
             f = [...pinnedCards, ...normalCards];
           }
@@ -943,33 +943,19 @@
               fallbackClass: 'card-sortable-fallback',
               onEnd: function(evt) {
                 const cards = Array.from(gridEl.querySelectorAll('.card'));
-                const newFavs = [];
-                const newPinned = [];
-                const oldPinnedSet = new Set(pinned);
-                // 记录最后一个原置顶卡片的索引（拖拽前的位置）
-                let lastPinnedIdx = -1;
-                cards.forEach((card, idx) => {
-                  const toolId = card.dataset.toolId;
-                  if (oldPinnedSet.has(toolId)) {
-                    lastPinnedIdx = idx;
-                  }
-                });
-
-                cards.forEach((card, idx) => {
-                  const toolId = card.dataset.toolId;
-                  if (favs.some(f => f.id === toolId)) {
-                    newFavs.push({ id: toolId, time: Date.now() });
-                  }
-                  // 如果卡片在最后一个原置顶卡片之前（包括它本身），则加入置顶列表
-                  if (idx <= lastPinnedIdx) {
-                    newPinned.push(toolId);
-                  }
-                });
-
-                favs = newFavs;
+                // 获取排序后的工具 ID 顺序
+                const orderedIds = cards.map(card => card.dataset.toolId);
+                // 找出第一个未置顶卡片的位置
+                const firstNonPinnedIdx = orderedIds.findIndex(id => !pinned.includes(id));
+                // 重新构建 pinned：所有在 firstNonPinnedIdx 之前的卡片置顶
+                const newPinned = firstNonPinnedIdx === -1 ? [...orderedIds] : orderedIds.slice(0, firstNonPinnedIdx);
                 pinned = newPinned;
+                // 重新构建 favs：保持当前排序顺序
+                favs = orderedIds.map(id => ({ id, time: Date.now() }));
                 saveFavs();
                 savePinned();
+                // 实时刷新视图
+                setTimeout(() => renderCards(), 0);
                 gridEl.classList.remove('swiping');
               }
             });
