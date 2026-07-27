@@ -514,20 +514,10 @@
         document.documentElement.style.setProperty('--bg-darken', darken);
         document.documentElement.style.setProperty('--glass-blur', blurEnabled ? '12px' : '0px');
         document.documentElement.style.setProperty('--card-glass-blur', cardBlurEnabled ? '12px' : '0px');
-        if (glassAlphaSlider) {
-          glassAlphaSlider.value = glass;
-          glassAlphaVal.textContent = glass;
-        }
-        if (bgDarkenSlider) {
-          bgDarkenSlider.value = darken;
-          bgDarkenVal.textContent = darken;
-        }
-        if (glassToggle) {
-          glassToggle.checked = blurEnabled;
-        }
-        if (cardGlassToggle) {
-          cardGlassToggle.checked = cardBlurEnabled;
-        }
+        if (glassAlphaSlider) { glassAlphaSlider.value = glass; glassAlphaVal.textContent = glass; }
+        if (bgDarkenSlider) { bgDarkenSlider.value = darken; bgDarkenVal.textContent = darken; }
+        if (glassToggle) glassToggle.checked = blurEnabled;
+        if (cardGlassToggle) cardGlassToggle.checked = cardBlurEnabled;
       }
 
       function applyBgFromStorage() {
@@ -893,9 +883,10 @@
           else if (curCat === 'favorites') {
             const ids = favs.map(x => x.id);
             f = f.filter(t => ids.includes(t.id));
-            // 先置顶卡片（按 pinned 顺序），再普通卡片（按 favs 顺序）
+            // 置顶卡片按 pinned 顺序排列
             const pinnedCards = pinned.filter(id => ids.includes(id)).map(id => f.find(t => t.id === id)).filter(Boolean);
-            const normalCards = f.filter(t => !pinned.includes(t.id));
+            // 未置顶卡片严格按 favs 顺序排列
+            const normalCards = favs.filter(fav => !pinned.includes(fav.id)).map(fav => f.find(t => t.id === fav.id)).filter(Boolean);
             f = [...pinnedCards, ...normalCards];
           }
           else if (curCat !== 'all') f = f.filter(t => t.category === curCat);
@@ -954,17 +945,27 @@
                 const cards = Array.from(gridEl.querySelectorAll('.card'));
                 const newFavs = [];
                 const newPinned = [];
-                // 遍历排序后的卡片，生成新的 favs 和 pinned 顺序
-                cards.forEach(card => {
+                const oldPinnedSet = new Set(pinned);
+                // 记录最后一个原置顶卡片的索引（拖拽前的位置）
+                let lastPinnedIdx = -1;
+                cards.forEach((card, idx) => {
+                  const toolId = card.dataset.toolId;
+                  if (oldPinnedSet.has(toolId)) {
+                    lastPinnedIdx = idx;
+                  }
+                });
+
+                cards.forEach((card, idx) => {
                   const toolId = card.dataset.toolId;
                   if (favs.some(f => f.id === toolId)) {
                     newFavs.push({ id: toolId, time: Date.now() });
                   }
-                  // 检查该卡片是否在 pinned 列表中，保留置顶状态
-                  if (pinned.includes(toolId)) {
+                  // 如果卡片在最后一个原置顶卡片之前（包括它本身），则加入置顶列表
+                  if (idx <= lastPinnedIdx) {
                     newPinned.push(toolId);
                   }
                 });
+
                 favs = newFavs;
                 pinned = newPinned;
                 saveFavs();
