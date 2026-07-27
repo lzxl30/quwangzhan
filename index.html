@@ -454,12 +454,15 @@
     <input type="range" id="glassAlphaSlider" min="0.3" max="0.9" step="0.05" value="0.6">
     <span style="font-size:0.7rem; color:var(--text-secondary);">当前透明度：<span id="glassAlphaVal">0.6</span></span>
 
-    <label style="display:flex; align-items:center; gap:4px; margin-top:8px;">
-      <input type="checkbox" id="glassToggle"> 启用全局模糊
-    </label>
-    <label style="display:flex; align-items:center; gap:4px;">
-      <input type="checkbox" id="cardGlassToggle"> 启用卡片模糊
-    </label>
+    <!-- 模糊复选框并排 -->
+    <div style="display:flex; justify-content:space-between; margin-top:8px;">
+      <label style="display:flex; align-items:center; gap:4px; font-size:0.8rem; color:var(--text);">
+        <input type="checkbox" id="glassToggle"> 全局模糊
+      </label>
+      <label style="display:flex; align-items:center; gap:4px; font-size:0.8rem; color:var(--text);">
+        <input type="checkbox" id="cardGlassToggle"> 卡片模糊
+      </label>
+    </div>
 
     <label>🌗 背景明暗</label>
     <input type="range" id="bgDarkenSlider" min="0" max="0.7" step="0.05" value="0">
@@ -471,6 +474,7 @@
       <button id="importConfigBtn" title="导入配置">📤 导入</button>
       <input type="file" id="importConfigFile" accept=".json" style="display:none;">
     </div>
+    <div style="font-size:0.65rem; color:var(--text-secondary); text-align:center; margin-top:2px;">导出/导入全部设置（主题、收藏、背景等）</div>
 
     <div class="panel-row">
       <button class="close-panel" id="closePanelBtn">关闭</button>
