@@ -77,7 +77,8 @@ var turingTools = [
     category: 'turing',
     icon: '🎨',
     iconBgClass: 'bg-3',
-    accentClass: 'accent-3'
+    accentClass: 'accent-3',
+    external: true                // 建议在新窗口打开，避免 iframe 被第三方限制
   },
   {
   id: 'turing-9',               // 根据已有 id 调整，如 turing-3
