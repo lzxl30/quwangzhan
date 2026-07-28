@@ -83,8 +83,8 @@ var gamesTools = [
   }, 
   {
   id: 'games-11',                        // 根据实际序号调整
-  title: '怀旧游戏',
-  url: 'http://accct.top/332',
+  title: '怀旧游戏机',
+  url: 'http://fc.my71.top/',
   description: '重温经典老游戏，多种童年街机与掌机游戏在线畅玩。',
   category: 'games',
   icon: '🕹️',
