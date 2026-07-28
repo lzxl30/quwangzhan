@@ -22,7 +22,7 @@ var sceneryTools = [
   external: true
   },
   {
-  id: 'scenery-2',                       // 根据实际已有风景工具数量调整序号
+  id: 'scenery-3',                       // 根据实际已有风景工具数量调整序号
   title: '环游世界',
   url: 'https://www.airpano.org.cn/',
   description: '全球360°高空全景影像，沉浸式俯瞰世界各地的绝美风光与城市地标。',
