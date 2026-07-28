@@ -73,7 +73,7 @@ var turingTools = [
     id: 'turing-8',
     title: '对称光绘',
     url: 'https://silk.art/',
-    description: '<a href="http://weavesilk.com/" target="_blank" rel="noopener" style="color:#8b7cf7;text-decoration:underline;">电脑端</a> ，在线丝绸绘画工具，用鼠标或手指画出飘逸灵动的丝绸线条，极具艺术感。',
+    description: '<a href="http://weavesilk.com/" target="_blank" rel="noopener" style="color:#8b7cf7;text-decoration:underline;">电脑端在这</a> ，在线丝绸绘画工具，用鼠标或手指画出飘逸灵动的丝绸线条，极具艺术感。',
     category: 'turing',
     icon: '🎨',
     iconBgClass: 'bg-3',
