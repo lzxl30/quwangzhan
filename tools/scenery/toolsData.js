@@ -20,5 +20,16 @@ var sceneryTools = [
   iconBgClass: 'bg-3',
   accentClass: 'accent-3',
   external: true
+  },
+  {
+  id: 'scenery-2',                       // 根据实际已有风景工具数量调整序号
+  title: '环游世界',
+  url: 'https://www.airpano.org.cn/',
+  description: '全球360°高空全景影像，沉浸式俯瞰世界各地的绝美风光与城市地标。',
+  category: 'scenery',
+  icon: '🌍',
+  iconBgClass: 'bg-2',                   // 青绿渐变，自然风光感
+  accentClass: 'accent-2',
+ 
   }
 ];
