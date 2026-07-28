@@ -25,9 +25,19 @@ var toolsTools = [
     title: '小空调',
     url: 'https://air.shadiao.pro/',
     description: '在线模拟空调，调节温度与模式，界面逼真，适合夏天望梅止渴。',
-    category: 'games',
+    category: 'tools',
     icon: '❄️',
     iconBgClass: 'bg-4',
     accentClass: 'accent-4'
   },
+  {
+  id: 'tools-4',                              // 根据实际序号调整
+  title: '小电视',
+  url: 'https://wxurl.cn/36C',
+  description: '在线模拟复古小电视，播放经典片段，怀旧又有趣。',
+  category: 'tools',
+  icon: '📺',
+  iconBgClass: 'bg-5',          // 橙红渐变，复古电视暖色调
+  accentClass: 'accent-5'
+  }
 ];
