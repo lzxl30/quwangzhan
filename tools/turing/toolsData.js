@@ -105,7 +105,7 @@ var turingTools = [
   title: '表情合成',
   url: 'https://emojikitchen.net/zh-CN/',
   description: 'Emoji 表情融合工具，选择两个表情即可生成创意合成表情，趣味十足。',
-  category: 'games',
+  category: 'turing',
   icon: '😀',
   iconBgClass: 'bg-3',
   accentClass: 'accent-3'
