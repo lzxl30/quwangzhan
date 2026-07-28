@@ -1,5 +1,14 @@
 var gamesTools = [
- 
+  {
+   id: 'games-1',                        // 根据实际已有游戏数量调整序号
+   title: '俄罗斯方块游戏机',
+   url: 'https://wxurl.cn/U0T',
+   description: '在线畅玩经典俄罗斯方块，重温童年掌机乐趣。',
+   category: 'games',
+   icon: '🕹️',
+   iconBgClass: 'bg-5',                   // 橙红渐变，复古街机风
+   accentClass: 'accent-5'
+  },
   {
    id: 'games-2',
     title: '在线《我的世界》',
