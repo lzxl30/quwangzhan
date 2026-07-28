@@ -40,6 +40,16 @@ var gamesTools = [
     accentClass: 'accent-5'
   },
   {
+  id: 'games-5',                        // 根据实际已有游戏数量调整序号
+  title: '人生重开模拟器',
+  url: 'https://liferestart.syaro.io/public/index.html',
+  description: '随机天赋、属性，模拟一段奇妙的虚拟人生，每次都有新结局。',
+  category: 'games',
+  icon: '🎲',
+  iconBgClass: 'bg-1',                   // 粉红渐变，活力有趣
+  accentClass: 'accent-1',
+  },
+  {
   id: 'games-6',               // 如果已有 games-1，用下一个序号
   title: '星球生成器',
   url: 'http://oskarstalberg.com/game/planet/planet.html',
