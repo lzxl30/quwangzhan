@@ -41,7 +41,7 @@ var toolsTools = [
   accentClass: 'accent-5'
   },
   {
-  id: 'tools-4',                         // 请根据实际已有工具数量调整序号
+  id: 'tools-5',                         // 请根据实际已有工具数量调整序号
   title: '小风扇',
   url: 'https://fan.elpsy.cn/',
   description: '在线模拟小风扇，调节风速，逼真界面带来夏日清凉。',
