@@ -38,7 +38,8 @@ var toolsTools = [
   category: 'tools',
   icon: '📺',
   iconBgClass: 'bg-5',          // 橙红渐变，复古电视暖色调
-  accentClass: 'accent-5'
+  accentClass: 'accent-5',
+  external: true            // 搜索引擎适合在新标签页打开
   },
   {
   id: 'tools-5',                         // 请根据实际已有工具数量调整序号
