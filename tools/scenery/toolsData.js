@@ -12,7 +12,7 @@ var sceneryTools = [
   },
   {
   id: 'scenery-2',
-  title: 'Skyline 全球高清实况摄像头',
+  title: '全球实况摄像头',
   url: 'https://www.skylinewebcams.com/zh.html',
   description: '全球高清实时摄像头直播，在线观看世界各地风景、城市街景与著名地标。',
   category: 'scenery',
