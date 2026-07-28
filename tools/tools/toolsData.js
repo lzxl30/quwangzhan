@@ -39,5 +39,15 @@ var toolsTools = [
   icon: '📺',
   iconBgClass: 'bg-5',          // 橙红渐变，复古电视暖色调
   accentClass: 'accent-5'
+  },
+  {
+  id: 'tools-4',                         // 请根据实际已有工具数量调整序号
+  title: '小风扇',
+  url: 'https://fan.elpsy.cn/',
+  description: '在线模拟小风扇，调节风速，逼真界面带来夏日清凉。',
+  category: 'tools',
+  icon: '🌬️',                             // 或换成 🌀
+  iconBgClass: 'bg-2',                   // 青绿渐变，清爽自然
+  accentClass: 'accent-2',
   }
 ];
