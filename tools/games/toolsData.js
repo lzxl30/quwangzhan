@@ -105,7 +105,7 @@ var gamesTools = [
   id: 'games-11',                        // 根据实际序号调整
   title: '怀旧游戏机',
   url: 'http://fc.my71.top/',
-  description: '<a href="http://fc.my71.top/" target="_blank" rel="noopener" style="color:#8b7cf7;text-decoration:underline;">电脑端在这</a> ，重温经典老游戏，多种童年街机与掌机游戏在线畅玩。',
+  description: '<a href="http://fc.my71.top/" target="_blank" rel="noopener" style="color:#8b7cf7;text-decoration:underline;">打不开点击这里</a> ，重温经典老游戏，多种童年街机与掌机游戏在线畅玩。',
   category: 'games',
   icon: '🕹️',
   iconBgClass: 'bg-5',                  // 橙红渐变，复古街机风
