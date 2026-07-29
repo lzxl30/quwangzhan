@@ -110,7 +110,6 @@ var gamesTools = [
   icon: '🕹️',
   iconBgClass: 'bg-5',                  // 橙红渐变，复古街机风
   accentClass: 'accent-5', 
-  external: true // 建议新窗口打开，兼容性更好
   }
   // 在这里继续添加更多游戏工具
 ];
